@@ -1,0 +1,13 @@
+package com.decentralized.marketplace;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class DecentralizedMarketplaceApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(DecentralizedMarketplaceApplication.class, args);
+	}
+
+}
