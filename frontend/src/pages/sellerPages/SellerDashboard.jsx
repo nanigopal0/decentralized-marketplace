@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-// import { useDispatch, useSelector } from 'react-redux';
-// import { clearAllUserErrors, logout } from '../../store/slices/userSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearAllUserErrors , logout } from '../../../store/slices/userSlice';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
@@ -12,7 +12,6 @@ import {
   HomeIcon, 
   LayoutGrid, 
   LogOut, 
-  MessageSquare, 
   Package2, 
   PanelLeft, 
   User2 } from 'lucide-react';
@@ -31,11 +30,15 @@ import {
 } from "@/components/ui/sheet";
 
 import { Button } from "@/components/ui/button"
+import AddProduct from './AddProduct';
+import UpdateProduct from './UpdateProduct';
+import Orders from './Orders';
+import AllProduct from './AllProduct';
 
 const SellerDashboard = () => {
   const [active,setActive] = useState("Dashboard")
-  // const {isAuthenticated, error , user} = useSelector((state) => state.user)
-  // const dispatch = useDispatch()
+  const {isAuthenticated, error , user} = useSelector((state) => state.user)
+  const dispatch = useDispatch()
 
   const handleLogout = () => {
     dispatch(logout())
@@ -44,15 +47,15 @@ const SellerDashboard = () => {
 
   const navigateTo = useNavigate()
 
-  // useEffect(() => {
-  //   if(error){
-  //     toast.error(error)
-  //     dispatch(clearAllUserErrors())
-  //   }
-  //   if(!isAuthenticated){
-  //     navigateTo('/login')
-  //   } 
-  // },[ /*isAuthenticated */])
+  useEffect(() => {
+    if(error){
+      toast.error(error)
+      dispatch(clearAllUserErrors())
+    }
+    if(!isAuthenticated){
+      navigateTo('/login')
+    } 
+  },[ isAuthenticated ])
 
   return (
     <>
@@ -87,82 +90,64 @@ const SellerDashboard = () => {
                   >
                   
                   <FolderPen  className='w-5 h-5'/>
-                  <span className='sr-only'>Add Project</span>
+                  <span className='sr-only'>Add Product</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Add Project</TooltipContent>
+                <TooltipContent side="right">Add Product</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${active === "All Products" ?
+                    ${active === "All Product" ?
                     "text-accent-foreground bg-accent" 
                     : "text-muted-foreground" } 
                     transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Add Skills")}
+                    onClick={() => setActive("All Product")}
                     >
                   
                   <FolderGit2 className='w-5 h-5'/>
-                  <span className='sr-only'>Add Skills</span>
+                  <span className='sr-only'>All Product</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Add Skills</TooltipContent>
+                <TooltipContent side="right">All Product</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${active === "Add Application" 
+                    ${active === "Update Product" 
                     ? "text-accent-foreground bg-accent" 
                     : "text-muted-foreground" } 
                     transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Add Application")}
+                    onClick={() => setActive("Update Product")}
                     >
                   
                   <LayoutGrid className='w-5 h-5'/>
-                  <span className='sr-only'>Add Application</span>
+                  <span className='sr-only'>Update Product</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Add Application</TooltipContent>
+                <TooltipContent side="right">Update Product</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${active === "Add Timeline" 
+                    ${active === "Orders" 
                     ? "text-accent-foreground bg-accent" 
                     : "text-muted-foreground" } 
                     transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Add Timeline")}
+                    onClick={() => setActive("Orders")}
                     >
                   
                   <History className='w-5 h-5'/>
-                  <span className='sr-only'>Add Timeline</span>
+                  <span className='sr-only'>Orders</span>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">Add Timeline</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${active === "Messages" ? 
-                    "text-accent-foreground bg-accent" 
-                    : "text-muted-foreground" } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Messages")}
-                    >
-                  
-                  <MessageSquare className='w-5 h-5'/>
-                  <span className='sr-only'>Messages</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Messages</TooltipContent>
+                <TooltipContent side="right">Orders</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider>
@@ -231,44 +216,36 @@ const SellerDashboard = () => {
                     <HomeIcon className='h-5 w-5'/> Dashboard
                   </Link>
                   <Link className={`flex items-center gap-4 px-2.5 
-                  ${active === "Add Project" ?
+                  ${active === "Add Product" ?
                   "text-foreground" :
                    "text-muted-foreground hover:text-foreground"}`}
-                   onClick={() => setActive("Add Project")}
+                   onClick={() => setActive("Add Product")}
                   >
-                    <FolderPen className='h-5 w-5'/> Add Project
+                    <FolderPen className='h-5 w-5'/> Add Product
                   </Link>
                   <Link className={`flex items-center gap-4 px-2.5 
-                  ${active === "Add Skill" ?
+                  ${active === "All Product" ?
                   "text-foreground" :
                    "text-muted-foreground hover:text-foreground"}`}
-                   onClick={() => setActive("Add Skill")}
+                   onClick={() => setActive("All Product")}
                   >
-                    <FolderGit2 className='h-5 w-5'/> Add Skill
+                    <FolderGit2 className='h-5 w-5'/> All Product
                   </Link>
                   <Link className={`flex items-center gap-4 px-2.5 
-                  ${active === "Add Application" ?
+                  ${active === "Update Product" ?
                   "text-foreground" :
                    "text-muted-foreground hover:text-foreground"}`}
-                   onClick={() => setActive("Add Application")}
+                   onClick={() => setActive("Update Product")}
                   >
-                    <LayoutGrid className='h-5 w-5'/> Add Application
+                    <LayoutGrid className='h-5 w-5'/> Update Product
                   </Link>
                   <Link className={`flex items-center gap-4 px-2.5 
-                  ${active === "Add Timeline" ?
+                  ${active === "Orders" ?
                   "text-foreground" :
                    "text-muted-foreground hover:text-foreground"}`}
-                   onClick={() => setActive("Add Timeline")}
+                   onClick={() => setActive("Orders")}
                   >
-                    <History className='h-5 w-5'/> Add Timeline
-                  </Link>
-                  <Link className={`flex items-center gap-4 px-2.5 
-                  ${active === "Messages" ?
-                  "text-foreground" :
-                   "text-muted-foreground hover:text-foreground"}`}
-                   onClick={() => setActive("Messages")}
-                  >
-                    <MessageSquare className='h-5 w-5'/> Messages
+                    <History className='h-5 w-5'/> Orders
                   </Link>
                   <Link className={`flex items-center gap-4 px-2.5 
                   ${active === "Account" ?
@@ -299,28 +276,25 @@ const SellerDashboard = () => {
           (() => {
             switch(active){
               case "Dashboard" :
-                return 
+                return <SellerDashboard />
                 break;
-              case "Add Project" :
-                return
+              case "Add Product" :
+                return <AddProduct/>
                 break;
-              case "Add Skills" :
-                return 
+              case "Update Product" :
+                return <UpdateProduct />
                 break;
-              case "Add Application" :
-                // return <AddApplication />
+              case "All Product" :
+                return <AllProduct />
                 break;
-              case "Add Timeline" :
-                // return <AddTimeline />
-                break;
-              case "Messages" :
-                // return <Messages />
+              case "Orders" :
+                return <Orders />
                 break;
               case "Account" :
-                // return <Account />
+                return <Account />
                 break;
               default: 
-                // return <Dashboard />
+                return <SellerDashboard />
                 break;
             }
           })()
