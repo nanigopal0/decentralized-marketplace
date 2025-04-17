@@ -123,7 +123,7 @@
 					<packageName>java</packageName>
 					<sourceDestination>src/main/java/generated</sourceDestination>
 					<nativeJavaType>true</nativeJavaType>
-					<outputFormat>java,bin</outputFormat>
+					<outputFormat>java,bin,abi</outputFormat>
 					<soliditySourceFiles>
 						<directory>src/main/resources/web3</directory>
 						<includes>
