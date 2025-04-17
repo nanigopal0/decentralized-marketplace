@@ -13,7 +13,6 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct,clearAllProductErrors,getAllProduct , resetProduct } from '../../../store/slices/productSlice';
 import { toast } from 'react-toastify';
-import { Link } from 'lucide-react'
 
 const AddProduct = () => {
 
