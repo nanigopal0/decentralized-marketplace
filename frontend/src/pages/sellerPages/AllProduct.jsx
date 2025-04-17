@@ -8,40 +8,40 @@ import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import SpecialLoadingButton from './SpecialLoadingButton.jsx';
 import { Trash2 } from 'lucide-react';
-import { getAllProduct } from '../../../store/slices/productSlice';
+import { getAllProduct , deleteProduct, clearAllProductErrors, resetProduct } from '../../../store/slices/productSlice';
 import {toast} from 'react-toastify'
 
 const AllProduct = () => {
 
   const navigateTo = useNavigate()
   const dispatch = useDispatch()
-  const { loading , messages , error , message } = useSelector((state) => state.messages)
+  const { loading , products , error , message } = useSelector((state) => state.product)
 
   const handleDashboard = () => {
     // e.preventDefault();
     navigateTo('/')
   };
 
-  const handleMessageDelete = (id) => {
-    setMessageId(id)
-    dispatch(deleteMessage(id))
+  const handleProductDelete = (id) => {
+    setProductId(id)
+    dispatch(deleteProduct(id))
   }
 
   useEffect(() => {
     if(error) {
       toast.error(error)
-      dispatch(clearAllMessagesErrors())  
+      dispatch(clearAllProductErrors())  
     }
     if(message) {
       toast.success(message)
-      dispatch(resetMessageSlice())
-      dispatch(getAllMessages())
+      dispatch(resetProduct())
+      dispatch(getAllProduct())
     }
   },[  dispatch , loading , error , message])
 
  
 
-  const [messageId , setMessageId] = useState('')
+  const [productId , setProductId] = useState('')
 
 
   return (
@@ -51,46 +51,50 @@ const AllProduct = () => {
             <TabsContent>
               <Card>
                 <CardHeader className='flex gap-4 sm:justify-between sm:flex-row sm:items-center'>
-                  <CardTitle>Messages</CardTitle>
+                  <CardTitle>Products</CardTitle>
                 </CardHeader>
                 <CardContent className='grid sm:grid-cols-2 gap-4 '>
                   {
-                    messages && messages.length > 0 ? (
-                      messages.map((element) => {
+                    products && products.length > 0 ? (
+                      products.map((element) => {
                         return (
                           <Card key={element._id} className='grid gap-2'>
                               <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Sender Name :</span>
-                                {element.senderName}
+                                <span className='font-bold mr-2' >Product Name :</span>
+                                {element.title}
                               </CardDescription>
                               <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Email :</span>
-                                {element.email}
+                                <span className='font-bold mr-2' >Description :</span>
+                                {element.description}
                               </CardDescription>
                               <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Subject :</span>
-                                {element.subject}
+                                <span className='font-bold mr-2' >Price :</span>
+                                {element.price}
                               </CardDescription>
                               <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Message :</span>
-                                {element.message}
+                                <span className='font-bold mr-2' >Product Type :</span>
+                                {element.productType}
                               </CardDescription>
                               <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2'>Sent on :</span>
-                                {element.createdAt}
+                                <span className='font-bold mr-2'>Stock :</span>
+                                {element.stock}
+                              </CardDescription>
+                              <CardDescription className='text-slate-950' >
+                                <span className='font-bold mr-2'>Stock :</span>
+                                {element.productImage}
                               </CardDescription>
                               <CardFooter className='justify-end' >
                                 {
-                                  loading && (messageId === element._id) ? 
+                                  loading && (productId === element._id) ? 
                                   (<SpecialLoadingButton content={"Deleting"} width={"w-32"} />) : (
-                                    <Button className="w-32" onClick={() => handleMessageDelete(element._id)} ><Trash2 />Delete</Button>
+                                    <Button className="w-32" onClick={() => handleProductDelete(element._id)} ><Trash2 />Delete</Button>
                                   )
                                 }
                               </CardFooter>
                           </Card>
                         )
                       })
-                    ) : <CardHeader>No message found!</CardHeader>
+                    ) : <CardHeader>No Product found!</CardHeader>
                   }
                 </CardContent>
               </Card>
