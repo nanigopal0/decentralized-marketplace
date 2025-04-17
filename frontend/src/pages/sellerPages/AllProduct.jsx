@@ -5,8 +5,6 @@ import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 import { Button } from '@/components/ui/button';
 import { useDispatch, useSelector } from 'react-redux';
 import { useState } from 'react';
-import { ChevronLeft } from 'lucide-react';
-import SpecialLoadingButton from './SpecialLoadingButton.jsx';
 import { Trash2 } from 'lucide-react';
 import { getAllProduct , deleteProduct, clearAllProductErrors, resetProduct } from '../../../store/slices/productSlice';
 import {toast} from 'react-toastify'
@@ -86,7 +84,7 @@ const AllProduct = () => {
                               <CardFooter className='justify-end' >
                                 {
                                   loading && (productId === element._id) ? 
-                                  (<SpecialLoadingButton content={"Deleting"} width={"w-32"} />) : (
+                                  "Finding!": (
                                     <Button className="w-32" onClick={() => handleProductDelete(element._id)} ><Trash2 />Delete</Button>
                                   )
                                 }
