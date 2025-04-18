@@ -112,8 +112,9 @@ const userSlice = createSlice({
 export const login = (email,password) => async(dispatch) => {
     dispatch(userSlice.actions.loginRequest())
     try {
-        const {data} = await axios.post(`${process.env.BACKEND_URL}/api/v1/user/login` ,
-            {role ,email,password} , 
+        const requestData = new FormData();
+        const {data} = await axios.post(`${process.env.BACKEND_URL}/public/login` ,
+            {email,password} , 
             {withCredentials: true , headers: {"Content-Type": "application/json"}}
         )
         dispatch(userSlice.actions.loginSuccess(data.user));
