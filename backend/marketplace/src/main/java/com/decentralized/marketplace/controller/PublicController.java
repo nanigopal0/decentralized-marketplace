@@ -1,6 +1,7 @@
 package com.decentralized.marketplace.controller;
 
 import com.decentralized.marketplace.dto.UserLoginRequestDTO;
+import com.decentralized.marketplace.dto.UserResponseDTO;
 import com.decentralized.marketplace.dto.UserSignupRequestDTO;
 import com.decentralized.marketplace.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,7 @@ public class PublicController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody UserLoginRequestDTO userLoginRequestDTO) {
-
+    public ResponseEntity<UserResponseDTO> login(@RequestBody UserLoginRequestDTO userLoginRequestDTO) {
         return ResponseEntity.ok(userService.login(userLoginRequestDTO));
 
     }

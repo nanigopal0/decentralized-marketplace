@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Map<String ,Object> login(UserLoginRequestDTO userLoginRequestDTO) {
+    public UserResponseDTO login(UserLoginRequestDTO userLoginRequestDTO) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userLoginRequestDTO.getEmail(), userLoginRequestDTO.getPassword());
         Authentication authenticate = authenticationManager.authenticate(authentication);
         if (authenticate.isAuthenticated()) {
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            String token = generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
+            generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
 
             UserResponseDTO responseDTO = UserResponseDTO.builder()
                     .id(userDetails.getUserId())
@@ -87,29 +87,29 @@ public class UserServiceImpl implements UserService {
                     .build();
 //            List<Role> roles = authenticate.getAuthorities().stream().map(a -> Role.valueOf(a.getAuthority().substring(5))).toList();
             responseDTO.setRole(userDetails.getRole());
-            Map<String,Object> map = new HashMap<>();
-            map.put("token", token);
-            map.put("user", responseDTO);
-            return map;
+//            Map<String,Object> map = new HashMap<>();
+//            map.put("token", token);
+//            map.put("user", responseDTO);
+            return responseDTO;
         }
         throw new RuntimeException("Authentication failed");
     }
 
-    private String  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
+    private void  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
         String token = jwtService.generateToken(fullName,id,role.name(),email);
 
-//        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-//                .httpOnly(true)
-//                .secure(true)
-//                .path("/")
-//                .maxAge(15 * 60)
-//                .sameSite("Strict")
-//                .build();
-//
-//        httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        return token;
+        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(15 * 60)
+                .sameSite("Strict")
+                .build();
 
+        httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//        return token;
     }
+
     @Override
     public UserResponseDTO getUser(ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toHexString()));

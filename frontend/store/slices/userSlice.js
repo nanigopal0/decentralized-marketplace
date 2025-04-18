@@ -113,11 +113,14 @@ export const login = (email,password) => async(dispatch) => {
     dispatch(userSlice.actions.loginRequest())
     try {
         const requestData = new FormData();
-        const {data} = await axios.post(`${process.env.BACKEND_URL}/public/login` ,
-            {email,password} , 
-            {withCredentials: true , headers: {"Content-Type": "application/json"}}
+        requestData.append("email", email);
+        requestData.append("password", password);
+        const {data} = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/public/login` ,
+            requestData, 
+            {withCredentials:true, headers: {"Content-Type": "application/json"}}
         )
-        dispatch(userSlice.actions.loginSuccess(data.user));
+        console.log(data);
+        dispatch(userSlice.actions.loginSuccess(data));
         dispatch(userSlice.actions.clearAllErrors())
     } catch (error) {
         dispatch(userSlice.actions.loginFailed(error.response.data.message))
