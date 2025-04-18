@@ -16,5 +16,6 @@ public class OrderRequestDTO {
     private String  productId;
     private Integer quantity;
     private Double pricePerItem;
-    private String priceUnit;
+    private String priceUnit = "ETH";
+
 }

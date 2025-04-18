@@ -20,30 +20,24 @@ public class UserController {
 
 
     @GetMapping("get")
-    public ResponseEntity<UserResponseDTO> getUser(@RequestParam(value = "id")ObjectId userId) {
-        try{
-            return ResponseEntity.ok(userService.getUser(userId));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<UserResponseDTO> getUser(@RequestParam(value = "id") ObjectId userId) {
+
+        return ResponseEntity.ok(userService.getUser(userId));
+
     }
 
     @PutMapping("update")
     public ResponseEntity<UserResponseDTO> updateUser(@RequestBody UpdateUserDTO updateUserDTO, @RequestParam(value = "userId") ObjectId userId) {
-        try{
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(userService.updateUser(updateUserDTO, userId));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(userService.updateUser(updateUserDTO, userId));
+
     }
 
     @DeleteMapping("delete")
-    public ResponseEntity<String > deleteUser(@RequestParam(value = "id")ObjectId userId) {
-        try{
-            userService.deleteUser(userId);
-            return ResponseEntity.accepted().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<String> deleteUser(@RequestParam(value = "id") ObjectId userId) {
+
+        userService.deleteUser(userId);
+        return ResponseEntity.accepted().build();
+
     }
 }

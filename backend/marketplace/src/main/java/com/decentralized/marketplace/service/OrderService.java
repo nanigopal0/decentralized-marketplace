@@ -1,30 +1,53 @@
 package com.decentralized.marketplace.service;
 
 import com.decentralized.marketplace.dto.OrderRequestDTO;
-import com.decentralized.marketplace.entity.Order;
+import com.decentralized.marketplace.dto.OrderResponseDTO;
+import jakarta.mail.MessagingException;
 import org.bson.types.ObjectId;
 
 import java.util.List;
 
 public interface OrderService {
 
-    Order createOrder(OrderRequestDTO order);
+    OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException;
 
-    List<Order> getAllOrderBySellerId(ObjectId sellerId);
+    List<OrderResponseDTO> getAllOrderBySellerId(ObjectId sellerId);
 
-    List<Order> getAllOrderByBuyerId(ObjectId buyerId);
+    List<OrderResponseDTO> getAllOrderByBuyerId(ObjectId buyerId);
 
-    List<Order> getAllOrderByProductId(ObjectId productId);
+    List<OrderResponseDTO> getAllOrderByProductId(ObjectId productId);
 
     void cancelOrder(ObjectId orderId);
 
-    Order getOrderById(ObjectId orderId);
+    OrderResponseDTO getOrderById(ObjectId orderId);
 
 //    Order updateOrder(OrderRequestDTO order);
 
     void deleteOrder(ObjectId orderId);
 
-    void deliverOrder(ObjectId orderId);
+//    void deliverOrder(ObjectId orderId) throws MessagingException;
 
-    void shipOrder(ObjectId orderId);
+//    void shipOrder(ObjectId orderId) throws MessagingException;
+
+    void generateShipmentOtp(ObjectId orderId) throws MessagingException;
+
+    void generateDeliveryOtp(ObjectId orderId) throws MessagingException;
+
+    /**
+     * Verifies the shipment OTP provided by the seller
+     *
+     * @param orderId The ID of the order
+     * @param otp     The OTP to verify
+     * @return true if the OTP is valid, false otherwise
+     */
+    boolean verifyShipmentOtp(ObjectId orderId, String otp) throws MessagingException;
+
+    /**
+     * Verifies the delivery OTP provided by the buyer
+     *
+     * @param orderId The ID of the order
+     * @param otp     The OTP to verify
+     * @return true if the OTP is valid, false otherwise
+     */
+    boolean verifyDeliveryOtp(ObjectId orderId, String otp) throws MessagingException;
 }

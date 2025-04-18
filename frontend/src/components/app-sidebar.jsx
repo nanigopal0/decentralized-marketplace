@@ -6,6 +6,7 @@ import {
   Command,
   Frame,
   GalleryVerticalEnd,
+  Mail,
   Map,
   PieChart,
   Settings2,
@@ -50,10 +51,22 @@ const data = {
   ],
   navMain: [
     {
+      title: "Mail",
+      url: "/mail",
+      icon: Mail,
+      isActive: true,
+      items: [
+        {
+          title: "Compose",
+          url: "/mail",
+        },
+      ],
+    },
+    {
       title: "Playground",
       url: "#",
       icon: SquareTerminal,
-      isActive: true,
+      isActive: false,
       items: [
         {
           title: "History",

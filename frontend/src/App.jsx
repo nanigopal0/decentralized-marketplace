@@ -3,6 +3,7 @@ import { BrowserRouter as Router , Routes , Route } from "react-router-dom"
 import Login from './pages/mainpages/login'
 import Home from './pages/mainpages/Home'
 import Register from './pages/mainpages/Register'
+import Mail from './pages/mainpages/Mail'
 
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
+          <Route path='/mail' element={<Mail />} />
         </Routes>
       </Router>
     </>

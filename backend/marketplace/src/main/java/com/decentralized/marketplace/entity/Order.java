@@ -29,4 +29,13 @@ public class Order {
     private String receiptUrl;
     private String priceUnit="ETH";//
     private String transactionHash; //ethereum payment blockchain hash
+
+    // OTP verification fields
+    private String deliveryOtp; // OTP for delivery confirmation
+    private LocalDateTime deliveryOtpExpiry; // When the delivery OTP expires
+    private Boolean deliveryOtpVerified = false; // Whether the delivery OTP has been verified
+
+    private String shipmentOtp; // OTP for shipment confirmation
+    private LocalDateTime shipmentOtpExpiry; // When the shipment OTP expires
+    private Boolean shipmentOtpVerified = false; // Whether the shipment OTP has been verified
 }

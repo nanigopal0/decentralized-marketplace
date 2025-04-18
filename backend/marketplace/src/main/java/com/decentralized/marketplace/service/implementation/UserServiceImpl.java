@@ -5,6 +5,7 @@ import com.decentralized.marketplace.dto.UserLoginRequestDTO;
 import com.decentralized.marketplace.dto.UserResponseDTO;
 import com.decentralized.marketplace.dto.UserSignupRequestDTO;
 import com.decentralized.marketplace.entity.*;
+import com.decentralized.marketplace.exception.UnauthorizedUserException;
 import com.decentralized.marketplace.exception.UserNotFoundException;
 import com.decentralized.marketplace.jwt.JwtService;
 import com.decentralized.marketplace.repository.BuyerRepo;
@@ -23,7 +24,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -64,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO login(UserLoginRequestDTO userLoginRequestDTO) {
+    public Map<String ,Object> login(UserLoginRequestDTO userLoginRequestDTO) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userLoginRequestDTO.getEmail(), userLoginRequestDTO.getPassword());
         Authentication authenticate = authenticationManager.authenticate(authentication);
         if (authenticate.isAuthenticated()) {
@@ -72,7 +76,7 @@ public class UserServiceImpl implements UserService {
 
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
+            String token = generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
 
             UserResponseDTO responseDTO = UserResponseDTO.builder()
                     .id(userDetails.getUserId())
@@ -83,23 +87,27 @@ public class UserServiceImpl implements UserService {
                     .build();
 //            List<Role> roles = authenticate.getAuthorities().stream().map(a -> Role.valueOf(a.getAuthority().substring(5))).toList();
             responseDTO.setRole(userDetails.getRole());
-            return responseDTO;
+            Map<String,Object> map = new HashMap<>();
+            map.put("token", token);
+            map.put("user", responseDTO);
+            return map;
         }
         throw new RuntimeException("Authentication failed");
     }
 
-    private void generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
+    private String  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
         String token = jwtService.generateToken(fullName,id,role.name(),email);
 
-        ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(15 * 60)
-                .sameSite("Strict")
-                .build();
-
-        httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//        ResponseCookie cookie = ResponseCookie.from("jwt", token)
+//                .httpOnly(true)
+//                .secure(true)
+//                .path("/")
+//                .maxAge(15 * 60)
+//                .sameSite("Strict")
+//                .build();
+//
+//        httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return token;
 
     }
     @Override
@@ -118,12 +126,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(ObjectId userId) {
-        userRepo.findById(userId).ifPresent(userRepo::delete);
+        User user =userRepo.findById(userId).orElseThrow(UserNotFoundException::new);
+        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+            throw new UnauthorizedUserException("Unauthorised user!");
     }
 
     @Override
     public UserResponseDTO updateUser(UpdateUserDTO update,ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toHexString()));
+        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+            throw new UnauthorizedUserException("Unauthorised user!");
         user.setFullName(update.getFullName());
         user.setEmail(update.getEmail());
         user.setAvatar(update.getAvatar());
@@ -137,5 +149,9 @@ public class UserServiceImpl implements UserService {
                 .ethereumPublicKey(user.getEthereumPublicKey())
                 .id(user.getId().toHexString())
                 .build();
+    }
+
+    public static CustomUserDetails getCustomUserDetailsFromAuthentication() {
+        return (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 }

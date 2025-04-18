@@ -1,6 +1,5 @@
 package com.decentralized.marketplace.entity;
 
-import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,28 +16,29 @@ public class CustomUserDetails implements UserDetails {
         this.user = user;
     }
 
-    public String getUserFullName(){
+    public String getUserFullName() {
         return user.getFullName();
     }
-    public String getUserEthereumPublicKey(){
+
+    public String getUserEthereumPublicKey() {
         return user.getEthereumPublicKey();
     }
 
-    public String getUserAvatar(){
+    public String getUserAvatar() {
         return user.getAvatar();
     }
 
-    public String getUserId(){
+    public String getUserId() {
         return user.getId().toHexString();
     }
 
-    public Role getRole(){
+    public Role getRole() {
         return user.getRole();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+user.getRole().name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override

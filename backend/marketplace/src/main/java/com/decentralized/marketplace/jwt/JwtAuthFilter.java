@@ -58,28 +58,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-//        String authHeader = request.getHeader("Authorization");
-//
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            filterChain.doFilter(request, response);
-//            return;
-//        }
 
         if (shouldNotFilter(request)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = null;
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("jwt")) {
-                token = cookie.getValue();
-                break;
-            }
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
+//        String token = null;
+//        for (Cookie cookie : request.getCookies()) {
+//            if (cookie.getName().equals("jwt")) {
+//                token = cookie.getValue();
+//                break;
+//            }
+//        }
+
         try {
-//            String token = authHeader.substring(7);
+            String token = authHeader.substring(7);
             Claims jwtClaims = jwtService.getClaims(token);
             String username = jwtService.extractUsername(token);
 
@@ -98,10 +98,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-                    System.out.println(authentication.getPrincipal());
+//                    System.out.println(authentication.getPrincipal());
                 } else {
                     response.setStatus(401);
-                    System.out.println("Entered" + response.getStatus());
+                    log.error("Token is not valid: {}" ,response.getStatus());
                 }
             }
 

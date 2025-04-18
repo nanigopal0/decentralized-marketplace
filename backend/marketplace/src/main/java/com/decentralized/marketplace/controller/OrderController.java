@@ -2,9 +2,9 @@ package com.decentralized.marketplace.controller;
 
 
 import com.decentralized.marketplace.dto.OrderRequestDTO;
-import com.decentralized.marketplace.entity.Order;
-import com.decentralized.marketplace.repository.OrderRepo;
+import com.decentralized.marketplace.dto.OrderResponseDTO;
 import com.decentralized.marketplace.service.OrderService;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.http.ResponseEntity;
@@ -19,104 +19,90 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    public OrderController( OrderService orderService) {
+    public OrderController(OrderService orderService) {
         this.orderService = orderService;
     }
 
     @PostMapping("create")
-    public ResponseEntity<Order> createOrder(@RequestBody OrderRequestDTO order) {
-        try{
-            return ResponseEntity.accepted().body(orderService.createOrder(order));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO order) throws MessagingException {
+
+        return ResponseEntity.accepted().body(orderService.createOrder(order));
     }
 
 
     @GetMapping("get-by-sellerId")
-    public ResponseEntity<List<Order>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId) {
-        try{
-            return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId) {
+
+        return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId));
+
     }
 
     @GetMapping("get-by-buyerId")
-    public ResponseEntity<List<Order>> getAllOrdersByBuyerId(@RequestParam(value = "buyerId") ObjectId buyerId) {
-        try{
-            return ResponseEntity.ok(orderService.getAllOrderByBuyerId(buyerId));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByBuyerId(@RequestParam(value = "buyerId") ObjectId buyerId) {
+
+        return ResponseEntity.ok(orderService.getAllOrderByBuyerId(buyerId));
+
     }
 
 
     @GetMapping("get-by-productId")
-    public ResponseEntity<List<Order>> getAllOrdersByProductId(@RequestParam(value = "ProductId") ObjectId ProductId) {
-        try{
-            return ResponseEntity.ok(orderService.getAllOrderByProductId(ProductId));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByProductId(@RequestParam(value = "ProductId") ObjectId ProductId) {
+
+        return ResponseEntity.ok(orderService.getAllOrderByProductId(ProductId));
+
     }
 
     @GetMapping("get")
-    public ResponseEntity<Order> getOrder(@RequestParam(value = "orderId") ObjectId id) {
-        try{
-            return ResponseEntity.ok(orderService.getOrderById(id));
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().build();
-        }
+    public ResponseEntity<OrderResponseDTO> getOrder(@RequestParam(value = "orderId") ObjectId id) {
+
+        return ResponseEntity.ok(orderService.getOrderById(id));
+
     }
 
     @PutMapping("cancel")
     public ResponseEntity<String> cancelOrder(@RequestParam(value = "orderId") ObjectId orderId) {
-        try{
-            orderService.cancelOrder(orderId);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.noContent().build();
+
     }
 
-    @PutMapping("deliver")
-    public ResponseEntity<String > deliverOrder(@RequestParam(value = "orderId") ObjectId id) {
-        try{
-            orderService.deliverOrder(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+    @PutMapping("deliver-otp")
+    public ResponseEntity<String> generateDeliveryOTP(@RequestParam(value = "orderId") ObjectId id) throws MessagingException {
+        orderService.generateDeliveryOtp(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("ship")
-    public ResponseEntity<String > ship(@RequestParam(value = "orderId") ObjectId id) {
-        try{
-            orderService.shipOrder(id);
+    //Verify the delivery Otp and update the status of the order to Delivered
+    @PutMapping("verify-deliver-otp")
+    public ResponseEntity<String> verifyDeliveryOtpAndDeliver(@RequestParam(value = "orderId") ObjectId id, @RequestParam(value = "otp") String otp) throws MessagingException {
+        if (orderService.verifyDeliveryOtp(id, otp))
             return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+        else return ResponseEntity.badRequest().body("Invalid OTP");
+    }
+
+    @PutMapping("shipment-otp")
+    public ResponseEntity<String> generateShipmentOtp(@RequestParam(value = "orderId") ObjectId id) throws MessagingException {
+        orderService.generateShipmentOtp(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    //Verify the shipment Otp and ship the order
+    @PutMapping("verify-shipment-otp")
+    public ResponseEntity<String> verifyShipmentOtpAndShip(@RequestParam(value = "orderId") ObjectId id, @RequestParam(value = "otp") String otp) throws MessagingException {
+
+        if (orderService.verifyShipmentOtp(id, otp))
+            return ResponseEntity.noContent().build();
+        else return ResponseEntity.badRequest().body("Invalid OTP");
+
     }
 
     @DeleteMapping("delete")
     public ResponseEntity<String> deleteOrder(@RequestParam(value = "orderId") ObjectId id) {
-        try{
-            orderService.deleteOrder(id);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-            return ResponseEntity.internalServerError().body(e.getMessage());
-        }
+
+        orderService.deleteOrder(id);
+        return ResponseEntity.ok().build();
+
     }
 
 }

@@ -4,12 +4,15 @@ import com.decentralized.marketplace.dto.UpdateUserDTO;
 import com.decentralized.marketplace.dto.UserLoginRequestDTO;
 import com.decentralized.marketplace.dto.UserResponseDTO;
 import com.decentralized.marketplace.dto.UserSignupRequestDTO;
+import com.decentralized.marketplace.entity.CustomUserDetails;
 import org.bson.types.ObjectId;
+
+import java.util.Map;
 
 public interface UserService {
     void signup(UserSignupRequestDTO userSignupRequestDTO);
 
-    UserResponseDTO login(UserLoginRequestDTO userLoginRequestDTO);
+    Map<String ,Object> login(UserLoginRequestDTO userLoginRequestDTO);
 
     UserResponseDTO getUser(ObjectId userId);
 
