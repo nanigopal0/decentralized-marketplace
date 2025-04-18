@@ -3,17 +3,51 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import {useDispatch, useSelector} from "react-redux"
+import { toast } from "react-toastify"
+import { login , clearAllUserErrors } from "../../store/slices/userSlice"
 
-export function LoginForm({
-  className,
-  ...props
-}) {
+export function LoginForm({className,...props}){
+  const [role , setRole] = useState('')
+  const [email , setEmail] = useState("")
+  const [password , setPassword] = useState("")
+  const {loading , isAuthenticated , error } = useSelector((state) => state.user)
+
+  const dispatch = useDispatch()
+  const navigateTo = useNavigate()
+  const handleLogin = (e) => {
+    e.preventDefault();
+    dispatch(login(email , password))
+    // console.log(isAuthenticated);
+  }
+
+  useEffect(() => {
+    if(error){
+      toast.error(error)
+      dispatch(clearAllUserErrors())
+    }
+    console.log(isAuthenticated);
+    if(!loading && isAuthenticated){
+      // toast.success("Login Successfully")
+      navigateTo('/')
+    }
+  },[dispatch , isAuthenticated , error , loading])
+
   return (
     (<div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <form className="h-full p-6 md:p-8 " >
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
@@ -21,9 +55,31 @@ export function LoginForm({
                   Login to your account
                 </p>
               </div>
+              <div className="w-full sm:col-span-4 gap-3">
+                  <Label className="block text-sm font-medium leading-6 text-gray-900">
+                    Role
+                  </Label>
+                  <div className="grid gap-3">
+                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+                      <Select
+                        value={role}
+                        onValueChange={(selectedValue) =>
+                          setRole(selectedValue)
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="select role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Yes">Seller</SelectItem>
+                          <SelectItem value="No">Buyer</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="m@example.com" required />
+                <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="m@example.com" required />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
@@ -32,11 +88,11 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Button type="submit" onClick={handleLogin} className="w-full">
+                  Login
+                </Button>
               </div>
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
               {/* <div
                 className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
@@ -75,6 +131,7 @@ export function LoginForm({
                   Sign up
                 </Link>
               </div>
+            </div>
             </div>
           </form>
           <div className="bg-muted relative hidden md:block">

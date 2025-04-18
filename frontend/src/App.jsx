@@ -1,9 +1,14 @@
 import './App.css'
 import { BrowserRouter as Router , Routes , Route } from "react-router-dom"
 import Login from './pages/mainpages/login'
-import Home from './pages/mainpages/Home'
 import Register from './pages/mainpages/Register'
-import Mail from './pages/mainpages/Mail'
+import { ToastContainer } from 'react-toastify'
+import AllProduct from './pages/sellerPages/AllProduct'
+import AddProduct from './pages/sellerPages/AddProduct'
+import SingleProduct from './pages/buyerPages/SingleProduct'
+import Payment from './pages/buyerPages/Payment'
+import SellerDashboard from './pages/sellerPages/SellerDashboard'
+import PlaecOrder from './pages/buyerPages/PlaecOrder'
 
 function App() {
 
@@ -14,11 +19,26 @@ function App() {
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route path='/mail' element={<Mail />} />
+          <Route path='/seller/dashboard' element={<SellerDashboard />} />
+          <Route path='/payment' element={<Payment />} />
+          <Route path='/product/:id' element={<SingleProduct />} />
+          <Route path='/product/add' element={<AddProduct />} />
+          <Route path='/product/all' element={<AllProduct />} />
+          <Route path='/order/product/:id' element={<PlaecOrder />} />
+          <Route path='/orders/all' element={<Orders/>} />
+          <Route path='/product/update/:id' element={<UpdateProduct/>} />
+          <Route path='/user/update/:id' element={<UpdateUser/>} />
+          <Route path='/myorders/all' element={<MyOrders/>} />
         </Routes>
+        <ToastContainer position='bottom-right' theme='light'/>
       </Router>
     </>
   )
 }
+import Orders from './pages/sellerPages/Orders'
+import UpdateProduct from './pages/sellerPages/UpdateProduct'
+import UpdateUser from './pages/mainpages/UpdateUser'
+import Home from './pages/buyerPages/Home'
+import MyOrders from './pages/buyerPages/MyOrders'
 
 export default App
