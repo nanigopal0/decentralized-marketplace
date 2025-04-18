@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserSignupRequestDTO extends UserLoginRequestDTO{
-
     private String fullName;
     private Role role;
     private String ethereumPublicKey;
