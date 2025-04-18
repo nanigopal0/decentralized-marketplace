@@ -15,15 +15,10 @@ import UpdateUser from "./pages/mainpages/UpdateUser";
 import Home from "./pages/buyerPages/Home";
 import MyOrders from "./pages/buyerPages/MyOrders";
 import LandingPage from "./pages/mainpages/LandingPage";
-import {isAuthenticated} from "./store/slices/userSlice";
-
+import { useSelector } from "react-redux";
 
 function App() {
-
-
-  console.log(isAuthenticated);
-
-  
+  const {isAuthenticated } = useSelector((state) => state.user)
   return (
     <>
       <Router>

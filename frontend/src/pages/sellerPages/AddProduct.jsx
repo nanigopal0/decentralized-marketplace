@@ -37,7 +37,6 @@ const AddProduct = () => {
 
   const {loading , error , message} = useSelector((state) => state.product)
   const dispatch = useDispatch()
-
   const handleAddProduct = (e) => {
     e.preventDefault()
     const formData = new FormData()
@@ -148,30 +147,6 @@ const AddProduct = () => {
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full sm:col-span-4">
-                  <Label className="block text-sm font-medium leading-6 text-gray-900">
-                    Deployed
-                  </Label>
-                  <div className="mt-2">
-                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                      <Select
-                        value={deployed}
-                        onValueChange={(selectedValue) =>
-                          setDeployed(selectedValue)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Is this project deployed?" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div> */}
-
                 <div className="w-full sm:col-span-4">
                   <Label className="block text-sm font-medium leading-6 text-gray-900">
                     Price
@@ -189,24 +164,6 @@ const AddProduct = () => {
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full sm:col-span-4">
-                  <Label className="block text-sm font-medium leading-6 text-gray-900">
-                    Project Link
-                  </Label>
-                  <div className="mt-2">
-                    <div className="relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 ">
-                      <Input
-                        type="text"
-                        className="block flex-1 border-0 bg-transparent py-1.5 pl-8 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                        placeholder="Github Repository Link"
-                        value={projectLink}
-                        onChange={(e) => setProjectLink(e.target.value)}
-                      />
-                      <Link className="absolute w-5 h-5 left-1 top-2" />
-                    </div>
-                  </div>
-                </div> */}
-
                 <div className="w-full col-span-full">
                   <Label
                     htmlFor="cover-photo"

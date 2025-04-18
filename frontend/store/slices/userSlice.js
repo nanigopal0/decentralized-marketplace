@@ -30,6 +30,20 @@ const userSlice = createSlice({
             state.user = {},
             state.error = action.payload
         },
+        registerRequest(state,action){
+            state.loading = true,
+            state.error = null
+        },
+        registerSuccess(state,action){
+            state.loading = false,
+            state.message = action.payload,
+            state.error = null
+        },
+        registerFailed(state,action){
+            state.loading = false,
+            state.message = state.message,
+            state.error = action.payload
+        },
         loadUserRequest(state,action){
             state.loading = true,
             state.isAuthenticated = false,
@@ -124,6 +138,25 @@ export const login = (email,password) => async(dispatch) => {
         dispatch(userSlice.actions.clearAllErrors())
     } catch (error) {
         dispatch(userSlice.actions.loginFailed(error.response.data.message))
+        console.log(error);
+    }
+}
+
+export const register = (registerData) => async(dispatch) => {
+    dispatch(userSlice.actions.registerRequest())
+    try{
+        const {data} = await axios.post(`` , registerData ,
+            {
+                withCredentials: true,
+                headers: { "Content-Type" : "application/json"}
+            }
+        )
+        console.log(data);
+        dispatch(userSlice.actions.registerSuccess(data))
+        dispatch(userSlice.actions.clearAllErrors(data))
+
+    }catch(error){
+        dispatch(userSlice.actions.registerFailed(error.response.data.message))
         console.log(error);
     }
 }
