@@ -19,11 +19,16 @@ const userSlice = createSlice({
         (state.error = null);
     },
     loginSuccess(state, action) {
-      (state.loading = false),
-        (state.isAuthenticated = true),
-        (state.user = action.payload),
-        (state.error = null);
-    },
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload || {}; // Ensure user is an object, even if payload is null/undefined
+      state.error = null;
+      localStorage.setItem("user", JSON.stringify(action.payload)); // Store user data in localStorage
+      // Optional: Log a warning if payload is invalid
+      if (!action.payload || !action.payload.id) {
+        console.warn("Invalid user data received in loginSuccess:", action.payload);
+    }
+  },
     loginFailed(state, action) {
       (state.loading = false),
         (state.isAuthenticated = false),
@@ -31,7 +36,6 @@ const userSlice = createSlice({
         (state.error = action.payload);
     },
     
-
     logoutSuccess(state, action) {
       (state.loading = false),
         (state.isAuthenticated = false),
@@ -119,8 +123,13 @@ export const login = (email, password) => async (dispatch) => {
       requestData,
       { withCredentials: true, headers: { "Content-Type": "application/json" } }
     );
-    console.log(data);
-    dispatch(userSlice.actions.loginSuccess(data));
+    if (data && data.id) {
+      dispatch(userSlice.actions.loginSuccess(data));
+      console.log(data);
+    } else {
+      throw new Error("Invalid login response");
+    }
+
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.loginFailed(error.response.data.message));
@@ -128,7 +137,7 @@ export const login = (email, password) => async (dispatch) => {
   }
 };
 
-export const loadUser = () => async (dispatch) => {
+export const pingServer = () => async (dispatch) => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
     const  data  = await axios.get(
@@ -152,10 +161,10 @@ export const getUser = () => async (dispatch) => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
     const { data } = await axios.get(
-      `${process.env.BACKEND_URL}/api/v1/user/getUser`,
+      `${process.env.BACKEND_URL}/user/get/?id=${userSlice.user.id}`,
       { withCredentials: true }
     );
-    dispatch(userSlice.actions.loadUserSuccess(data.user));
+    dispatch(userSlice.actions.loadUserSuccess(data));
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
     dispatch(userSlice.actions.loadUserFailed(error.response.data.message));

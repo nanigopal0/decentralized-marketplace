@@ -18,7 +18,6 @@ import {
   resetProduct,
 } from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
-import { log } from "console";
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -27,15 +26,17 @@ const AddProduct = () => {
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
+  const { loading, error, message } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
   const [productImagePreview, setProductImagePreview] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
+  const handleFileUpload = async () => {
+    // const file = e.target.files[0];
+    // if (!file) return;
+    console.log(productImage)
     const data = new FormData();
-
-    data.append("file", file);
+    data.append("file", productImage);
     data.append("upload_preset", "Banner_Upload");
     data.append("cloud_name", "dckahd0gz");
 
@@ -46,9 +47,11 @@ const AddProduct = () => {
         body: data,
       }
     );
-    const uploadedImageURL = await res.json;
+    const uploadedImageURL = await res.json();
     console.log(uploadedImageURL.url);
+    return uploadedImageURL.url;
   };
+
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -59,18 +62,19 @@ const AddProduct = () => {
     };
   };
 
-  const { loading, error, message } = useSelector((state) => state.product);
-  const dispatch = useDispatch();
 
-  const handleAddProduct = (e) => {
+  const handleAddProduct = async (e) => {
     e.preventDefault();
+    console.log(user);
+    const imageUrl =await handleFileUpload();
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
     formData.append("price", price);
-    formData.append("productType", productType);
+    formData.append("type", productType);
     formData.append("stock", stock);
-    formData.append("productImage", productImage);
+    formData.append("mediaUrl", imageUrl);
+    formData.append("sellerId",user.id);
     dispatch(addProduct(formData));
     setTitle("");
     setDescription("");
@@ -165,36 +169,13 @@ const AddProduct = () => {
                           <SelectValue placeholder="Select Project Stack" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Physical">Physical</SelectItem>
-                          <SelectItem value="Digital">Digital</SelectItem>
+                          <SelectItem value="PHYSICAL">Physical</SelectItem>
+                          <SelectItem value="DIGITAL">Digital</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full sm:col-span-4">
-                  <Label className="block text-sm font-medium leading-6 text-gray-900">
-                    Deployed
-                  </Label>
-                  <div className="mt-2">
-                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                      <Select
-                        value={deployed}
-                        onValueChange={(selectedValue) =>
-                          setDeployed(selectedValue)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Is this project deployed?" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div> */}
 
                 <div className="w-full sm:col-span-4">
                   <Label className="block text-sm font-medium leading-6 text-gray-900">
@@ -209,27 +190,11 @@ const AddProduct = () => {
                         value={price}
                         onChange={(e) => setPrice(e.target.value)}
                       />
-                      {/* <Link className="absolute w-5 h-5 left-1 top-2" /> */}
+       
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full sm:col-span-4">
-                  <Label className="block text-sm font-medium leading-6 text-gray-900">
-                    Project Link
-                  </Label>
-                  <div className="mt-2">
-                    <div className="relative flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 ">
-                      <Input
-                        type="text"
-                        className="block flex-1 border-0 bg-transparent py-1.5 pl-8 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                        placeholder="Github Repository Link"
-                        value={projectLink}
-                        onChange={(e) => setProjectLink(e.target.value)}
-                      />
-                      <Link className="absolute w-5 h-5 left-1 top-2" />
-                    </div>
-                  </div>
-                </div> */}
+            
 
                 <div className="w-full col-span-full">
                   <Label
@@ -300,7 +265,6 @@ const AddProduct = () => {
             >
               Add Project
             </button>
-            {/* )} */}
           </div>
         </form>
       </div>

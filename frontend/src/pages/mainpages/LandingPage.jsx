@@ -1,7 +1,11 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -10,9 +14,11 @@ const LandingPage = () => {
         <p className="text-lg mb-6">
           Discover, buy, and sell products securely on our decentralized platform.
         </p>
-        <Button className="bg-white text-blue-600 hover:bg-gray-200">
+        <Link to="/login">
+        <Button className="px-6 py-3 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
           Get Started
         </Button>
+        </Link>
       </section>
 
       {/* Inspirational Quote Section */}

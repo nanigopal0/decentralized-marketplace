@@ -45,7 +45,6 @@ public class ProductController {
 
     @GetMapping("get")
     public ResponseEntity<ProductDTO> getProduct(@RequestParam(value = "productId") ObjectId productId) {
-
         return ResponseEntity.ok(productService.getProduct(productId));
 
     }

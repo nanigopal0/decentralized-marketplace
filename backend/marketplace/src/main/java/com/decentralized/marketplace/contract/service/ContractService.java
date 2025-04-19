@@ -48,8 +48,8 @@ public class ContractService {
     }
 
 
-    public void listProduct(int price, ProductType productType){
-        smartMarketPlace.listProduct(BigInteger.valueOf(price),productType == ProductType.DIGITAL ? BigInteger.ONE : BigInteger.ZERO);
+    public void listProduct(String productId,int price, ProductType productType){
+        smartMarketPlace.listProduct(productId,BigInteger.valueOf(price),productType == ProductType.DIGITAL ? BigInteger.ONE : BigInteger.ZERO);
     }
 
     public void purchaseProduct(){

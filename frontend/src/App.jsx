@@ -22,7 +22,7 @@ import MyOrders from "./pages/buyerPages/MyOrders";
 import LandingPage from "./pages/mainpages/LandingPage";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { loadUser } from "../store/slices/userSlice";
+import { pingServer } from "../store/slices/userSlice";
 
 function App() {
   const dispatch = useDispatch();
@@ -30,11 +30,13 @@ function App() {
   console.log(isAuthenticated);
 
   useEffect(() => {
-    dispatch(loadUser());
+    dispatch(pingServer());
   }, [dispatch]);
 
   return (
     <>
+
+    
       <Router>
         <Routes>
           {isAuthenticated ? (
@@ -62,6 +64,8 @@ function App() {
         </Routes>
         <ToastContainer position="bottom-right" theme="light" />
       </Router>
+
+      
     </>
   );
 }

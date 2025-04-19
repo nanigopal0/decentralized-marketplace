@@ -91,12 +91,14 @@ const productSlice = createSlice({
 export const getAllProduct = () => async(dispatch) => {
     dispatch(productSlice.actions.getAllProductRequest())
     try {
-        const {data} = await axios.get(`${process.env.BACKEND_URL}/api/v1/product/allProduct` , 
+        const data = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/product/get-all-products` , 
             {
-                withCredentials: true
+                withCredentials: true,
+                headers: { "Content-Type": "application/json" },
             }
         )
-        dispatch(productSlice.actions.getAllProductSuccess(data.products))
+    
+        dispatch(productSlice.actions.getAllProductSuccess(data.data))
         dispatch(productSlice.actions.clearAllErrors())
     } catch (error) {
         dispatch(productSlice.actions.getAllProductFailed(error.response.data.message))
@@ -121,18 +123,19 @@ export const deleteProduct = (id) => async(dispatch) => {
 export const addProduct = (productData) => async(dispatch) => {
     dispatch(productSlice.actions.addNewProductRequest())
     try {
-        const {data} = await axios.post(`${process.env.BACKEND_URL}/api/v1/product/post` , productData , 
+        const {data} = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/product/add` , productData , 
             {
                 withCredentials: true,
                 headers: {
-                    "Content-Type" : "multipart/form-data"
+                    "Content-Type" : "application/json"
                 }
             }
         )
         dispatch(productSlice.actions.addNewProductSuccess(data.message))
-        dispatch(product.actions.clearAllErrors())
+        dispatch(productSlice.actions.clearAllErrors())
     } catch (error) {
-        dispatch(productSlice.actions.addNewProductFailed(error.response.data.message))
+        dispatch(productSlice.actions.addNewProductFailed(error.response))
+        console.log(error)
     }
 }
 
