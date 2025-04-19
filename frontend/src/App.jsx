@@ -30,7 +30,7 @@ import Footer from "./pages/layout/Footer";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
-  console.log(isAuthenticated);
+
 
   useEffect(() => {
     dispatch(pingServer());
