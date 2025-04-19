@@ -21,9 +21,7 @@ export function LoginForm({ className, ...props }) {
   const [role, setRole] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { loading, isAuthenticated, error } = useSelector(
-    (state) => state.user
-  );
+  const { loading, isAuthenticated, error } = useSelector((state) => state.user );
 
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
@@ -41,7 +39,7 @@ export function LoginForm({ className, ...props }) {
     console.log(isAuthenticated);
     if (!loading && isAuthenticated) {
       // toast.success("Login Successfully")
-      navigateTo("/");
+      navigateTo("/home");
     }
   }, [dispatch, isAuthenticated, error, loading]);
 

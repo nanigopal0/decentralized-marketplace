@@ -40,4 +40,9 @@ public class UserController {
         return ResponseEntity.accepted().build();
 
     }
+
+    @GetMapping("ping")
+    public ResponseEntity<String> ping() {
+        return ResponseEntity.ok("Ping successful!");
+    }
 }

@@ -12,7 +12,7 @@ import java.util.Map;
 public interface UserService {
     void signup(UserSignupRequestDTO userSignupRequestDTO);
 
-    Map<String ,Object> login(UserLoginRequestDTO userLoginRequestDTO);
+    UserResponseDTO login(UserLoginRequestDTO userLoginRequestDTO);
 
     UserResponseDTO getUser(ObjectId userId);
 
