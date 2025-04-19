@@ -35,11 +35,29 @@ function App() {
 
   return (
     <>
-
-    
+      <Navbar />
       <Router>
         <Routes>
-          {isAuthenticated ? (
+          {/* Redirect to /home if authenticated, otherwise to /login */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/home" />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          {/* Public Routes */}
+          {!isAuthenticated && (
+            <>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+            </>
+          )}
+          {/* Protected Routes */}
+          {isAuthenticated && (
             <>
               <Route path="/home" element={<Home />} />
               <Route path="/seller/dashboard" element={<SellerDashboard />} />
@@ -52,20 +70,23 @@ function App() {
               <Route path="/product/update/:id" element={<UpdateProduct />} />
               <Route path="/user/update/:id" element={<UpdateUser />} />
               <Route path="/myorders/all" element={<MyOrders />} />
-              <Route path="*" element={<Home />} />
-            </>
-          ) : (
-            <>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="*" element={<LandingPage />} />
             </>
           )}
+          {/* Catch-All Route */}
+          <Route
+            path="*"
+            element={
+              isAuthenticated ? (
+                <Navigate to="/home" />
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
         </Routes>
         <ToastContainer position="bottom-right" theme="light" />
       </Router>
-
-      
+      <Footer />
     </>
   );
 }
