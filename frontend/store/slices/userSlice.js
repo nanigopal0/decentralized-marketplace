@@ -128,7 +128,7 @@ export const login = (email, password) => async (dispatch) => {
     );
     if (data && data.id) {
       dispatch(userSlice.actions.loginSuccess(data));
-      console.log(data);
+      // console.log(data);
     } else {
       throw new Error("Invalid login response");
     }
