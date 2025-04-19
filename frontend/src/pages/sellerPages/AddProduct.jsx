@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {Label} from '@/components/ui/Label';
-import {Input} from '@/components/ui/Input';
-import {Button} from '@/components/ui/button';
-import {Textarea} from '@/components/ui/textarea';
+import React, { useEffect, useState } from "react";
+import { Label } from "@/components/ui/Label";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -10,63 +10,87 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDispatch, useSelector } from 'react-redux';
-import { addProduct,clearAllProductErrors,getAllProduct , resetProduct } from '../../../store/slices/productSlice';
-import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addProduct,
+  clearAllProductErrors,
+  getAllProduct,
+  resetProduct,
+} from "../../../store/slices/productSlice";
+import { toast } from "react-toastify";
+import { log } from "console";
 
 const AddProduct = () => {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [productType, setProductType] = useState("");
+  const [stock, setStock] = useState(0);
+  const [productImage, setProductImage] = useState("");
+  const [productImagePreview, setProductImagePreview] = useState("");
 
-  const [title , setTitle] = useState('')
-  const [description , setDescription] = useState('')
-  const [price , setPrice] = useState('')
-  const [productType , setProductType] = useState('')
-  const [stock , setStock] = useState(0)
-  const [productImage , setProductImage] = useState('')
-  const [ productImagePreview , setProductImagePreview ] = useState('')
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  
+    const data = new FormData();
+
+    data.append("file", file);
+    data.append("upload_preset", "Banner_Upload");
+    data.append("cloud_name", "dckahd0gz");
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/dckahd0gz/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
+    const uploadedImageURL = await res.json;
+    console.log(uploadedImageURL.url);
+  };
   const handleBanner = (e) => {
-    const file = e.target.files[0]
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
     reader.onload = () => {
-      setProductImagePreview(reader.result)
-      setProductImage(file)
-    }
-  }
+      setProductImagePreview(reader.result);
+      setProductImage(file);
+    };
+  };
 
-  const {loading , error , message} = useSelector((state) => state.product)
-  const dispatch = useDispatch()
+  const { loading, error, message } = useSelector((state) => state.product);
+  const dispatch = useDispatch();
 
   const handleAddProduct = (e) => {
-    e.preventDefault()
-    const formData = new FormData()
-    formData.append("title" , title)
-    formData.append("description" , description)
-    formData.append("price" , price)
-    formData.append("productType" , productType)
-    formData.append("stock" , stock)
-    formData.append("productImage" , productImage)
-    dispatch(addProduct(formData))
-    setTitle('')
-    setDescription('')
-    setPrice('')
-    setProductType('')
-    setStock('')
-    setProductImage('')
-  }
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("productType", productType);
+    formData.append("stock", stock);
+    formData.append("productImage", productImage);
+    dispatch(addProduct(formData));
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setProductType("");
+    setStock("");
+    setProductImage("");
+  };
 
   useEffect(() => {
-    if(error){
-      toast.error(error)
-      dispatch(clearAllProductErrors())
+    if (error) {
+      toast.error(error);
+      dispatch(clearAllProductErrors());
     }
-    if(message){
-      toast.success(message)
-      dispatch(resetProduct())
-      dispatch(getAllProduct())
+    if (message) {
+      toast.success(message);
+      dispatch(resetProduct());
+      dispatch(getAllProduct());
     }
-  },[ loading , dispatch , error , message ])
+  }, [loading, dispatch, error, message]);
 
   return (
     <>
@@ -220,9 +244,7 @@ const AddProduct = () => {
                         <img
                           className="mx-auto h-[250px] w-full text-gray-300"
                           viewBox="0 0 24 24"
-                          src={
-                            productImagePreview && `${productImagePreview}`
-                          }
+                          src={productImagePreview && `${productImagePreview}`}
                         />
                       ) : (
                         <svg
@@ -272,18 +294,18 @@ const AddProduct = () => {
                 width={"w-56"}
               />
             ) : ( */}
-              <button
-                type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-56"
-              >
-                Add Project
-              </button>
+            <button
+              type="submit"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-56"
+            >
+              Add Project
+            </button>
             {/* )} */}
           </div>
         </form>
       </div>
     </>
   );
-}
+};
 
 export default AddProduct;
