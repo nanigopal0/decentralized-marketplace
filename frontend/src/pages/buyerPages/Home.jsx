@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
 
@@ -83,6 +83,33 @@ const products = [
 ];
 
 export default function Home() {
+
+  const [products, setProducts] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  const fetchProducts = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/products`);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      setProducts(data);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+
+    fetchProducts();
+  },[])
+
+
+
+
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <h1 className="text-4xl font-bold text-center mb-10">

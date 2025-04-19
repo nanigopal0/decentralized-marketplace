@@ -22,7 +22,6 @@ import MyOrders from "./pages/buyerPages/MyOrders";
 import LandingPage from "./pages/mainpages/LandingPage";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import axios from "axios";
 import { loadUser } from "../store/slices/userSlice";
 
 function App() {
@@ -30,7 +29,7 @@ function App() {
   const { isAuthenticated } = useSelector((state) => state.user);
   console.log(isAuthenticated);
 
-  useEffect( () => {
+  useEffect(() => {
     dispatch(loadUser());
   }, [dispatch]);
 
@@ -38,26 +37,7 @@ function App() {
     <>
       <Router>
         <Routes>
-          {/* Redirect to /home if authenticated, otherwise to /login */}
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/home" />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
-          {/* Public Routes */}
-          {!isAuthenticated && (
-            <>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            </>
-          )}
-          {/* Protected Routes */}
-          {isAuthenticated && (
+          {isAuthenticated ? (
             <>
               <Route path="/home" element={<Home />} />
               <Route path="/seller/dashboard" element={<SellerDashboard />} />
@@ -70,19 +50,15 @@ function App() {
               <Route path="/product/update/:id" element={<UpdateProduct />} />
               <Route path="/user/update/:id" element={<UpdateUser />} />
               <Route path="/myorders/all" element={<MyOrders />} />
+              <Route path="*" element={<Home />} />
+            </>
+          ) : (
+            <>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="*" element={<LandingPage />} />
             </>
           )}
-          {/* Catch-All Route */}
-          <Route
-            path="*"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/home" />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
-          />
         </Routes>
         <ToastContainer position="bottom-right" theme="light" />
       </Router>
