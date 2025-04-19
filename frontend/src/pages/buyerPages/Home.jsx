@@ -66,10 +66,7 @@ export default function Home() {
         ))}
       </div>
 
-      <footer className="mt-20 py-6 bg-gradient-to-r from-emerald-500 to-teal-400 text-white text-center text-sm shadow-inner">
-        &copy; {new Date().getFullYear()} Smart Marketplace. All rights
-        reserved.
-      </footer>
+    
     </div>
   );
 }

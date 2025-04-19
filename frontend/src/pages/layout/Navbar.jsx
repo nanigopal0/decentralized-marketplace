@@ -15,7 +15,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-600 text-white p-4 flex justify-between items-center shadow-md relative">
+    <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center shadow-md relative">
       <h1 className="text-xl font-semibold">Smart Market</h1>
 
       <div className="flex items-center space-x-4">

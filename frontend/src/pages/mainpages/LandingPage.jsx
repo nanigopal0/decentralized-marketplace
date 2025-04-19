@@ -39,9 +39,11 @@ const LandingPage = () => {
         <p className="text-lg mb-6">
           Start exploring the decentralized marketplace now.
         </p>
+        <Link to="/register">
         <Button className="bg-blue-600 text-white hover:bg-blue-700">
           Sign Up
         </Button>
+        </Link>
       </section>
     </div>
   );
