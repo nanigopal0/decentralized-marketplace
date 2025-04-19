@@ -13,7 +13,7 @@ import AddProduct from "./pages/sellerPages/AddProduct";
 import SingleProduct from "./pages/buyerPages/SingleProduct";
 import Payment from "./pages/buyerPages/Payment";
 import SellerDashboard from "./pages/sellerPages/SellerDashboard";
-import PlaecOrder from "./pages/buyerPages/PlaecOrder";
+import PlaceOrder from "./pages/buyerPages/PlaceOrder";
 import Orders from "./pages/sellerPages/Orders";
 import UpdateProduct from "./pages/sellerPages/UpdateProduct";
 import UpdateUser from "./pages/mainpages/UpdateUser";
@@ -65,7 +65,7 @@ function App() {
               <Route path="/product/:id" element={<SingleProduct />} />
               <Route path="/product/add" element={<AddProduct />} />
               <Route path="/product/all" element={<AllProduct />} />
-              <Route path="/order/product/:id" element={<PlaecOrder />} />
+              <Route path="/order/product/:id" element={<PlaceOrder />} />
               <Route path="/orders/all" element={<Orders />} />
               <Route path="/product/update/:id" element={<UpdateProduct />} />
               <Route path="/user/update/:id" element={<UpdateUser />} />
