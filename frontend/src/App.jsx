@@ -5,6 +5,8 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
+import Navbar from "./pages/layout/Navbar";
+import Footer from "./pages/layout/Footer";
 import Login from "./pages/mainpages/login";
 import Register from "./pages/mainpages/Register";
 import { ToastContainer } from "react-toastify";
@@ -14,7 +16,7 @@ import SingleProduct from "./pages/buyerPages/SingleProduct";
 import Payment from "./pages/buyerPages/Payment";
 import SellerDashboard from "./pages/sellerPages/SellerDashboard";
 import PlaceOrder from "./pages/buyerPages/PlaceOrder";
-import Orders from "./pages/sellerPages/Orders";
+import SellerOrders from "./pages/sellerPages/SellerOrders";
 import UpdateProduct from "./pages/sellerPages/UpdateProduct";
 import UpdateUser from "./pages/mainpages/UpdateUser";
 import Home from "./pages/buyerPages/Home";
@@ -36,6 +38,7 @@ function App() {
 
   return (
     <>
+      <Navbar />
       <Router>
         <Routes>
           {/* Redirect to /home if authenticated, otherwise to /login */}
@@ -66,7 +69,7 @@ function App() {
               <Route path="/product/add" element={<AddProduct />} />
               <Route path="/product/all" element={<AllProduct />} />
               <Route path="/order/product/:id" element={<PlaceOrder />} />
-              <Route path="/orders/all" element={<Orders />} />
+              <Route path="/orders/all" element={<SellerOrders />} />
               <Route path="/product/update/:id" element={<UpdateProduct />} />
               <Route path="/user/update/:id" element={<UpdateUser />} />
               <Route path="/myorders/all" element={<MyOrders />} />
@@ -86,6 +89,7 @@ function App() {
         </Routes>
         <ToastContainer position="bottom-right" theme="light" />
       </Router>
+      <Footer />
     </>
   );
 }
