@@ -6,7 +6,7 @@ const userSlice = createSlice({
   initialState: {
     loading: false,
     user: {},
-    isAuthenticated: false,
+    isAuthenticated: true,
     error: null,
     message: null,
     isUpdated: false,
@@ -30,7 +30,6 @@ const userSlice = createSlice({
         (state.user = {}),
         (state.error = action.payload);
     },
-    
 
     logoutSuccess(state, action) {
       (state.loading = false),
@@ -91,10 +90,10 @@ const userSlice = createSlice({
       state.loading = true;
     },
     loadUserSuccess(state, action) {
-        state.loading = false;
-        state.isAuthenticated = true;
-        state.user = action.payload || {}; // Set user to an empty object if no data is returned
-        state.error = null;
+      state.loading = false;
+      state.isAuthenticated = true;
+      state.user = action.payload || {}; // Set user to an empty object if no data is returned
+      state.error = null;
     },
     loadUserFailed(state, action) {
       state.loading = false;
@@ -103,8 +102,8 @@ const userSlice = createSlice({
       state.error = action.payload;
     },
     clearErrors(state) {
-        state.error = null;
-    }
+      state.error = null;
+    },
   },
 });
 
@@ -131,19 +130,20 @@ export const login = (email, password) => async (dispatch) => {
 export const loadUser = () => async (dispatch) => {
   dispatch(userSlice.actions.loadUserRequest());
   try {
-    const  data  = await axios.get(
+    const data = await axios.get(
       `${import.meta.env.VITE_BACKEND_URL}/user/ping`,
       {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
       }
     );
-    if(data.status === 200)
-        dispatch(userSlice.actions.loadUserSuccess(null)); 
+    if (data.status === 200) dispatch(userSlice.actions.loadUserSuccess(null));
     else throw new Error("Not logged in!");
   } catch (error) {
     dispatch(
-      userSlice.actions.loadUserFailed(error.response?.data?.message || "Failed to load user")
+      userSlice.actions.loadUserFailed(
+        error.response?.data?.message || "Failed to load user"
+      )
     );
   }
 };

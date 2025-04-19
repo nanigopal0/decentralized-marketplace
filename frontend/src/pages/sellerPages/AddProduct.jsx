@@ -18,7 +18,6 @@ import {
   resetProduct,
 } from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
-import { log } from "console";
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -49,6 +48,7 @@ const AddProduct = () => {
     const uploadedImageURL = await res.json;
     console.log(uploadedImageURL.url);
   };
+
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();

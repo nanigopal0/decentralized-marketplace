@@ -30,9 +30,9 @@ function App() {
   const { isAuthenticated } = useSelector((state) => state.user);
   console.log(isAuthenticated);
 
-  useEffect( () => {
-    dispatch(loadUser());
-  }, [dispatch]);
+  // useEffect( () => {
+  //   dispatch(loadUser());
+  // }, [dispatch]);
 
   return (
     <>
