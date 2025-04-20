@@ -1,55 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
-import { FiSearch } from "react-icons/fi";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
 
 export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
-  const handleSearch = () => {
-    console.log("Search for:", searchQuery);
+  const handleProfileClick = () => {
+    setShowDropdown((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    console.log("Logout clicked");
+  const handleOutsideClick = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setShowDropdown(false);
+    }
   };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post("/api/logout");
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   return (
-    <nav className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 flex justify-between items-center shadow-md relative">
-      <h1 className="text-xl font-semibold">Smart Market</h1>
+    <nav className="bg-white shadow-md py-4 px-6 flex items-center justify-between">
+      <Link to="/" className="text-2xl font-bold text-blue-600 cursor-pointer">
+        SmartMarket
+      </Link>
 
-      <div className="flex items-center space-x-4">
-        {/* Search Bar */}
+      <div className="flex items-center space-x-4 relative">
+        <input
+          type="text"
+          placeholder="Search..."
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+        />
+        <button className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700">
+          Search
+        </button>
+
         <div className="relative">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="px-4 py-2 rounded-md text-black w-60 bg-blue-200"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
           <button
-            onClick={handleSearch}
-            className="absolute right-0 top-0 bottom-0 bg-blue-800 px-3 rounded-r-md hover:bg-blue-900"
+            onClick={handleProfileClick}
+            className="text-2xl text-gray-600"
           >
-            <FiSearch />
-          </button>
-        </div>
-
-        {/* Profile Icon */}
-        <div className="relative">
-          <button onClick={() => setShowProfileMenu(!showProfileMenu)}>
-            <FaUserCircle className="text-2xl" />
+            <FaUserCircle />
           </button>
 
-          {showProfileMenu && (
-            <div className="absolute right-0 mt-2 bg-white text-black rounded-md shadow-lg w-40 z-50">
-              <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+          {showDropdown && (
+            <div
+              ref={dropdownRef}
+              className="absolute top-10 right-0 bg-white shadow-lg rounded-md w-40 py-2 z-50 transition-all duration-300 ease-in-out"
+            >
+              <Link
+                to="/profile"
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+              >
                 View Profile
-              </button>
+              </Link>
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-500"
               >
                 Logout
               </button>

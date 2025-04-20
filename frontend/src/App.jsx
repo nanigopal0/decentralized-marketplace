@@ -25,49 +25,45 @@ import { useEffect } from "react";
 import { pingServer } from "../store/slices/userSlice";
 import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
-
-
+import ProfileView from "./pages/buyerPages/ProfileView";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
 
-
   useEffect(() => {
     dispatch(pingServer());
-  }, [dispatch]);
+  }, [dispatch]); //Make it uncomment while push
 
   return (
     <>
       <Navbar />
-      <Router>
-        <Routes>
-
-          {isAuthenticated ? (
-            <>
-              <Route path="/home" element={<Home />} />
-              <Route path="/seller/dashboard" element={<SellerDashboard />} />
-              <Route path="/payment" element={<Payment />} />
-              <Route path="/product/:id" element={<SingleProduct />} />
-              <Route path="/product/add" element={<AddProduct />} />
-              <Route path="/product/all" element={<AllProduct />} />
-              <Route path="/order/product/:id" element={<PlaceOrder />} />
-              <Route path="/orders/all" element={<SellerOrders />} />
-              <Route path="/product/update/:id" element={<UpdateProduct />} />
-              <Route path="/user/update/:id" element={<UpdateUser />} />
-              <Route path="/myorders/all" element={<MyOrders />} />
-              <Route path="*" element={<Navigate to="/home" />} />
-            </>
-          ) : (
-            <>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/" element={<LandingPage />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </>
-          )}
-        </Routes>
-        <ToastContainer position="bottom-right" theme="light" />
-      </Router>
+      <Routes>
+        {isAuthenticated ? (
+          <>
+            <Route path="/home" element={<Home />} />
+            <Route path="/seller/dashboard" element={<SellerDashboard />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/product/:id" element={<SingleProduct />} />
+            <Route path="/product/add" element={<AddProduct />} />
+            <Route path="/product/all" element={<AllProduct />} />
+            <Route path="/order/product/:id" element={<PlaceOrder />} />
+            <Route path="/orders/all" element={<SellerOrders />} />
+            <Route path="/product/update/:id" element={<UpdateProduct />} />
+            <Route path="/user/update/:id" element={<UpdateUser />} />
+            <Route path="/myorders/all" element={<MyOrders />} />
+            <Route path="/profile" element={<ProfileView />} />
+            <Route path="*" element={<Navigate to="/home" />} />
+          </>
+        ) : (
+          <>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </>
+        )}
+      </Routes>
+      <ToastContainer position="bottom-right" theme="light" />
       <Footer />
     </>
   );
