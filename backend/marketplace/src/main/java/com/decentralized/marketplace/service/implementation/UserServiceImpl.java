@@ -24,9 +24,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -85,14 +82,23 @@ public class UserServiceImpl implements UserService {
                     .fullName(userDetails.getUserFullName())
                     .ethereumPublicKey(userDetails.getUserEthereumPublicKey())
                     .build();
-//            List<Role> roles = authenticate.getAuthorities().stream().map(a -> Role.valueOf(a.getAuthority().substring(5))).toList();
             responseDTO.setRole(userDetails.getRole());
-//            Map<String,Object> map = new HashMap<>();
-//            map.put("token", token);
-//            map.put("user", responseDTO);
             return responseDTO;
         }
         throw new RuntimeException("Authentication failed");
+    }
+
+    @Override
+    public void logout() {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0) // Set maxAge to 0 to remove the cookie
+                .sameSite("Strict")
+                .build();
+
+        httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     private void  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
@@ -107,7 +113,6 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-//        return token;
     }
 
     @Override
@@ -150,6 +155,8 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId().toHexString())
                 .build();
     }
+
+
 
     public static CustomUserDetails getCustomUserDetailsFromAuthentication() {
         return (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
