@@ -158,10 +158,11 @@ export const pingServer = () => async (dispatch) => {
 };
 
 export const getUser = () => async (dispatch) => {
+  const user = JSON.parse(localStorage.getItem("user"));
   dispatch(userSlice.actions.loadUserRequest());
   try {
     const { data } = await axios.get(
-      `${process.env.BACKEND_URL}/user/get/?id=${userSlice.user.id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/user/get/?id=${user.id}`,
       { withCredentials: true }
     );
     dispatch(userSlice.actions.loadUserSuccess(data));
@@ -174,7 +175,7 @@ export const getUser = () => async (dispatch) => {
 export const logout = () => async (dispatch) => {
   try {
     const { data } = await axios.get(
-      `${process.env.BACKEND_URL}/api/v1/user/logout`,
+      `${import.meta.env.VITE_BACKEND_URL}/user/logout`,
       { withCredentials: true }
     );
     dispatch(userSlice.actions.logoutSuccess(data.message));
@@ -190,7 +191,7 @@ export const updatePassword =
     dispatch(userSlice.actions.updatePasswordRequest());
     try {
       const { data } = await axios.put(
-        `${process.env.BACKEND_URL}/api/v1/user/update/password`,
+        `${import.meta.env.VITE_BACKEND_URL}/user/update/password`,
         { currentPassword, newPassword, conformNewPassword },
         {
           withCredentials: true,
@@ -209,11 +210,11 @@ export const updateProfile = (newData) => async (dispatch) => {
   dispatch(userSlice.actions.updateProfileRequest());
   try {
     const { data } = await axios.put(
-      `${process.env.BACKEND_URL}/api/v1/user/update/profile`,
+      `${import.meta.env.VITE_BACKEND_URL}/user/update/profile`,
       newData,
       {
         withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "application/json" },
       }
     );
     dispatch(userSlice.actions.updateProfileSuccess(data.message));

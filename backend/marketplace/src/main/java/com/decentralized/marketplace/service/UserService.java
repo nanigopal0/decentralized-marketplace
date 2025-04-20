@@ -20,4 +20,5 @@ public interface UserService {
 
     UserResponseDTO updateUser(UpdateUserDTO update, ObjectId userId);
 
+    void logout();
 }

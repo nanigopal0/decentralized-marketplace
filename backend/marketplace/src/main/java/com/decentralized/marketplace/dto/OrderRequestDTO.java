@@ -12,10 +12,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderRequestDTO {
     private String sellerId;
-    private String  buyerId;
     private String  productId;
     private Integer quantity;
-    private Double pricePerItem;
     private String priceUnit = "ETH";
 
 }

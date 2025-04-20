@@ -3,11 +3,9 @@ package com.decentralized.marketplace.service.implementation;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
 import com.decentralized.marketplace.entity.*;
-import com.decentralized.marketplace.exception.InvalidOTPException;
-import com.decentralized.marketplace.exception.OrderNotFoundException;
-import com.decentralized.marketplace.exception.UnauthorizedUserException;
-import com.decentralized.marketplace.exception.UserNotFoundException;
+import com.decentralized.marketplace.exception.*;
 import com.decentralized.marketplace.repository.OrderRepo;
+import com.decentralized.marketplace.repository.ProductRepo;
 import com.decentralized.marketplace.repository.UserRepo;
 import com.decentralized.marketplace.service.MailService;
 import com.decentralized.marketplace.service.OrderService;
@@ -31,11 +29,13 @@ public class OrderServiceImpl implements OrderService {
 
     // OTP configuration
     private static final int OTP_EXPIRY_MINUTES = 30;
+    private final ProductRepo productRepo;
 
-    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo) {
+    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo) {
         this.orderRepo = orderRepo;
         this.mailService = mailService;
         this.userRepo = userRepo;
+        this.productRepo = productRepo;
     }
 
     /**
@@ -87,18 +87,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException {
+        Product product = productRepo.findById(new ObjectId(order.getProductId())).orElseThrow(() -> new ProductNotFoundException(order.getProductId()));
         order.setPriceUnit(order.getPriceUnit() == null ? "ETH" : order.getPriceUnit());
         CustomUserDetails userDetails = UserServiceImpl.getCustomUserDetailsFromAuthentication();
-        order.setBuyerId(userDetails.getUserId());
         Order order1 = Order.builder()
                 .sellerId(new ObjectId(order.getSellerId()))
-                .buyerId(new ObjectId(order.getBuyerId()))
-                .productId(new ObjectId(order.getProductId()))
-                .pricePerItem(order.getPricePerItem())
+                .buyerId(new ObjectId(userDetails.getUserId()))
+                .productId(product.getId())
+                .pricePerItem(product.getPrice())
                 .orderedAt(LocalDateTime.now())
-                .priceUnit(order.getPriceUnit())
+                .priceUnit(product.getPriceUnit())
                 .quantity(order.getQuantity())
-                .totalPrice(order.getPricePerItem() * order.getQuantity())
+                .totalPrice(product.getPrice() * order.getQuantity())
                 .status(OrderStatus.Accepted)
                 .build();
         User seller = userRepo.findById(order1.getSellerId()).orElseThrow(() -> new UserNotFoundException(order.getSellerId()));

@@ -1,5 +1,6 @@
 package com.decentralized.marketplace.service.implementation;
 
+import com.decentralized.marketplace.contract.service.ContractService;
 import com.decentralized.marketplace.dto.ProductDTO;
 import com.decentralized.marketplace.entity.Product;
 import com.decentralized.marketplace.entity.ProductType;
@@ -19,9 +20,11 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepo productRepo;
+    private final ContractService contractService;
 
-    public ProductServiceImpl(ProductRepo productRepo) {
+    public ProductServiceImpl(ProductRepo productRepo, ContractService contractService) {
         this.productRepo = productRepo;
+        this.contractService = contractService;
     }
 
 
@@ -40,6 +43,10 @@ public class ProductServiceImpl implements ProductService {
                 .sellerId(new ObjectId(productDTO.getSellerId()))
                 .build();
         Product saved = productRepo.save(product);
+        //add product to blockchain
+        contractService.addProductToBlockchain(product.getId().toHexString(),product.getPrice().intValue(),product.getType());
+
+
         return convertProductToProductDTO(saved);
     }
 
