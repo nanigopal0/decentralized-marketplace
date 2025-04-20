@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export default function PlaceOrder() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -78,7 +79,7 @@ export default function PlaceOrder() {
               </p>
 
               <button
-                onClick={handlePlaceOrder}
+                onClick={() => navigate(`/payment`)}
                 disabled={loading}
                 className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all"
               >
