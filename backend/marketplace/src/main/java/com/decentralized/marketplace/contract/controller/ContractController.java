@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tuples.generated.Tuple8;
 
 import java.math.BigInteger;
 
@@ -23,8 +24,13 @@ public class ContractController {
     }
 
     @GetMapping("get-product")
-    public ResponseEntity<Tuple4<String, String, BigInteger, BigInteger>> getProduct(@RequestParam(value = "productId") String productId){
+    public ResponseEntity<Tuple4<String, String, BigInteger, BigInteger>> getProduct(@RequestParam(value = "productId") String productId) {
         return ResponseEntity.ok(contractService.getProduct(productId));
+    }
+
+    @GetMapping("get-order")
+    public ResponseEntity<Tuple8<String, String, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger>> getOrder(@RequestParam(value = "orderId") String orderId) {
+        return ResponseEntity.ok(contractService.getOrderByOrderId(orderId));
     }
 
 

@@ -8,46 +8,35 @@ export default function SellerOrders() {
   const [otpInputs, setOtpInputs] = useState({});
   const [otpVisible, setOtpVisible] = useState({});
 
-  useEffect(() => {
-    const fetchOrders = async () => {
+  const fetchOrders = async () => {
+    setLoading(true);
+      const user = JSON.parse(localStorage.getItem("user"));
       try {
-        // const res = await axios.get("/api/seller/orders");
-        // setOrders(res.data);
-
-        const demoOrders = [
-          {
-            orderId: "ORD123",
-            buyer: "0xBuyer123",
-            productName: "Bluetooth Headphones",
-            description: "Wireless over-ear headphones with noise cancelling",
-            price: 0.075,
-            image: "https://via.placeholder.com/120",
-            estimatedDelivery: "2025-04-25",
+       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order/get-by-sellerId?sellerId=${user.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            orderId: "ORD124",
-            buyer: "0xBuyer456",
-            productName: "Gaming Mouse",
-            description: "Ergonomic gaming mouse with RGB lighting",
-            price: 0.045,
-            image: "https://via.placeholder.com/120",
-            estimatedDelivery: "2025-04-26",
-          },
-        ];
-        setOrders(demoOrders);
+          credentials: "include",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch orders.");
+        }
+        const data = await response.json();
+        console.log(data);
+        setOrders(data);
       } catch (err) {
         console.error("Failed to fetch seller orders", err);
       }
+      finally{
+        setLoading(false);
+      }
     };
-
+    
+    useEffect(() => {
     fetchOrders();
   }, []);
 
-  const handleOtpChange = (orderId, value) => {
-    if (/^\d*$/.test(value)) {
-      setOtpInputs((prev) => ({ ...prev, [orderId]: value }));
-    }
-  };
 
   const handleGenerateOtp = async (orderId) => {
     try {

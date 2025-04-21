@@ -29,10 +29,12 @@ import ProfileView from "./pages/buyerPages/ProfileView";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
 
   useEffect(() => {
     dispatch(pingServer());
-  }, [dispatch]); //Make it uncomment while push
+  }, [dispatch]);
 
   return (
     <>
@@ -40,17 +42,22 @@ function App() {
       <Routes>
         {isAuthenticated ? (
           <>
+            {isSeller && (
+              <>
+                <Route path="/seller/dashboard" element={<SellerDashboard />} />
+                <Route path="/product/add" element={<AddProduct />} />
+                <Route path="/product/update/:id" element={<UpdateProduct />} />
+                <Route path="/orders" element={<SellerOrders />} />
+              </>
+            )}
+
             <Route path="/home" element={<Home />} />
-            <Route path="/seller/dashboard" element={<SellerDashboard />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/product/:id" element={<SingleProduct />} />
-            <Route path="/product/add" element={<AddProduct />} />
             <Route path="/product/all" element={<AllProduct />} />
             <Route path="/order/product/:id" element={<PlaceOrder />} />
-            <Route path="/orders/all" element={<SellerOrders />} />
-            <Route path="/product/update/:id" element={<UpdateProduct />} />
             <Route path="/user/update/:id" element={<UpdateUser />} />
-            <Route path="/myorders/all" element={<MyOrders />} />
+            <Route path="/myorders" element={<MyOrders />} />
             <Route path="/profile" element={<ProfileView />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
@@ -63,7 +70,7 @@ function App() {
           </>
         )}
       </Routes>
-      <ToastContainer position="bottom-right" theme="light" />
+      <ToastContainer />
       <Footer />
     </>
   );

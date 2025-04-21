@@ -32,17 +32,17 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final BuyerRepo buyerRepo;
-    private final SellerRepo sellerRepo;
+//    private final BuyerRepo buyerRepo;
+//    private final SellerRepo sellerRepo;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
 
-    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, BuyerRepo buyerRepo, SellerRepo sellerRepo, JwtService jwtService, HttpServletResponse httpServletResponse) {
+    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, HttpServletResponse httpServletResponse) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.buyerRepo = buyerRepo;
-        this.sellerRepo = sellerRepo;
+//        this.buyerRepo = buyerRepo;
+//        this.sellerRepo = sellerRepo;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
     }
@@ -58,10 +58,10 @@ public class UserServiceImpl implements UserService {
                 .role(userSignupRequestDTO.getRole())
                 .build();
         User saved = userRepo.save(user);
-        if (userSignupRequestDTO.getRole() == Role.SELLER)
-            sellerRepo.save(Seller.builder().userId(saved.getId()).build());
-        else
-            buyerRepo.save(Buyer.builder().userId(saved.getId()).build());
+//        if (userSignupRequestDTO.getRole() == Role.SELLER)
+//            sellerRepo.save(Seller.builder().userId(saved.getId()).build());
+//        else
+//            buyerRepo.save(Buyer.builder().userId(saved.getId()).build());
     }
 
     @Override

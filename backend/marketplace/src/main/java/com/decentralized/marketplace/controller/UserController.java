@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping
+    @GetMapping("logout")
     public ResponseEntity<String> logout() {
         userService.logout();
         return ResponseEntity.accepted().body("Logout successful!");

@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
 
-public interface OrderRepo extends MongoRepository<Order, ObjectId> {
+public interface OrderRepo extends MongoRepository<Order, ObjectId>, CustomOrderRepo  {
 
     List<Order> findOrderBySellerId(ObjectId sellerId);
     List<Order> findOrderByBuyerId(ObjectId buyerId);

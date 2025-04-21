@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface BuyerRepo extends MongoRepository<Buyer, ObjectId> {
+public interface BuyerRepo {
 
 //    Optional<Buyer> findByEmail(String email);
 }

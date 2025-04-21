@@ -1,12 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { handleUnauthorizedStatus } from "../../src/util/HandleUnauthorizedStatus";
+import { toast } from "react-toastify";
 
 const userSlice = createSlice({
   name: "user",
   initialState: {
     loading: false,
     user: {},
-    isAuthenticated: false, //while push make it False
+    isAuthenticated: false,
     error: null,
     message: null,
     isUpdated: false,
@@ -178,14 +180,25 @@ export const getUser = () => async (dispatch) => {
 
 export const logout = () => async (dispatch) => {
   try {
-    const { data } = await axios.get(
+    const response = await fetch(
       `${import.meta.env.VITE_BACKEND_URL}/user/logout`,
-      { withCredentials: true }
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
     );
-    dispatch(userSlice.actions.logoutSuccess(data.message));
-    dispatch(userSlice.actions.clearAllErrors());
+    handleUnauthorizedStatus(response);
+    if (response.status == 202) {
+      const data = await response.text();
+      dispatch(userSlice.actions.logoutSuccess(data));
+      dispatch(userSlice.actions.clearAllErrors());
+      toast.success(data);
+    } else throw new Error("Logout failed!");
   } catch (error) {
-    dispatch(userSlice.actions.logoutFailed(error.response.data.message));
+    dispatch(userSlice.actions.logoutFailed(error.message || "Logout failed"));
     console.log(error);
   }
 };

@@ -1,83 +1,104 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { logout } from "../../../store/slices/userSlice";
 
 export default function Navbar() {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
-  const navigate = useNavigate();
-
-  const handleProfileClick = () => {
-    setShowDropdown((prev) => !prev);
-  };
-
-  const handleOutsideClick = (e) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setShowDropdown(false);
-    }
-  };
+  const { isAuthenticated } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSeller = isAuthenticated ? user && user.role === "SELLER" : false;
 
   const handleLogout = async () => {
-    try {
-      await axios.post("/api/logout");
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
+   
+      dispatch(logout());
+   
   };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
-
   return (
-    <nav className="bg-white shadow-md py-4 px-6 flex items-center justify-between">
-      <Link to="/" className="text-2xl font-bold text-blue-600 cursor-pointer">
+    <nav className="bg-gradient-to-r from-blue-500 to-purple-600 shadow-md py-4 px-6 flex items-center justify-between">
+      {/* Logo */}
+      <Link to="/" className="text-2xl font-bold text-white cursor-pointer">
         SmartMarket
       </Link>
 
-      <div className="flex items-center space-x-4 relative">
-        <input
+      {/* Search Bar */}
+      <div className="flex items-center space-x-4">
+        <Input
           type="text"
-          placeholder="Search..."
-          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+          placeholder="Search products..."
+          className="w-64 text-white placeholder:text-white border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-        <button className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700">
+        <Button
+          variant="secondary"
+          className="bg-white text-blue-600 hover:bg-gray-100"
+        >
           Search
-        </button>
+        </Button>
+      </div>
 
-        <div className="relative">
-          <button
-            onClick={handleProfileClick}
-            className="text-2xl text-gray-600"
-          >
-            <FaUserCircle />
-          </button>
-
-          {showDropdown && (
-            <div
-              ref={dropdownRef}
-              className="absolute top-10 right-0 bg-white shadow-lg rounded-md w-40 py-2 z-50 transition-all duration-300 ease-in-out"
-            >
-              <Link
-                to="/profile"
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
-              >
-                View Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-500"
-              >
-                Logout
+      {/* Profile or Login/Register */}
+      <div className="relative">
+        {isAuthenticated ? (
+          // Profile Dropdown
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              {/* Wrap the icon in a button for proper styling */}
+              <button className="text-white text-3xl focus:outline-none">
+                <FaUserCircle />
               </button>
-            </div>
-          )}
-        </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="text-gray-700">
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              {isSeller && (
+                <DropdownMenuItem asChild>
+                  <Link to="/seller/dashboard" className="text-gray-700">
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem asChild>
+                <Link to="/myorders" className="text-gray-700">
+                  My Orders
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          // Login and Register Buttons
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/register"
+              className="bg-white text-blue-600 px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
+            >
+              Register
+            </Link>
+            {/* <Link
+              to="/login"
+              className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 transition"
+            >
+              Login
+            </Link> */}
+          </div>
+        )}
       </div>
     </nav>
   );

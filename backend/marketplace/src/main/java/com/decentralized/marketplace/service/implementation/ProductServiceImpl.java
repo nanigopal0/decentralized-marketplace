@@ -44,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
                 .build();
         Product saved = productRepo.save(product);
         //add product to blockchain
-        contractService.addProductToBlockchain(product.getId().toHexString(),product.getPrice().intValue(),product.getType());
+//        contractService.addProductToBlockchain(product.getId().toHexString(),product.getPrice().intValue(),product.getType());
 
 
         return convertProductToProductDTO(saved);

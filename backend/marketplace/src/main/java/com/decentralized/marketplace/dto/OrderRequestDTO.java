@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class OrderRequestDTO {
-    private String sellerId;
+//    private String sellerId;
     private String  productId;
     private Integer quantity;
     private String priceUnit = "ETH";

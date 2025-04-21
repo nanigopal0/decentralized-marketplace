@@ -1,7 +1,10 @@
 package com.decentralized.marketplace.service.implementation;
 
+import com.decentralized.marketplace.contract.service.ContractService;
+import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
+import com.decentralized.marketplace.dto.SellerOrderDTO;
 import com.decentralized.marketplace.entity.*;
 import com.decentralized.marketplace.exception.*;
 import com.decentralized.marketplace.repository.OrderRepo;
@@ -12,6 +15,7 @@ import com.decentralized.marketplace.service.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,12 +34,14 @@ public class OrderServiceImpl implements OrderService {
     // OTP configuration
     private static final int OTP_EXPIRY_MINUTES = 30;
     private final ProductRepo productRepo;
+    private final ContractService contractService;
 
-    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo) {
+    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo, ContractService contractService) {
         this.orderRepo = orderRepo;
         this.mailService = mailService;
         this.userRepo = userRepo;
         this.productRepo = productRepo;
+        this.contractService = contractService;
     }
 
     /**
@@ -88,10 +94,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException {
         Product product = productRepo.findById(new ObjectId(order.getProductId())).orElseThrow(() -> new ProductNotFoundException(order.getProductId()));
+        if (product.getStock() < order.getQuantity())
+            throw new ProductOutOfStockException("Product stock is less than the requested quantity!");
         order.setPriceUnit(order.getPriceUnit() == null ? "ETH" : order.getPriceUnit());
         CustomUserDetails userDetails = UserServiceImpl.getCustomUserDetailsFromAuthentication();
         Order order1 = Order.builder()
-                .sellerId(new ObjectId(order.getSellerId()))
+                .sellerId(product.getSellerId())
                 .buyerId(new ObjectId(userDetails.getUserId()))
                 .productId(product.getId())
                 .pricePerItem(product.getPrice())
@@ -101,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
                 .totalPrice(product.getPrice() * order.getQuantity())
                 .status(OrderStatus.Accepted)
                 .build();
-        User seller = userRepo.findById(order1.getSellerId()).orElseThrow(() -> new UserNotFoundException(order.getSellerId()));
+        User seller = userRepo.findById(product.getSellerId()).orElseThrow(() -> new UserNotFoundException(product.getSellerId().toHexString()));
 
         /* 1. Pay the ordered amount by blockchain transaction */
 
@@ -120,9 +128,14 @@ public class OrderServiceImpl implements OrderService {
         */
 
         Order saved = orderRepo.save(order1);
+
+        //add product to blockchain
+//        contractService.purchaseProduct(saved.getProductId().toHexString(),saved.getId().toHexString(),saved.getTotalPrice());
+
         OrderResponseDTO orderResponseDTO = convertOrderToOrderResponseDTO(saved);
-
-
+        //save the stock update
+        product.setStock(product.getStock() - order.getQuantity());
+        productRepo.save(product);
         // Create a model with the order details
         Map<String, Object> model = new HashMap<>();
         model.put("order", orderResponseDTO);
@@ -158,13 +171,14 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public List<OrderResponseDTO> getAllOrderBySellerId(ObjectId sellerId) {
-        return orderRepo.findOrderBySellerId(sellerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId,String sortBy) {
+        return orderRepo.findAllSellerPendingOrderWithProductBySellerId(sellerId, Sort.by(Sort.Direction.DESC, sortBy));
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrderByBuyerId(ObjectId buyerId) {
-        return orderRepo.findOrderByBuyerId(buyerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId,String sortBy) {
+        return orderRepo.findAllBuyerOrderWithProductByBuyerId(buyerId, Sort.by(Sort.Direction.DESC, sortBy));
+//        return orderRepo.findOrderByBuyerId(buyerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
     }
 
     @Override

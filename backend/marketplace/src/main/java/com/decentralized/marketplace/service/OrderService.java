@@ -1,7 +1,9 @@
 package com.decentralized.marketplace.service;
 
+import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
+import com.decentralized.marketplace.dto.SellerOrderDTO;
 import jakarta.mail.MessagingException;
 import org.bson.types.ObjectId;
 
@@ -11,9 +13,9 @@ public interface OrderService {
 
     OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException;
 
-    List<OrderResponseDTO> getAllOrderBySellerId(ObjectId sellerId);
+    List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId,String sortBy);
 
-    List<OrderResponseDTO> getAllOrderByBuyerId(ObjectId buyerId);
+    List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId,String sortBy);
 
     List<OrderResponseDTO> getAllOrderByProductId(ObjectId productId);
 

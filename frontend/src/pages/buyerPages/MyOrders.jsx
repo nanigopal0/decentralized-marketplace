@@ -11,66 +11,26 @@ const statusMap = {
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     async function fetchOrders() {
       try {
-        // Fetch Order History From Backend
-        /*const response = await axios.get("/api/orders?buyer=0x123");
-        const enrichedOrders = await Promise.all(
-          response.data.map(async (order) => {
-            const productRes = await axios.get(
-              `/api/products/${order.productId}`
-            );
-            return { ...order, product: productRes.data };
-          })
-        );
-        setOrders(enrichedOrders);*/
-
-        // Demo data
-        const demoOrders = [
-          {
-            orderId: 1,
-            productId: "prod1",
-            status: 3,
-            createdAt: 1713400000,
-            shippedAt: 1713480000,
-            product: {
-              name: "Noise ColorFit Ultra Smartwatch",
-              price: 2999,
-              imageUrl:
-                "https://m.media-amazon.com/images/I/61ZUjF5+xpL._SX679_.jpg",
-            },
+       
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order/get-by-buyerId?buyerId=${user.id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
           },
-          {
-            orderId: 2,
-            productId: "prod2",
-            status: 2,
-            createdAt: 1713500000,
-            shippedAt: 1713550000,
-            product: {
-              name: "Samsung Galaxy Buds2 Pro",
-              price: 9999,
-              imageUrl:
-                "https://m.media-amazon.com/images/I/51+4GZjN9zL._SX679_.jpg",
-            },
-          },
-          {
-            orderId: 3,
-            productId: "prod3",
-            status: 1,
-            createdAt: 1713600000,
-            shippedAt: 0,
-            product: {
-              name: "Boat Rockerz 255 ANC Neckband",
-              price: 1799,
-              imageUrl:
-                "https://m.media-amazon.com/images/I/61zNjdWp+VL._SX679_.jpg",
-            },
-          },
-        ];
-
-        setOrders(demoOrders);
+          credentials: "include",
+        }
+        )
+        if (!response.ok) 
+          throw new Error("Failed to fetch orders.");
+        
+        const data = await response.json();
+        console.log(data)
+        setOrders(data);
       } catch (error) {
         console.error("Error fetching orders:", error);
       }
@@ -88,22 +48,22 @@ export default function MyOrders() {
             className="bg-white p-4 rounded-2xl shadow hover:shadow-lg transition-all"
           >
             <img
-              src={order.product.imageUrl}
-              alt={order.product.name}
+              src={order.imageUrl || "/placeholder.jpg"}
+              alt={order.image}
               className="w-full h-48 object-cover rounded-lg mb-4"
             />
-            <h3 className="text-xl font-semibold mb-2">{order.product.name}</h3>
+            <h3 className="text-xl font-semibold mb-2">{order.orderId}</h3>
             <p className="text-gray-600">Product ID: {order.productId}</p>
-            <p className="text-gray-600">Price: ₹{order.product.price}</p>
-            <p className="text-gray-600">Status: {statusMap[order.status]}</p>
+            <p className="text-gray-600">Price: {order.totalPrice} {order.priceUnit}</p>
+            <p className="text-gray-600">Status: {order.status}</p>
             <p className="text-gray-500 text-sm">
-              Ordered At: {new Date(order.createdAt * 1000).toLocaleString()}
+              Ordered At: {new Date(order.orderedAt).toLocaleString()}
             </p>
-            {order.shippedAt > 0 && (
+            {/* {order.shippedAt > 0 && (
               <p className="text-gray-500 text-sm">
                 Shipped At: {new Date(order.shippedAt * 1000).toLocaleString()}
               </p>
-            )}
+            )} */}
           </div>
         ))}
       </div>
