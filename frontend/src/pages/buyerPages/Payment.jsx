@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import SmartMarketplace from "../contracts/SmartMarketplace.json";
+
+const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
 
 export default function Payment() {
   const [product, setProduct] = useState(null);
-  const [sellerAddress, setSellerAddress] = useState("");
-  const [amount, setAmount] = useState("");
+  const [productId, setProductId] = useState("product-001");
+  const [orderId, setOrderId] = useState("order-001");
+  const [quantity, setQuantity] = useState(1);
+  const [amount, setAmount] = useState("0.03");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [txStatus, setTxStatus] = useState("");
 
   useEffect(() => {
-    // Simulate backend response
     const fetchPaymentDetails = async () => {
-      // const res = await axios.get("/api/payment-details");
-      // const { product, sellerAddress, amount } = res.data;
       const res = {
         product: {
           name: "Wireless Bluetooth Headphones",
@@ -20,12 +22,16 @@ export default function Payment() {
             "High-quality over-ear headphones with noise cancellation.",
           image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
         },
-        sellerAddress: "0xABCD1234abcd1234ABCD1234abcd1234ABCD1234",
-        amount: "0.03",
+        productId: "nani100",
+        orderId: "order-002",
+        amount: "1",
+        quantity: 1,
       };
       setProduct(res.product);
-      setSellerAddress(res.sellerAddress);
+      setProductId(res.productId);
+      setOrderId(res.orderId);
       setAmount(res.amount);
+      setQuantity(res.quantity);
     };
 
     fetchPaymentDetails();
@@ -41,16 +47,22 @@ export default function Payment() {
       if (!window.ethereum) throw new Error("MetaMask is not installed");
       await window.ethereum.request({ method: "eth_requestAccounts" });
 
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        SmartMarketplace,
+        signer
+      );
 
-      const tx = await signer.sendTransaction({
-        to: sellerAddress,
-        value: ethers.utils.parseEther(amount),
+      const tx = await contract.purchaseProduct(productId, orderId, quantity, {
+        // value: ethers.utils.parseEther(amount.toString()),
+        value: amount.toString(),
       });
 
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
+      console.log("Transaction Hash:", tx.hash);
       setTxStatus("Payment successful!");
     } catch (error) {
       console.error("Transaction failed:", error);
@@ -81,8 +93,13 @@ export default function Payment() {
 
             <div className="bg-gray-100 p-4 rounded-lg">
               <p>
-                <span className="font-medium">Seller Address:</span>{" "}
-                {sellerAddress}
+                <span className="font-medium">Product ID:</span> {productId}
+              </p>
+              <p>
+                <span className="font-medium">Order ID:</span> {orderId}
+              </p>
+              <p>
+                <span className="font-medium">Quantity:</span> {quantity}
               </p>
               <p>
                 <span className="font-medium">Amount:</span> Ξ {amount}
