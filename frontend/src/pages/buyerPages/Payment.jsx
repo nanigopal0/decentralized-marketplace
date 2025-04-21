@@ -6,16 +6,56 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
+import SmartMarketplace from "../contracts/SmartMarketplace.json";
+
+const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [sellerAddress, setSellerAddress] = useState("");
-  const [isConfirmed, setIsConfirmed] = useState(false);
   // const [txStatus, setTxStatus] = useState("");
   const location = useLocation();
-  const { product, quantity } = location.state || {}; 
- 
+  const { product, quantity } = location.state || {};
+
+  // const [product, setProduct] = useState(null);
+  const [productId, setProductId] = useState("product-001");
+  const [orderId, setOrderId] = useState("order-001");
+  // const [quantity, setQuantity] = useState(1);
+  const [amount, setAmount] = useState("0.03");
+  const [isConfirmed, setIsConfirmed] = useState(false);
+  const [txStatus, setTxStatus] = useState("");
+
+  // const fetchPaymentDetails = async () => {
+  // const res = {
+  //   product: {
+  //     name: "Wireless Bluetooth Headphones",
+  //     description:
+  //       "High-quality over-ear headphones with noise cancellation.",
+  //     image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
+  //   },
+  //   productId: "nani100",
+  //   orderId: "order-002",
+  //   amount: "1",
+  //   quantity: 1,
+  // };
+  //   setProduct(res.product);
+  //   setProductId(res.productId);
+  //   setOrderId(res.orderId);
+  //   setAmount(res.amount);
+  //   setQuantity(res.quantity);
+  // };
+
+  useEffect(() => {
+    // fetchPaymentDetails();
+  }, []);
+
+  const handlePayment = async () => {
+    if (!isConfirmed) {
+      alert("Please accept the terms and conditions.");
+      return;
+    }
+  };
 
   const payAndPlaceOrder = async () => {
     try {
@@ -42,11 +82,38 @@ export default function Payment() {
         toast.success("Order placed successfully!");
         setMessage("Order placed successfully!");
         // Redirect to myorder page or show success message
+        payWithCrypto();
       }
     } catch (error) {
       toast.error("Failed to place order. Try again.");
       setMessage("Failed to place order. Try again.");
-    } finally {
+      setLoading(false);
+    } 
+  };
+
+  const payWithCrypto = async () => {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        SmartMarketplace,
+        signer
+      );
+
+      const tx = await contract.purchaseProduct(productId, orderId, quantity, {
+        // value: ethers.utils.parseEther(amount.toString()),
+        value: amount.toString(),
+      });
+
+      setTxStatus("Transaction submitted. Waiting for confirmation...");
+      await tx.wait();
+      console.log("Transaction Hash:", tx.hash);
+      setTxStatus("Payment successful!");
+    } catch (error) {
+      console.error("Error during payment:", error);
+      setTxStatus("Payment failed. Please try again.");
+    }finally {
       setLoading(false);
     }
   };
@@ -94,6 +161,16 @@ export default function Payment() {
                 <span className="text-green-600 font-bold">
                   {product.price * quantity} {product.priceUnit || "ETH"}
                 </span>
+                <span className="font-medium">Product ID:</span> {productId}
+              </p>
+              <p>
+                <span className="font-medium">Order ID:</span> {orderId}
+              </p>
+              <p>
+                <span className="font-medium">Quantity:</span> {quantity}
+              </p>
+              <p>
+                <span className="font-medium">Amount:</span> Ξ {amount}
               </p>
             </div>
 

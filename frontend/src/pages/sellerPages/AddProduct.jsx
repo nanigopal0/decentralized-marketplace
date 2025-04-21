@@ -68,33 +68,56 @@ const AddProduct = () => {
   const handleAddProduct = async (e) => {
     e.preventDefault();
 
-    handleAddProductToBlockchain();;
-
-    // const imageUrl = await handleFileUpload();
-    // const formData = new FormData();
-    // formData.append("title", title);
-    // formData.append("description", description);
-    // formData.append("price", price);
-    // formData.append("type", productType);
-    // formData.append("stock", stock);
-    // formData.append("mediaUrl", imageUrl);
-    // formData.append("sellerId", user.id);
+    const imageUrl = await handleFileUpload();
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("type", productType);
+    formData.append("stock", stock);
+    formData.append("mediaUrl", imageUrl);
+    formData.append("sellerId", user.id);
     // dispatch(addProduct(formData));
+    const data = await addProductToDB(formData);
+    handleAddProductToBlockchain();
 
-    // setTitle("");
-    // setDescription("");
-    // setPrice("");
-    // setProductType("");
-    // setStock("");
-    // setProductImage("");
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setProductType("");
+    setStock("");
+    setProductImage("");
+  };
+
+  const addProductToDB = async (formData) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/product/add`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status == 201) {
+        const data = await response.json();
+        console.log(data);
+        toast.success("Product added successfully!");
+        return data;
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
   };
 
   const handleAddProductToBlockchain = async () => {
-    
     try {
       console.log("Submitting product listing...");
       console.log("Product ID :", productId);
-      console.log("Price (ETH):", price);
+      console.log("Price (wei):", price);
       console.log("Product Type:", productType);
 
       if (!window.ethereum) throw new Error("MetaMask not detected");
@@ -121,24 +144,9 @@ const AddProduct = () => {
     }
   };
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearAllProductErrors());
-    }
-    if (message) {
-      toast.success(message);
-      dispatch(resetProduct());
-      dispatch(getAllProduct());
-    }
-  }, [loading, dispatch, error, message]);
-
   return (
     <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
-      <form
-        onSubmit={handleAddProduct}
-        className="w-[100%] px-5 md:w-[1000px]"
-      >
+      <form onSubmit={handleAddProduct} className="w-[100%] px-5 md:w-[1000px]">
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
             <h2 className="font-semibold leading-7 text-gray-900 text-3xl">

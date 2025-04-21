@@ -26,6 +26,7 @@ import { pingServer } from "../store/slices/userSlice";
 import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
 import ProfileView from "./pages/buyerPages/ProfileView";
+import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
@@ -59,6 +60,7 @@ function App() {
             <Route path="/user/update/:id" element={<UpdateUser />} />
             <Route path="/myorders" element={<MyOrders />} />
             <Route path="/profile" element={<ProfileView />} />
+            <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (
