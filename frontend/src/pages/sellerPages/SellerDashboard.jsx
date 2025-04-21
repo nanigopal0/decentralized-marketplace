@@ -1,343 +1,151 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { clearAllUserErrors, logout } from "../../../store/slices/userSlice";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import { Link } from "react-router-dom";
-
 import {
-  FolderGit2,
+  HomeIcon,
+  Package2,
   FolderPen,
   History,
-  HomeIcon,
-  LayoutGrid,
-  LogOut,
-  Package2,
-  PanelLeft,
   User2,
+  LogOut,
 } from "lucide-react";
-
-import {
-  Tooltip,
-  TooltipTrigger,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
 import { Button } from "@/components/ui/button";
-import AddProduct from "./AddProduct";
-import UpdateProduct from "./UpdateProduct";
-import Orders from "./SellerOrders";
-import AllProduct from "./AllProduct";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const SellerDashboard = () => {
-  const [active, setActive] = useState("Dashboard");
-  const { isAuthenticated, error, user } = useSelector((state) => state.user);
-  const dispatch = useDispatch();
-
   const handleLogout = () => {
-    dispatch(logout());
-    toast.success("Logged out successfully");
+    // Add logout logic here
+    console.log("Logged out");
   };
 
-  const navigateTo = useNavigate();
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearAllUserErrors());
-    }
-    if (!isAuthenticated) {
-      navigateTo("/login");
-    }
-  }, [isAuthenticated]);
-
   return (
-    <>
-      <div className="flex min-h-screen w-full flex-col bg-muted/40 ">
-        <aside className="fixed inset-y-0 left-0 hidden w-14 flex-col border-r bg-background sm:flex z-50">
-          <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "Dashboard"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Dashboard")}
-                  >
-                    <HomeIcon className="w-5 h-5" />
-                    <span className="sr-only">Dashboard</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Dashboard</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                  ${
-                    active === "Add Product"
-                      ? "text-accent-foreground bg-accent"
-                      : "text-muted-foreground"
-                  } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Add Product")}
-                  >
-                    <FolderPen className="w-5 h-5" />
-                    <span className="sr-only">Add Product</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Add Product</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "All Product"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("All Product")}
-                  >
-                    <FolderGit2 className="w-5 h-5" />
-                    <span className="sr-only">All Product</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">All Product</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "Update Product"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Update Product")}
-                  >
-                    <LayoutGrid className="w-5 h-5" />
-                    <span className="sr-only">Update Product</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Update Product</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "Orders"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Orders")}
-                  >
-                    <History className="w-5 h-5" />
-                    <span className="sr-only">Orders</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Orders</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "Account"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={() => setActive("Account")}
-                  >
-                    <User2 className="w-5 h-5" />
-                    <span className="sr-only">Account</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Account</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </nav>
-          <nav className="mt-auto flex-col items-center gap-4 px-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    className={`flex h-9 w-9 items-center justify-center rounded-lg 
-                    ${
-                      active === "Logout"
-                        ? "text-accent-foreground bg-accent"
-                        : "text-muted-foreground"
-                    } 
-                    transition-colors hover:text-foreground md:h-8 md:w-8`}
-                    onClick={handleLogout}
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="sr-only">Logout</span>
-                  </Link>
-                </TooltipTrigger>
-                <TooltipContent side="right">Logout</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </nav>
-        </aside>
-        <header
-          className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background
-            px-4 sm:static sm:h-auto sm:border-0 lg:bg-transparent sm:px-6 max-[900px]:h-[100px]"
-        >
+    <div className="min-h-screen flex bg-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gradient-to-r from-blue-500 to-purple-600 text-white flex flex-col">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold">Seller Dashboard</h1>
+        </div>
+        <nav className="flex-1 space-y-2 p-4">
+          <Link
+            to="/seller/dashboard"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <HomeIcon className="w-5 h-5" />
+            Dashboard
+          </Link>
+          <Link
+            to="/seller/products"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <Package2 className="w-5 h-5" />
+            Manage Products
+          </Link>
+          <Link
+            to="/add/product"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <Package2 className="w-5 h-5" />
+            Add Product
+          </Link>
+          <Link
+            to="/seller/orders"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <FolderPen className="w-5 h-5" />
+            Manage Orders
+          </Link>
+          <Link
+            to="/seller/history"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <History className="w-5 h-5" />
+            Order History
+          </Link>
+          <Link
+            to="/seller/profile"
+            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
+          >
+            <User2 className="w-5 h-5" />
+            Profile
+          </Link>
+        </nav>
+        <div className="p-4">
+          <Button
+            onClick={handleLogout}
+            className="w-full bg-red-500 hover:bg-red-600 text-white"
+          >
+            <LogOut className="w-5 h-5 mr-2" />
+            Logout
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-6">
+        <header className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">Welcome, Seller!</h2>
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
+              <Button variant="outline">Menu</Button>
             </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
+            <SheetContent side="right" className="p-4">
+              <nav className="space-y-2">
                 <Link
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2
-                  rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
+                  to="/seller/dashboard"
+                  className="block p-2 rounded-md hover:bg-gray-200"
                 >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
+                  Dashboard
                 </Link>
                 <Link
-                  href="#"
-                  className={`flex items-center gap-4 px-2.5 
-                    ${
-                      active === "Dashboard"
-                        ? "text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  onClick={() => setActive("Dashboard")}
+                  to="/seller/products"
+                  className="block p-2 rounded-md hover:bg-gray-200"
                 >
-                  <HomeIcon className="h-5 w-5" /> Dashboard
+                  Manage Products
                 </Link>
                 <Link
-                  className={`flex items-center gap-4 px-2.5 
-                  ${
-                    active === "Add Product"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setActive("Add Product")}
+                  to="/seller/orders"
+                  className="block p-2 rounded-md hover:bg-gray-200"
                 >
-                  <FolderPen className="h-5 w-5" /> Add Product
+                  Manage Orders
                 </Link>
                 <Link
-                  className={`flex items-center gap-4 px-2.5 
-                  ${
-                    active === "All Product"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setActive("All Product")}
+                  to="/seller/history"
+                  className="block p-2 rounded-md hover:bg-gray-200"
                 >
-                  <FolderGit2 className="h-5 w-5" /> All Product
+                  Order History
                 </Link>
                 <Link
-                  className={`flex items-center gap-4 px-2.5 
-                  ${
-                    active === "Update Product"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setActive("Update Product")}
+                  to="/seller/profile"
+                  className="block p-2 rounded-md hover:bg-gray-200"
                 >
-                  <LayoutGrid className="h-5 w-5" /> Update Product
-                </Link>
-                <Link
-                  className={`flex items-center gap-4 px-2.5 
-                  ${
-                    active === "Orders"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setActive("Orders")}
-                >
-                  <History className="h-5 w-5" /> Orders
-                </Link>
-                <Link
-                  className={`flex items-center gap-4 px-2.5 
-                  ${
-                    active === "Account"
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setActive("Account")}
-                >
-                  <User2 className="h-5 w-5" /> Account
-                </Link>
-                <Link
-                  className={`flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground`}
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-5 w-5" /> Logout
+                  Profile
                 </Link>
               </nav>
             </SheetContent>
           </Sheet>
-
-          <div className="flex items-center gap-4 md:grow-0 sm:ml-16 sm:mt-5">
-            <img
-              /*src= {user && user.avatar && user.avatar.url} */ alt="avatar"
-              className="w-20 h-20 rounded-full max-[900px]:hidden"
-            />
-            <h1 className="text-4xl max-[900px]:text-2xl">
-              {/* Welcome back , {user.fullname} */}
-            </h1>
-          </div>
         </header>
 
-        {(() => {
-          switch (active) {
-            case "Dashboard":
-              return <SellerDashboard />;
-              break;
-            case "Add Product":
-              return <AddProduct />;
-              break;
-            case "Update Product":
-              return <UpdateProduct />;
-              break;
-            case "All Product":
-              return <AllProduct />;
-              break;
-            case "Orders":
-              return <Orders />;
-              break;
-            case "Account":
-              return <Account />;
-              break;
-            default:
-              return <SellerDashboard />;
-              break;
-          }
-        })()}
-      </div>
-    </>
+        {/* Dashboard Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-gray-800">Total Products</h3>
+            <p className="text-2xl font-bold text-blue-600">120</p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-gray-800">Total Orders</h3>
+            <p className="text-2xl font-bold text-green-600">45</p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-gray-800">Pending Orders</h3>
+            <p className="text-2xl font-bold text-yellow-600">8</p>
+          </div>
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h3 className="text-lg font-bold text-gray-800">Revenue</h3>
+            <p className="text-2xl font-bold text-purple-600">$12,345</p>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 };
 

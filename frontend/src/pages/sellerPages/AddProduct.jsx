@@ -21,7 +21,7 @@ import {
 } from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
 
-const CONTRACT_ADDRESS = "0x651f37cA108Ca281adea77E55CB06B2ED3d61B70"; //Replace with your contract_Address
+const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133"; //Replace with your contract_Address
 
 const AddProduct = () => {
   const [productId, setProductId] = useState("");
@@ -67,23 +67,48 @@ const AddProduct = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
+
+    handleAddProductToBlockchain();;
+
+    // const imageUrl = await handleFileUpload();
+    // const formData = new FormData();
+    // formData.append("title", title);
+    // formData.append("description", description);
+    // formData.append("price", price);
+    // formData.append("type", productType);
+    // formData.append("stock", stock);
+    // formData.append("mediaUrl", imageUrl);
+    // formData.append("sellerId", user.id);
+    // dispatch(addProduct(formData));
+
+    // setTitle("");
+    // setDescription("");
+    // setPrice("");
+    // setProductType("");
+    // setStock("");
+    // setProductImage("");
+  };
+
+  const handleAddProductToBlockchain = async () => {
+    
     try {
       console.log("Submitting product listing...");
-      console.log("Product ID (title):", title);
+      console.log("Product ID :", productId);
       console.log("Price (ETH):", price);
       console.log("Product Type:", productType);
 
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
+      // price = ethers.parseEther(price.toString());
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
         SmartMarketplace,
         signer
       );
       const tx = await contract.listProduct(
-        title,
-        price.toString(),
+        productId,
+        ethers.parseEther(price.toString()),
         productType
       );
       console.log("Transaction submitted:", tx.hash);
@@ -94,24 +119,6 @@ const AddProduct = () => {
       console.error("Blockchain listing error:", err);
       toast.error("Blockchain product listing failed.");
     }
-
-    const imageUrl = await handleFileUpload();
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("price", price);
-    formData.append("type", productType);
-    formData.append("stock", stock);
-    formData.append("mediaUrl", imageUrl);
-    formData.append("sellerId", user.id);
-    dispatch(addProduct(formData));
-
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setProductType("");
-    setStock("");
-    setProductImage("");
   };
 
   useEffect(() => {
@@ -128,7 +135,10 @@ const AddProduct = () => {
 
   return (
     <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
-      <form onSubmit={handleAddProduct} className="w-[100%] px-5 md:w-[1000px]">
+      <form
+        onSubmit={handleAddProduct}
+        className="w-[100%] px-5 md:w-[1000px]"
+      >
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
             <h2 className="font-semibold leading-7 text-gray-900 text-3xl">

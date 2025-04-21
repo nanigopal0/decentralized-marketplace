@@ -31,7 +31,7 @@ function App() {
   const { isAuthenticated } = useSelector((state) => state.user);
   const user = JSON.parse(localStorage.getItem("user"));
   const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
-
+  console.log(isSeller)
   useEffect(() => {
     dispatch(pingServer());
   }, [dispatch]);
@@ -45,7 +45,7 @@ function App() {
             {isSeller && (
               <>
                 <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                <Route path="/product/add" element={<AddProduct />} />
+                <Route path="/add/product" element={<AddProduct />} />
                 <Route path="/product/update/:id" element={<UpdateProduct />} />
                 <Route path="/orders" element={<SellerOrders />} />
               </>
