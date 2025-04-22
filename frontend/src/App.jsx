@@ -29,6 +29,10 @@ import ProfileView from "./pages/buyerPages/ProfileView";
 import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
 import OrderDetails from "./pages/sellerPages/OrderDetails";
 import ProductDetails from "./pages/sellerPages/ProductDetails";
+import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
+
+
+
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
@@ -65,9 +69,12 @@ function App() {
                 <Route path="/order/product/:id" element={<PlaceOrder />} />
                 <Route path="/myorders" element={<MyOrders />} />
                 <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
+                <Route path="/blockchain/orderDetails" element={<BlockchainOrderDetails />} />
               </>
             )}
+            
             <Route path="/user/update/:id" element={<UpdateUser />} />
+
             <Route path="*" element={<Navigate to="/home" />} />
             <Route path="/profile" element={<ProfileView />} />
           </>

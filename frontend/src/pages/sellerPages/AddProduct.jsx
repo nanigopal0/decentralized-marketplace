@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -12,13 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  addProduct,
-  clearAllProductErrors,
-  getAllProduct,
-  resetProduct,
-} from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +20,7 @@ const AddProduct = () => {
   const [productId, setProductId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState(0);
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
@@ -67,7 +59,8 @@ const AddProduct = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-
+      console.log("Submitting product listing...");
+    console.log(title,description,price,productType,stock,productImage);
     const imageUrl = await handleFileUpload();
     const formData = new FormData();
     formData.append("title", title);
@@ -93,12 +86,13 @@ const AddProduct = () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/add`,
-        formData,
         {
-          withCredentials: true,
+          credentials: "include",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          body: formData,
         }
       );
       if (response.status == 201) {
@@ -129,10 +123,11 @@ const AddProduct = () => {
         SmartMarketplace,
         signer
       );
+      const wei = price * 1000000000000000000;
       const tx = await contract.listProduct(
         productId,
-        ethers.parseEther(price.toString()),
-        productType
+        wei.toString(),
+        productType === "PHYSICAL" ? 0 : 1,
       );
       console.log("Transaction submitted:", tx.hash);
       await tx.wait();
@@ -162,7 +157,7 @@ const AddProduct = () => {
                   <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300">
                     <Input
                       type="text"
-                      placeholder="Title of the project..."
+                      placeholder="Title of the product..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />
@@ -182,7 +177,7 @@ const AddProduct = () => {
                   />
                 </div>
               </div>
-              <div className="w-full sm:col-span-4">
+              {/* <div className="w-full sm:col-span-4">
                 <Label className="block text-sm font-medium leading-6 text-gray-900">
                   Product ID
                 </Label>
@@ -195,7 +190,7 @@ const AddProduct = () => {
                     className="w-full border rounded px-3 py-2"
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="w-full sm:col-span-4">
                 <Label className="block text-sm font-medium leading-6 text-gray-900">
                   Stock
@@ -224,8 +219,8 @@ const AddProduct = () => {
                       <SelectValue placeholder="Select Product Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0">Physical</SelectItem>
-                      <SelectItem value="1">Digital</SelectItem>
+                      <SelectItem value="PHYSICAL">Physical</SelectItem>
+                      <SelectItem value="DIGITAL">Digital</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

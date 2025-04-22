@@ -53,6 +53,7 @@ export default function Payment() {
       alert("Please accept the terms and conditions.");
       return;
     }
+    console.log(order)
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
