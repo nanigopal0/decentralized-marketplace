@@ -27,6 +27,7 @@ import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
 import ProfileView from "./pages/buyerPages/ProfileView";
 import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
+import OrderDetails from "./pages/buyerPages/OrderDetails";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
@@ -54,6 +55,7 @@ function App() {
             <Route path="/myorders/all" element={<MyOrders />} />
             <Route path="/profile" element={<ProfileView />} />
             <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
+            <Route path="/orderDetails" element={<OrderDetails />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (

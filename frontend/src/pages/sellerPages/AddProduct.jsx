@@ -69,9 +69,6 @@ const AddProduct = () => {
     e.preventDefault();
     try {
       console.log("Submitting product listing...");
-      console.log("Product ID :", productId);
-      console.log("Price (wei):", price);
-      console.log("Product Type:", productType);
 
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
@@ -81,11 +78,15 @@ const AddProduct = () => {
         SmartMarketplace,
         signer
       );
+      const wei = price * 1000000000000000000;
       const tx = await contract.listProduct(
         productId,
-        price.toString(),
+        wei.toString(),
         productType
       );
+      console.log("Product ID :", productId);
+      console.log("Price (eth):", wei.toString());
+      console.log("Product Type:", productType);
       console.log("Transaction submitted:", tx.hash);
       await tx.wait();
       console.log("Transaction confirmed");
@@ -143,7 +144,7 @@ const AddProduct = () => {
                   <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300">
                     <Input
                       type="text"
-                      placeholder="Title of the project..."
+                      placeholder="Title of the product..."
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                     />

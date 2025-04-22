@@ -9,7 +9,7 @@ export default function Payment() {
   const [productId, setProductId] = useState("product-001");
   const [orderId, setOrderId] = useState("order-001");
   const [quantity, setQuantity] = useState(1);
-  const [amount, setAmount] = useState("0.03");
+  const [amount, setAmount] = useState("0.003");
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [txStatus, setTxStatus] = useState("");
 
@@ -22,9 +22,9 @@ export default function Payment() {
             "High-quality over-ear headphones with noise cancellation.",
           image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
         },
-        productId: "nani100",
-        orderId: "order-002",
-        amount: "1",
+        productId: "1001",
+        orderId: "order-033",
+        amount: "0.003",
         quantity: 1,
       };
       setProduct(res.product);
@@ -57,7 +57,7 @@ export default function Payment() {
 
       const tx = await contract.purchaseProduct(productId, orderId, quantity, {
         // value: ethers.utils.parseEther(amount.toString()),
-        value: amount.toString(),
+        value: (amount * 1000000000000000000).toString(),
       });
 
       setTxStatus("Transaction submitted. Waiting for confirmation...");
