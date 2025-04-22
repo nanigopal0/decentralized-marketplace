@@ -1,150 +1,127 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import {
-  HomeIcon,
-  Package2,
-  FolderPen,
-  History,
-  User2,
-  LogOut,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../store/slices/userSlice";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { Loader2 } from "lucide-react"; // Import spinner icon for loading
+import Sidebar from "../layout/Sidebar";
+
 
 const SellerDashboard = () => {
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log("Logged out");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [sellerDashboardData, setSellerDashboardData] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
+
+  
+
+  const fetchSellerDashboardData = async () => {
+    setLoading(true); // Start loading
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/seller-info?userId=${user.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      handleUnauthorizedStatus(response);
+      if (response.ok) {
+        const data = await response.json();
+        setSellerDashboardData(data);
+      }
+    } catch (error) {
+      console.error("Error fetching seller dashboard data:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
+  useEffect(() => {
+    fetchSellerDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gradient-to-r from-blue-500 to-purple-600 text-white flex flex-col">
-        <div className="p-6">
-          <h1 className="text-2xl font-bold">Seller Dashboard</h1>
-        </div>
-        <nav className="flex-1 space-y-2 p-4">
-          <Link
-            to="/seller/dashboard"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <HomeIcon className="w-5 h-5" />
-            Dashboard
-          </Link>
-          <Link
-            to="/seller/products"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <Package2 className="w-5 h-5" />
-            Manage Products
-          </Link>
-          <Link
-            to="/add/product"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <Package2 className="w-5 h-5" />
-            Add Product
-          </Link>
-          <Link
-            to="/seller/orders"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <FolderPen className="w-5 h-5" />
-            Manage Orders
-          </Link>
-          <Link
-            to="/seller/history"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <History className="w-5 h-5" />
-            Order History
-          </Link>
-          <Link
-            to="/seller/profile"
-            className="flex items-center gap-3 p-3 rounded-md hover:bg-blue-600 transition"
-          >
-            <User2 className="w-5 h-5" />
-            Profile
-          </Link>
-        </nav>
-        <div className="p-4">
-          <Button
-            onClick={handleLogout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white"
-          >
-            <LogOut className="w-5 h-5 mr-2" />
-            Logout
-          </Button>
-        </div>
-      </aside>
+    <div className="min-h-screen flex flex-col bg-gradient-to-r from-yellow-100 to-pink-100">
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <Sidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        <header className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Welcome, Seller!</h2>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline">Menu</Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="p-4">
-              <nav className="space-y-2">
-                <Link
-                  to="/seller/dashboard"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/seller/products"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Manage Products
-                </Link>
-                <Link
-                  to="/seller/orders"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Manage Orders
-                </Link>
-                <Link
-                  to="/seller/history"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Order History
-                </Link>
-                <Link
-                  to="/seller/profile"
-                  className="block p-2 rounded-md hover:bg-gray-200"
-                >
-                  Profile
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </header>
+        {/* Main Content */}
+        <main className="flex-1 p-6">
+          <header className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">
+              Welcome, {user.fullName}!
+            </h2>
+          
+ 
+          </header>
 
-        {/* Dashboard Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-gray-800">Total Products</h3>
-            <p className="text-2xl font-bold text-blue-600">120</p>
+          {/* Dashboard Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Link to={"/products"}
+              className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+           
+            >
+              <h3 className="text-lg font-bold text-gray-800">Total Products</h3>
+              <p className="text-2xl font-bold text-blue-600">
+                {sellerDashboardData.totalProducts}
+              </p>
+            </Link>
+            <Link to={"/orders"}
+              className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+              
+            >
+              <h3 className="text-lg font-bold text-gray-800">Total Orders</h3>
+              <p className="text-2xl font-bold text-green-600">
+                {sellerDashboardData.totalOrders}
+              </p>
+            </Link>
+            <Link to={"/orders?status=Pending"}
+              className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+              
+            >
+              <h3 className="text-lg font-bold text-gray-800">Pending Orders</h3>
+              <p className="text-2xl font-bold text-yellow-600">
+                {sellerDashboardData.totalPendingOrders}
+              </p>
+            </Link>
+            <Link 
+              className="bg-white p-6 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition"
+              
+            >
+              <h3 className="text-lg font-bold text-gray-800">Revenue</h3>
+              <p className="text-2xl font-bold text-purple-600">
+                {sellerDashboardData.totalEarnings} ETH
+              </p>
+            </Link>
+            <Link to={"/orders?status=Cancelled"}
+             className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold text-gray-800">Cancelled Orders</h3>
+              <p className="text-2xl font-bold text-red-600">
+                {sellerDashboardData.totalCancelledOrders}
+              </p>
+            </Link>
+            <Link to={"/orders?status=Delivered"}
+            className="bg-white p-6 rounded-lg shadow-md">
+              <h3 className="text-lg font-bold text-gray-800">Delivered Orders</h3>
+              <p className="text-2xl font-bold text-green-600">
+                {sellerDashboardData.totalDeliveredOrders}
+              </p>
+            </Link>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-gray-800">Total Orders</h3>
-            <p className="text-2xl font-bold text-green-600">45</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-gray-800">Pending Orders</h3>
-            <p className="text-2xl font-bold text-yellow-600">8</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-lg font-bold text-gray-800">Revenue</h3>
-            <p className="text-2xl font-bold text-purple-600">$12,345</p>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderResponseDTO {
-    private String OrderId;
+    private String orderId;
     private String sellerId;
     private String buyerId;
     private String productId;

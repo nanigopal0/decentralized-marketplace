@@ -6,7 +6,7 @@ export const handleUnauthorizedStatus = (response) => {
     if (response.status === 401) {
         localStorage.removeItem("user");
         toast.error("Session expired. Please log in again.", {
-            position: toast.POSITION.TOP_RIGHT,
+            position: "top-right",
         });
         
     } else if (response.status === 403) {

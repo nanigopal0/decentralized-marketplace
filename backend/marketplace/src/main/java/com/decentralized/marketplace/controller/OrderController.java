@@ -5,6 +5,7 @@ import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
 import com.decentralized.marketplace.dto.SellerOrderDTO;
+import com.decentralized.marketplace.entity.OrderStatus;
 import com.decentralized.marketplace.service.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,9 +33,9 @@ public class OrderController {
 
 
     @GetMapping("get-by-sellerId")
-    public ResponseEntity<List<SellerOrderDTO>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId,
+    public ResponseEntity<List<SellerOrderDTO>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId, @RequestParam(value = "status", required = false) OrderStatus status,
                                                                        @RequestParam(value = "sortBy", defaultValue = "orderedAt", required = false) String sortBy) {
-        return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId, sortBy));
+        return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId, sortBy,status));
     }
 
     @GetMapping("get-by-buyerId")
@@ -45,15 +46,13 @@ public class OrderController {
 
 
     @GetMapping("get-by-productId")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByProductId(@RequestParam(value = "ProductId") ObjectId ProductId) {
+    public ResponseEntity<List<SellerOrderDTO>> getAllOrdersByProductId(@RequestParam(value = "productId") ObjectId ProductId) {
         return ResponseEntity.ok(orderService.getAllOrderByProductId(ProductId));
     }
 
     @GetMapping("get")
     public ResponseEntity<OrderResponseDTO> getOrder(@RequestParam(value = "orderId") ObjectId id) {
-
         return ResponseEntity.ok(orderService.getOrderById(id));
-
     }
 
     @PutMapping("cancel")
@@ -67,6 +66,12 @@ public class OrderController {
     @PutMapping("deliver-otp")
     public ResponseEntity<String> generateDeliveryOTP(@RequestParam(value = "orderId") ObjectId id) throws MessagingException {
         orderService.generateDeliveryOtp(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("accept-order")
+    public ResponseEntity<String> updateTheOrderStatusToAccept(@RequestParam(value = "orderId") ObjectId id,@RequestParam(value = "txHash") String txHash) throws MessagingException {
+        orderService.acceptOrder(id,txHash);
         return ResponseEntity.noContent().build();
     }
 

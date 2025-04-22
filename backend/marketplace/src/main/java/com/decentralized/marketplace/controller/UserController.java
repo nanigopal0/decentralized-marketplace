@@ -1,5 +1,6 @@
 package com.decentralized.marketplace.controller;
 
+import com.decentralized.marketplace.dto.SellerDashboardInfoDTO;
 import com.decentralized.marketplace.dto.UpdateUserDTO;
 import com.decentralized.marketplace.dto.UserResponseDTO;
 import com.decentralized.marketplace.service.UserService;
@@ -44,5 +45,11 @@ public class UserController {
     @GetMapping("ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("Ping successful!");
+    }
+
+    @GetMapping("seller-info")
+    public ResponseEntity<SellerDashboardInfoDTO> getSellerInfoInDashboard(@RequestParam(value = "userId") ObjectId userId) {
+        return ResponseEntity.ok(userService.getSellerDashboardInfo(userId));
+
     }
 }

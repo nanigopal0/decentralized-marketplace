@@ -11,6 +11,7 @@ const UpdateUser = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -25,13 +26,19 @@ const UpdateUser = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
 
+    if (!fullName || !email || !password || !confirmPassword) {
+      toast.error("All fields are required!");
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
 
+    setLoading(true);
+
     try {
-      // Simulate API call
       const formData = new FormData();
       formData.append("fullName", fullName);
       formData.append("email", email);
@@ -52,14 +59,16 @@ const UpdateUser = () => {
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-6">
       <form
         onSubmit={handleUpdateProfile}
-        className="bg-white shadow-lg rounded-lg p-8 w-full max-w-lg"
+        className="bg-white border-gray-400 border shadow-lg rounded-lg p-8 w-full max-w-lg"
       >
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           Update Profile
@@ -71,7 +80,7 @@ const UpdateUser = () => {
             <img
               src={avatarPreview}
               alt="Avatar Preview"
-              className="w-24 h-24 rounded-full mb-4 shadow-md"
+              className="w-24 h-24 rounded-full mb-4 shadow-md hover:opacity-90 transition"
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4 shadow-md">
@@ -80,7 +89,7 @@ const UpdateUser = () => {
           )}
           <Label
             htmlFor="avatar"
-            className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            className="cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
           >
             Change Avatar
           </Label>
@@ -155,9 +164,12 @@ const UpdateUser = () => {
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full bg-blue-600 text-white hover:bg-blue-700 py-2 rounded-md"
+          className={`w-full py-2 rounded-md ${
+            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          } text-white`}
+          disabled={loading}
         >
-          Update Profile
+          {loading ? "Updating..." : "Update Profile"}
         </Button>
       </form>
     </div>

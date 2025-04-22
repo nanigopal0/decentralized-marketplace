@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 
 const statusMap = {
   0: "Pending",
@@ -16,20 +15,19 @@ export default function MyOrders() {
   useEffect(() => {
     async function fetchOrders() {
       try {
-       
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/order/get-by-buyerId?buyerId=${user.id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-        )
-        if (!response.ok) 
-          throw new Error("Failed to fetch orders.");
-        
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/order/get-by-buyerId?buyerId=${user.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          }
+        );
+        if (!response.ok) throw new Error("Failed to fetch orders.");
+
         const data = await response.json();
-        console.log(data)
         setOrders(data);
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -39,31 +37,50 @@ export default function MyOrders() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h2 className="text-3xl font-bold mb-6 text-center">My Orders</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-6">
+      <h2 className="text-4xl font-bold mb-8 text-center text-gray-800">
+        My Orders
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
         {orders.map((order) => (
           <div
             key={order.orderId}
-            className="bg-white p-4 rounded-2xl shadow hover:shadow-lg transition-all"
+            className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-200"
           >
-            <img
-              src={order.imageUrl || "/placeholder.jpg"}
-              alt={order.image}
-              className="w-full h-48 object-cover rounded-lg mb-4"
-            />
-            <h3 className="text-xl font-semibold mb-2">{order.orderId}</h3>
-            <p className="text-gray-600">Product ID: {order.productId}</p>
-            <p className="text-gray-600">Price: {order.totalPrice} {order.priceUnit}</p>
-            <p className="text-gray-600">Status: {order.status}</p>
-            <p className="text-gray-500 text-sm">
-              Ordered At: {new Date(order.orderedAt).toLocaleString()}
+            {/* Order Image */}
+            <div className="w-full h-48 bg-gray-200 rounded-lg overflow-hidden mb-4">
+              <img
+                src={order.imageUrl || "/placeholder.jpg"}
+                alt={order.image}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Order Details */}
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Order ID: {order.orderId}
+            </h3>
+            <p className="text-gray-600 text-sm mb-1">
+              <span className="font-medium">Product ID:</span> {order.productId}
             </p>
-            {/* {order.shippedAt > 0 && (
+            <p className="text-gray-600 text-sm mb-1">
+              <span className="font-medium">Price:</span> {order.totalPrice}{" "}
+              {order.priceUnit}
+            </p>
+            <p className="text-gray-600 text-sm mb-1">
+              <span className="font-medium">Status:</span>{" "}
+              {statusMap[order.status] || "Unknown"}
+            </p>
+            <p className="text-gray-500 text-sm mb-1">
+              <span className="font-medium">Ordered At:</span>{" "}
+              {new Date(order.orderedAt).toLocaleString()}
+            </p>
+            {order.shippedAt && (
               <p className="text-gray-500 text-sm">
-                Shipped At: {new Date(order.shippedAt * 1000).toLocaleString()}
+                <span className="font-medium">Shipped At:</span>{" "}
+                {new Date(order.shippedAt * 1000).toLocaleString()}
               </p>
-            )} */}
+            )}
           </div>
         ))}
       </div>

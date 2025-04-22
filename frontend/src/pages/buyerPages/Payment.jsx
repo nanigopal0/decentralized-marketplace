@@ -8,90 +8,51 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 
-const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
+const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133";
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [sellerAddress, setSellerAddress] = useState("");
-  // const [txStatus, setTxStatus] = useState("");
   const location = useLocation();
-  const { product, quantity } = location.state || {};
-
-  // const [product, setProduct] = useState(null);
-  const [productId, setProductId] = useState("product-001");
-  const [orderId, setOrderId] = useState("order-001");
-  // const [quantity, setQuantity] = useState(1);
-  const [amount, setAmount] = useState("0.03");
+  const { product, order } = location.state || {};
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [txStatus, setTxStatus] = useState("");
 
-  // const fetchPaymentDetails = async () => {
-  // const res = {
-  //   product: {
-  //     name: "Wireless Bluetooth Headphones",
-  //     description:
-  //       "High-quality over-ear headphones with noise cancellation.",
-  //     image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
-  //   },
-  //   productId: "nani100",
-  //   orderId: "order-002",
-  //   amount: "1",
-  //   quantity: 1,
-  // };
-  //   setProduct(res.product);
-  //   setProductId(res.productId);
-  //   setOrderId(res.orderId);
-  //   setAmount(res.amount);
-  //   setQuantity(res.quantity);
-  // };
 
-  useEffect(() => {
-    // fetchPaymentDetails();
-  }, []);
-
-  const handlePayment = async () => {
+  const updateOrderStatusToAccept = async (txHash) => {
+      try {
+        setLoading(true);
+        setMessage("order accepting...");
+  
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/order/accept-order?orderId=${order.orderId}&txHash=${txHash}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include"
+          }
+        );
+        if (response.status == 204) {
+          const data = await response.text();
+          console.log(data);
+          toast.success(  "Order accepted!");
+          navigate("/myorders");
+        }
+      } catch (error) {
+        toast.error("Failed to place order. Try again.");
+      } finally {
+        setLoading(false);
+        setMessage("");
+      }
+    };
+  
+  const payWithCrypto = async () => {
     if (!isConfirmed) {
       alert("Please accept the terms and conditions.");
       return;
     }
-  };
-
-  const payAndPlaceOrder = async () => {
-    try {
-      setLoading(true);
-      setMessage("");
-
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/create`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            productId: product.productId,
-            quantity,
-          }),
-        }
-      );
-      if (response.status == 202) {
-        const data = await response.json();
-        console.log(data);
-        toast.success("Order placed successfully!");
-        setMessage("Order placed successfully!");
-        // Redirect to myorder page or show success message
-        payWithCrypto();
-      }
-    } catch (error) {
-      toast.error("Failed to place order. Try again.");
-      setMessage("Failed to place order. Try again.");
-      setLoading(false);
-    } 
-  };
-
-  const payWithCrypto = async () => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -101,19 +62,25 @@ export default function Payment() {
         signer
       );
 
-      const tx = await contract.purchaseProduct(productId, orderId, quantity, {
-        // value: ethers.utils.parseEther(amount.toString()),
-        value: amount.toString(),
-      });
+      const tx = await contract.purchaseProduct(
+        order.productId,
+        order.orderId,
+        order.quantity,
+        {
+          // value: ethers.utils.parseEther(amount.toString()),
+         value: (order.totalPrice * 1000000000000000000).toString(),
+        }
+      );
 
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
       console.log("Transaction Hash:", tx.hash);
       setTxStatus("Payment successful!");
+      updateOrderStatusToAccept(tx.hash);
     } catch (error) {
       console.error("Error during payment:", error);
       setTxStatus("Payment failed. Please try again.");
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -159,18 +126,20 @@ export default function Payment() {
               <p>
                 <span className="font-bold text-gray-800">Amount:</span>{" "}
                 <span className="text-green-600 font-bold">
-                  {product.price * quantity} {product.priceUnit || "ETH"}
+                  {product.price * order.quantity} {product.priceUnit || "ETH"}
                 </span>
-                <span className="font-medium">Product ID:</span> {productId}
+                <span className="font-medium">Product ID:</span>{" "}
+                {product.productId}
               </p>
               <p>
-                <span className="font-medium">Order ID:</span> {orderId}
+                <span className="font-medium">Order ID:</span> {order.orderId}
               </p>
               <p>
-                <span className="font-medium">Quantity:</span> {quantity}
+                <span className="font-medium">Quantity:</span> {order.quantity}
               </p>
               <p>
-                <span className="font-medium">Amount:</span> Ξ {amount}
+                <span className="font-medium">Amount:</span> 
+                {order.totalPrice} ETH
               </p>
             </div>
 
@@ -193,7 +162,7 @@ export default function Payment() {
 
             {/* Confirm Payment Button */}
             <Button
-              onClick={payAndPlaceOrder}
+              onClick={payWithCrypto}
               disabled={!isConfirmed}
               className={`w-full py-2 rounded-lg font-semibold transition-all ${
                 isConfirmed

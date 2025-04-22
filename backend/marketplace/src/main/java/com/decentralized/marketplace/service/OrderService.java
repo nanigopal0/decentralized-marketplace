@@ -4,6 +4,7 @@ import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
 import com.decentralized.marketplace.dto.SellerOrderDTO;
+import com.decentralized.marketplace.entity.OrderStatus;
 import jakarta.mail.MessagingException;
 import org.bson.types.ObjectId;
 
@@ -13,11 +14,11 @@ public interface OrderService {
 
     OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException;
 
-    List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId,String sortBy);
+    List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId, String sortBy, OrderStatus status);
 
     List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId,String sortBy);
 
-    List<OrderResponseDTO> getAllOrderByProductId(ObjectId productId);
+    List<SellerOrderDTO> getAllOrderByProductId(ObjectId productId);
 
     void cancelOrder(ObjectId orderId);
 
@@ -52,4 +53,6 @@ public interface OrderService {
      * @return true if the OTP is valid, false otherwise
      */
     boolean verifyDeliveryOtp(ObjectId orderId, String otp) throws MessagingException;
+
+    void acceptOrder(ObjectId id, String txHash);
 }

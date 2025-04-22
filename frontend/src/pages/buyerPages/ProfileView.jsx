@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { User } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function ProfileView() {
   const [profileData, setProfileData] = useState({});
@@ -37,8 +38,8 @@ export default function ProfileView() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center p-6">
-      <Card className="w-full max-w-3xl shadow-lg">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-6">
+      <Card className="w-full max-w-3xl shadow-lg border-gray-400 bg-gradient-to-r from-yellow-100 to-pink-100">
         <CardContent className="p-6 md:p-10">
           <div className="text-center">
             {/* Profile Image */}
@@ -90,9 +91,9 @@ export default function ProfileView() {
 
           {/* Edit Profile Button */}
           <div className="mt-6 text-center">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md">
+            <Link to={`/user/update/${user.id}`} className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md">
               Edit Profile
-            </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>

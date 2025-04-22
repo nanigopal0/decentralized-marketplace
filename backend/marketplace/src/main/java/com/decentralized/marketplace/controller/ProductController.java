@@ -1,10 +1,12 @@
 package com.decentralized.marketplace.controller;
 
 import com.decentralized.marketplace.dto.ProductDTO;
+import com.decentralized.marketplace.dto.UpdateProduct;
 import com.decentralized.marketplace.entity.ProductType;
 import com.decentralized.marketplace.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,38 +25,34 @@ public class ProductController {
 
     @PostMapping("add")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO product) {
-
         return ResponseEntity.accepted().body(productService.addProduct(product));
+    }
 
+    @PutMapping("update")
+    public ResponseEntity<ProductDTO> updateProduct(@RequestBody UpdateProduct product) {
+        return new ResponseEntity<>(productService.updateProduct(product), HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("delete")
-    public ResponseEntity<String> deleteProduct(@RequestParam("product-id") ObjectId productId) {
-
+    public ResponseEntity<String> deleteProduct(@RequestParam("productId") ObjectId productId) {
         productService.removeProduct(productId);
         return ResponseEntity.accepted().body("Product deleted successfully");
-
     }
 
     @GetMapping("get-all-products")
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
-
         return ResponseEntity.ok(productService.getAllProducts());
-
     }
 
     @GetMapping("get")
     public ResponseEntity<ProductDTO> getProduct(@RequestParam(value = "productId") ObjectId productId) {
         return ResponseEntity.ok(productService.getProduct(productId));
-
     }
 
 
     @GetMapping("get-by-sellerId")
     public ResponseEntity<List<ProductDTO>> getAllProductsBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId) {
-
         return ResponseEntity.ok(productService.getAllProductsBySellerId(sellerId));
-
     }
 
     @GetMapping("get-by-product-type")
@@ -87,9 +85,7 @@ public class ProductController {
 
     @GetMapping("search")
     public ResponseEntity<List<ProductDTO>> searchProductByTitle(@RequestParam(value = "keyword") String title) {
-
         return ResponseEntity.ok(productService.searchProductsByTitle(title));
-
     }
 
 }

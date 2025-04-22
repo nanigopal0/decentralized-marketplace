@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import {Label} from '@/components/ui/Label';
-import {Input} from '@/components/ui/Input';
-import {Button} from '@/components/ui/button';
-import {Textarea} from '@/components/ui/textarea';
+import React, { useEffect, useState } from "react";
+import { Label } from "@/components/ui/Label";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -10,89 +10,100 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDispatch, useSelector } from 'react-redux';
-import { updateProduct,clearAllProductErrors,getAllProduct , resetProduct } from '../../../store/slices/productSlice';
-import { toast } from 'react-toastify';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useDispatch, useSelector } from "react-redux";
+import {
+  updateProduct,
+  clearAllProductErrors,
+  getAllProduct,
+  resetProduct,
+} from "../../../store/slices/productSlice";
+import { toast } from "react-toastify";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 
 const UpdateProduct = () => {
-
-  const [title , setTitle] = useState('')
-  const [description , setDescription] = useState('')
-  const [price , setPrice] = useState('')
-  const [productType , setProductType] = useState('')
-  const [stock , setStock] = useState(0)
-  const [productImage , setProductImage] = useState('')
-  const [ productImagePreview , setProductImagePreview ] = useState('')
-
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [productType, setProductType] = useState(""); //
+  const [stock, setStock] = useState(0);
+  const [productImage, setProductImage] = useState("");
+  const [productImagePreview, setProductImagePreview] = useState("");
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const { id } = useParams();
+  const navigate = useNavigate();
   
   const handleBanner = (e) => {
-    const file = e.target.files[0]
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
     reader.onload = () => {
-      setProductImagePreview(reader.result)
-      setProductImage(file)
-    }
+      setProductImagePreview(reader.result);
+      setProductImage(file);
+    };
+  };
+
+  const updateProduct = async (formData) => {
+      try{
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/product/update`,
+        {
+          method: "PUT",
+          credentials: "include",
+          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      handleUnauthorizedStatus(response);
+      if (response.status === 204) {
+        const data = await response.json();
+        toast.success("Product updated successfully");
+        navigate("/products");
+      }
+      }catch (error) {
+        console.log(error);
+      }
   }
-
-  const {loading , error , message} = useSelector((state) => state.product)
-  const dispatch = useDispatch()
-
-  const {id} = useParams()
 
   const handleUpdateProduct = (e) => {
-    e.preventDefault()
-    const formData = new FormData()
-    formData.append("title" , title)
-    formData.append("description" , description)
-    formData.append("price" , price)
-    formData.append("productType" , productType)
-    formData.append("stock" , stock)
-    formData.append("productImage" , productImage)
-    dispatch(updateProduct(formData))
-    setTitle('')
-    setDescription('')
-    setPrice('')
-    setProductType('')
-    setStock('')
-    setProductImage('')
-  }
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("productId", id);
+    formData.append("title", title);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("stock", stock);
+    formData.append("mediaUrl", productImage);
+   
+    updateProduct(formData);
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setProductType("");
+    setStock("");
+    setProductImage("");
+  };
 
   useEffect(() => {
-    const getProduct = async() => {
-      const {data} = await axios.get(`/api/${id}`,
-        {
-          withCredentials: true
-        }
-      ).then((res) => {
-      setTitle(res.data.product.title)
-      setDescription(res.data.product.description)
-      setPrice(res.data.product.price)
-      setProductType(res.data.product.productType)
-      setStock(res.data.product.stock)
-      setProductImage(res.data.product.productImage && res.data.product.productImage.url)
-      setProductImagePreview(res.data.product.productImage && res.data.product.productImage.url)
-      }).catch((error) => {
-        toast.error(error.response.data.message)
-      })
-    }
-    getProduct()
-    if(error){
-      toast.error(error)
-      dispatch(clearAllProductErrors())
-    }
-    if(message){
-      toast.success(message)
-      dispatch(resetProduct())
-      dispatch(getAllProduct())
-    }
-  },[ loading , dispatch , error , message ])
+    const { initialProduct } = location.state || {};
+
+    setTitle(initialProduct.title);
+    setDescription(initialProduct.description);
+    setPrice(initialProduct.price);
+    setProductType(initialProduct.type);
+    setStock(initialProduct.stock);
+    setProductImage(initialProduct.mediaUrl);
+    setProductImagePreview(initialProduct.mediaUrl);
+    
+  }, []);
 
   return (
     <>
-      <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
+      <div className="flex mt-7 justify-center bg-gradient-to-r from-yellow-100 to-pink-100 items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
         <form
           onSubmit={handleUpdateProduct}
           className="w-[100%] px-5 md:w-[1000px]"
@@ -153,46 +164,20 @@ const UpdateProduct = () => {
                   </Label>
                   <div className="mt-2">
                     <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                      <Select
+                      <Select disabled
                         value={productType}
-                        onValueChange={(selectedValue) =>
-                          setProductType(selectedValue)
-                        }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Product Stack" />
+                          <SelectValue/>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Physical">Physical</SelectItem>
-                          <SelectItem value="Digital">Digital</SelectItem>
+                          <SelectItem value={productType}>{productType}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
                 </div>
-                {/* <div className="w-full sm:col-span-4">
-                  <Label className="block text-sm font-medium leading-6 text-gray-900">
-                    Deployed
-                  </Label>
-                  <div className="mt-2">
-                    <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
-                      <Select
-                        value={deployed}
-                        onValueChange={(selectedValue) =>
-                          setDeployed(selectedValue)
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Is this product deployed?" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Yes">Yes</SelectItem>
-                          <SelectItem value="No">No</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </div> */}
+           
 
                 <div className="w-full sm:col-span-4">
                   <Label className="block text-sm font-medium leading-6 text-gray-900">
@@ -242,9 +227,7 @@ const UpdateProduct = () => {
                         <img
                           className="mx-auto h-[250px] w-full text-gray-300"
                           viewBox="0 0 24 24"
-                          src={
-                            productImagePreview && `${productImagePreview}`
-                          }
+                          src={productImagePreview && `${productImagePreview}`}
                         />
                       ) : (
                         <svg
@@ -294,18 +277,18 @@ const UpdateProduct = () => {
                 width={"w-56"}
               />
             ) : ( */}
-              <button
-                type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-56"
-              >
-                Update Product
-              </button>
+            <button
+              type="submit"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500  focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-56"
+            >
+              Update Product
+            </button>
             {/* )} */}
           </div>
         </form>
       </div>
     </>
   );
-}
+};
 
 export default UpdateProduct;

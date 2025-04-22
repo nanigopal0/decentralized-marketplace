@@ -21,4 +21,5 @@ public interface ProductRepo extends MongoRepository<Product, ObjectId> {
 
     List<Product> findProductsByPriceBetween(Double lowerPrice, Double upperPrice);
 
+    Integer countProductBySellerId(ObjectId sellerId);
 }

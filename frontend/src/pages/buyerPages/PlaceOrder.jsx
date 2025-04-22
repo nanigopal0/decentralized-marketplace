@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -13,6 +13,42 @@ export default function PlaceOrder() {
   const location = useLocation();
   const { product } = location.state || {}; // Get product from location state
   const totalPrice = (product.price || 0) * quantity;
+  const navigate = useNavigate();
+
+  const placeOrder = async () => {
+    try {
+      setLoading(true);
+      setMessage("order placing in db");
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/order/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productId: product.productId,
+            quantity,
+          }),
+        }
+      );
+      if (response.status == 202) {
+        const data = await response.json();
+        console.log(data);
+        toast.success(
+          "Order placed successfully, pay the amount to accept the order!"
+        );
+        navigate("/payment", { state: { order: data,product } });
+      }
+    } catch (error) {
+      toast.error("Failed to place order. Try again.");
+    } finally {
+      setLoading(false);
+      setMessage("");
+    }
+  };
 
   if (!product) {
     return <p className="text-center mt-10">No product details available.</p>;
@@ -82,14 +118,14 @@ export default function PlaceOrder() {
 
               {/* Place Order Button */}
               <Button
-                asChild
-                // onClick={handlePlaceOrder}
+                // asChild
+                onClick={placeOrder}
                 disabled={loading}
                 className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
               >
-                <Link to="/payment" state={{ product, quantity }}>
-                  {loading ? "Placing Order..." : "Place Order"}
-                </Link>
+                {/* <Link to="/payment" state={{ product, quantity }}> */}
+                {loading ? "Placing Order..." : "Place Order"}
+                {/* </Link> */}
               </Button>
 
               {/* Message */}

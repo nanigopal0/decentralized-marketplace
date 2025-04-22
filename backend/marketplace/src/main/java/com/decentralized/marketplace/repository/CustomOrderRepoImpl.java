@@ -2,6 +2,7 @@ package com.decentralized.marketplace.repository;
 
 import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.SellerOrderDTO;
+import com.decentralized.marketplace.entity.OrderStatus;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -38,7 +39,35 @@ public class CustomOrderRepoImpl implements CustomOrderRepo {
     }
 
     @Override
-    public List<SellerOrderDTO> findAllSellerPendingOrderWithProductBySellerId(ObjectId sellerId, Sort sort) {
+    public List<SellerOrderDTO> findAllOrderWithBuyerByProductId(ObjectId productId, Sort sort) {
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("productId").is(productId)),
+                orderToProductLookup(),
+                orderToUserLookup("buyerId", "buyer"),
+                unwind("product_info"),
+                unwind("buyer"),
+                orderToProductAndUserProjection("buyer"),
+                Aggregation.sort(sort)
+        );
+        return mongoTemplate.aggregate(aggregation, "orders", SellerOrderDTO.class).getMappedResults();
+    }
+
+    @Override
+    public List<SellerOrderDTO> findAllSellerOrderWithProductBySellerIdAndOrderStatus(ObjectId sellerId, Sort sort, OrderStatus status) {
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("sellerId").is(sellerId).and("status").is(status)),
+                orderToProductLookup(),
+                orderToUserLookup("buyerId", "buyer"),
+                unwind("product_info"),
+                unwind("buyer"),
+                orderToProductAndUserProjection("buyer"),
+                Aggregation.sort(sort)
+        );
+        return mongoTemplate.aggregate(aggregation, "orders", SellerOrderDTO.class).getMappedResults();
+    }
+    @Override
+    public List<SellerOrderDTO> findAllSellerOrderWithProductBySellerId(ObjectId sellerId, Sort sort) {
 
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(Criteria.where("sellerId").is(sellerId)),

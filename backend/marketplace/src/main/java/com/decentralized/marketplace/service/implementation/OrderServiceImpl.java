@@ -107,7 +107,7 @@ public class OrderServiceImpl implements OrderService {
                 .priceUnit(product.getPriceUnit())
                 .quantity(order.getQuantity())
                 .totalPrice(product.getPrice() * order.getQuantity())
-                .status(OrderStatus.Accepted)
+                .status(OrderStatus.Pending)
                 .build();
         User seller = userRepo.findById(product.getSellerId()).orElseThrow(() -> new UserNotFoundException(product.getSellerId().toHexString()));
 
@@ -158,7 +158,7 @@ public class OrderServiceImpl implements OrderService {
                 .pricePerItem(order.getPricePerItem())
                 .quantity(order.getQuantity())
                 .totalPrice(order.getTotalPrice())
-                .OrderId(order.getId().toHexString())
+                .orderId(order.getId().toHexString())
                 .sellerId(order.getSellerId().toHexString())
                 .buyerId(order.getBuyerId().toHexString())
                 .productId(order.getProductId().toHexString())
@@ -171,19 +171,22 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId,String sortBy) {
-        return orderRepo.findAllSellerPendingOrderWithProductBySellerId(sellerId, Sort.by(Sort.Direction.DESC, sortBy));
+    public List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId, String sortBy, OrderStatus status) {
+        if (status != null)
+            return orderRepo.findAllSellerOrderWithProductBySellerIdAndOrderStatus(sellerId, Sort.by(Sort.Direction.DESC, sortBy), status);
+        else return orderRepo.findAllSellerOrderWithProductBySellerId(sellerId, Sort.by(Sort.Direction.DESC, sortBy));
     }
 
     @Override
-    public List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId,String sortBy) {
+    public List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId, String sortBy) {
         return orderRepo.findAllBuyerOrderWithProductByBuyerId(buyerId, Sort.by(Sort.Direction.DESC, sortBy));
 //        return orderRepo.findOrderByBuyerId(buyerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrderByProductId(ObjectId productId) {
-        return orderRepo.findOrderByProductId(productId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<SellerOrderDTO> getAllOrderByProductId(ObjectId productId) {
+//        return orderRepo.findOrderByProductId(productId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+        return orderRepo.findAllOrderWithBuyerByProductId(productId,Sort.by(Sort.Direction.DESC,"orderedAt"));
     }
 
     @Override
@@ -383,6 +386,13 @@ public class OrderServiceImpl implements OrderService {
         sendDeliveryMailToSeller(order);
         log.info("Delivery OTP verified successfully for order: {}", orderId);
         return true;
+    }
+
+    @Override
+    public void acceptOrder(ObjectId id, String txHash) {
+        Order order = orderRepo.findById(id).orElseThrow(() -> new OrderNotFoundException(id.toString()));
+        order.setTransactionHash(txHash);
+        orderRepo.save(order);
     }
 
     private void sendDeliveryMailToSeller(Order order) throws MessagingException {

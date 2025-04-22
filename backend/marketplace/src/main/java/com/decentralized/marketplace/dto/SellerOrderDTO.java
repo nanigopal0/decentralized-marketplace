@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 //seller order request
 @Data
 @NoArgsConstructor
@@ -23,7 +25,7 @@ public class SellerOrderDTO {
     private Double pricePerItem;
     private Double totalPrice;
     private String transactionHash;
-    private String orderedAt;
+    private LocalDateTime orderedAt;
     private ProductType productType;
     private OrderStatus orderStatus;
 }

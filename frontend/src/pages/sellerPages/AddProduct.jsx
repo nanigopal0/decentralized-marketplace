@@ -20,6 +20,7 @@ import {
   resetProduct,
 } from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133"; //Replace with your contract_Address
 
@@ -31,8 +32,7 @@ const AddProduct = () => {
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
-  const { loading, error, message } = useSelector((state) => state.product);
-  const dispatch = useDispatch();
+ const navigate = useNavigate();
   const [productImagePreview, setProductImagePreview] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -79,7 +79,7 @@ const AddProduct = () => {
     formData.append("sellerId", user.id);
     // dispatch(addProduct(formData));
     const data = await addProductToDB(formData);
-    handleAddProductToBlockchain();
+    handleAddProductToBlockchain(data.productId,data.price,data.type);
 
     setTitle("");
     setDescription("");
@@ -113,7 +113,7 @@ const AddProduct = () => {
     }
   };
 
-  const handleAddProductToBlockchain = async () => {
+  const handleAddProductToBlockchain = async (productId,price,productType) => {
     try {
       console.log("Submitting product listing...");
       console.log("Product ID :", productId);
@@ -138,6 +138,7 @@ const AddProduct = () => {
       await tx.wait();
       console.log("Transaction confirmed");
       toast.success("Product listed on blockchain successfully!");
+      navigate("/products");
     } catch (err) {
       console.error("Blockchain listing error:", err);
       toast.error("Blockchain product listing failed.");
@@ -145,7 +146,7 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
+    <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14 bg-gradient-to-r from-yellow-100 to-pink-100">
       <form onSubmit={handleAddProduct} className="w-[100%] px-5 md:w-[1000px]">
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">

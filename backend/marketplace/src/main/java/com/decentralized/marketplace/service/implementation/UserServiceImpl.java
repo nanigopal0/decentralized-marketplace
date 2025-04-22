@@ -1,16 +1,11 @@
 package com.decentralized.marketplace.service.implementation;
 
-import com.decentralized.marketplace.dto.UpdateUserDTO;
-import com.decentralized.marketplace.dto.UserLoginRequestDTO;
-import com.decentralized.marketplace.dto.UserResponseDTO;
-import com.decentralized.marketplace.dto.UserSignupRequestDTO;
+import com.decentralized.marketplace.dto.*;
 import com.decentralized.marketplace.entity.*;
 import com.decentralized.marketplace.exception.UnauthorizedUserException;
 import com.decentralized.marketplace.exception.UserNotFoundException;
 import com.decentralized.marketplace.jwt.JwtService;
-import com.decentralized.marketplace.repository.BuyerRepo;
-import com.decentralized.marketplace.repository.SellerRepo;
-import com.decentralized.marketplace.repository.UserRepo;
+import com.decentralized.marketplace.repository.*;
 import com.decentralized.marketplace.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
@@ -24,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -36,8 +32,10 @@ public class UserServiceImpl implements UserService {
 //    private final SellerRepo sellerRepo;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
+    private final ProductRepo productRepo;
+    private final OrderRepo orderRepo;
 
-    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, HttpServletResponse httpServletResponse) {
+    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, HttpServletResponse httpServletResponse, ProductRepo productRepo, OrderRepo orderRepo) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -45,6 +43,8 @@ public class UserServiceImpl implements UserService {
 //        this.sellerRepo = sellerRepo;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
+        this.productRepo = productRepo;
+        this.orderRepo = orderRepo;
     }
 
     @Override
@@ -99,6 +99,25 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    @Override
+    public SellerDashboardInfoDTO getSellerDashboardInfo(ObjectId userId) {
+        Integer totalProducts = productRepo.countProductBySellerId(userId);
+        List<Order> orders = orderRepo.findOrderBySellerId(userId);
+        List<Order> deliveredOrders = orders.stream().filter((order -> order.getStatus() == OrderStatus.Delivered)).toList();
+        double totalEarnings = deliveredOrders.stream().mapToDouble(Order::getTotalPrice).sum();
+        int cancelledOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Cancelled).toList().size();
+        int pendingOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Pending).toList().size();
+        return SellerDashboardInfoDTO.builder()
+                .totalDeliveredOrders(deliveredOrders.size())
+                .totalCancelledOrders(cancelledOrders)
+                .totalPendingOrders(pendingOrders)
+                .totalProducts(totalProducts)
+                .sellerId(userId.toHexString())
+                .totalOrders(orders.size())
+                .totalEarnings(totalEarnings)
+                .build();
     }
 
     private void  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {

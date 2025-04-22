@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { logout } from "../../../store/slices/userSlice";
+import {firstColor, secondcolor, thirdcolor} from "../../util/ColorPalete";
 
 export default function Navbar() {
   const { isAuthenticated } = useSelector((state) => state.user);
@@ -21,15 +22,12 @@ export default function Navbar() {
   const isSeller = isAuthenticated ? user && user.role === "SELLER" : false;
 
   const handleLogout = async () => {
-   
-      dispatch(logout());
-   
+    dispatch(logout());
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-500 to-purple-600 shadow-md py-4 px-6 flex items-center justify-between">
-      {/* Logo */}
-      <Link to="/" className="text-2xl font-bold text-white cursor-pointer">
+    <nav className=" shadow-md py-4 px-6 flex items-center justify-between bg-gradient-to-r from-yellow-100 to-pink-100">
+      <Link to="/" className="text-2xl font-bold cursor-pointer">
         SmartMarket
       </Link>
 
@@ -38,11 +36,12 @@ export default function Navbar() {
         <Input
           type="text"
           placeholder="Search products..."
-          className="w-64 text-white placeholder:text-white border border-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-64  placeholder:text-gray-600 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <Button
           variant="secondary"
-          className="bg-white text-blue-600 hover:bg-gray-100"
+          className="text-white bg-blue-700 hover:bg-blue-500 "
+          // style={{ backgroundColor: firstColor }}
         >
           Search
         </Button>
@@ -55,7 +54,7 @@ export default function Navbar() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               {/* Wrap the icon in a button for proper styling */}
-              <button className="text-white text-3xl focus:outline-none">
+              <button className=" text-3xl focus:outline-none">
                 <FaUserCircle />
               </button>
             </DropdownMenuTrigger>
@@ -87,7 +86,7 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             <Link
               to="/register"
-              className="bg-white text-blue-600 px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
+              className=" text-blue-600 px-3 py-2 rounded-md text-sm font-semibold hover:bg-gray-100 transition"
             >
               Register
             </Link>

@@ -27,12 +27,15 @@ import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
 import ProfileView from "./pages/buyerPages/ProfileView";
 import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
+import OrderDetails from "./pages/sellerPages/OrderDetails";
+import ProductDetails from "./pages/sellerPages/ProductDetails";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
   const user = JSON.parse(localStorage.getItem("user"));
   const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
-  console.log(isSeller)
+  // console.log(isSeller);
+
   useEffect(() => {
     dispatch(pingServer());
   }, [dispatch]);
@@ -43,25 +46,30 @@ function App() {
       <Routes>
         {isAuthenticated ? (
           <>
-            {isSeller && (
+            {isSeller ? (
               <>
-                <Route path="/seller/dashboard" element={<SellerDashboard />} />
-                <Route path="/add/product" element={<AddProduct />} />
+                <Route path="/home" element={<SellerDashboard />} />
+                <Route path="/products" element={<AllProduct />} />
+                <Route path="/dashboard" element={<SellerDashboard />} />
+                <Route path="/product/add" element={<AddProduct />} />
                 <Route path="/product/update/:id" element={<UpdateProduct />} />
                 <Route path="/orders" element={<SellerOrders />} />
+                <Route path="/order/details/:id" element={<OrderDetails />} />
+                <Route path="product/details/:id" element={<ProductDetails />} />
+              </>
+            ) : (
+              <>
+                <Route path="/home" element={<Home />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/product/:id" element={<SingleProduct />} />
+                <Route path="/order/product/:id" element={<PlaceOrder />} />
+                <Route path="/myorders" element={<MyOrders />} />
+                <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
               </>
             )}
-
-            <Route path="/home" element={<Home />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/product/:id" element={<SingleProduct />} />
-            <Route path="/product/all" element={<AllProduct />} />
-            <Route path="/order/product/:id" element={<PlaceOrder />} />
             <Route path="/user/update/:id" element={<UpdateUser />} />
-            <Route path="/myorders" element={<MyOrders />} />
-            <Route path="/profile" element={<ProfileView />} />
-            <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
             <Route path="*" element={<Navigate to="/home" />} />
+            <Route path="/profile" element={<ProfileView />} />
           </>
         ) : (
           <>
