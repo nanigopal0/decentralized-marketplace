@@ -55,4 +55,6 @@ public interface OrderService {
     boolean verifyDeliveryOtp(ObjectId orderId, String otp) throws MessagingException;
 
     void acceptOrder(ObjectId id, String txHash);
+
+    void generateCancelOTP(ObjectId orderId);
 }

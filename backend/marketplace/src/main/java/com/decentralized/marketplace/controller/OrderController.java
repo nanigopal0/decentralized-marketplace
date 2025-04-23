@@ -55,9 +55,15 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(id));
     }
 
-    @PutMapping("cancel")
+    @PutMapping("cancel-order")
     public ResponseEntity<String> cancelOrder(@RequestParam(value = "orderId") ObjectId orderId) {
         orderService.cancelOrder(orderId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("cancel-otp")
+    public ResponseEntity<String> generateCancelOTP(@RequestParam(value = "orderId") ObjectId orderId) {
+        orderService.generateCancelOTP(orderId);
         return ResponseEntity.noContent().build();
     }
 

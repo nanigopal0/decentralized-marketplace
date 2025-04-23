@@ -18,7 +18,7 @@ export default function ProductCard({ product, onClick }) {
       {/* Product Details */}
       <CardContent className="p-4">
         <h2 className="text-xl font-semibold mb-1 text-gray-800">
-          {product.name}
+          {product.title}
         </h2>
         <p className="text-gray-600 text-sm mb-2">{product.description}</p>
         <p className="text-lg font-bold text-emerald-600">

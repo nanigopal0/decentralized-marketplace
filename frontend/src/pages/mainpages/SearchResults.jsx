@@ -13,6 +13,7 @@ export default function SearchResults() {
   const query = new URLSearchParams(location.search).get("query");
 
   async function fetchSearchResults() {
+    console.log(query)
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/search?keyword=${query}`,
@@ -24,9 +25,11 @@ export default function SearchResults() {
           credentials: "include",
         }
       );
+      console.log(response.status)
       handleUnauthorizedStatus(response);
       if (response.ok) {
         const data = await response.json();
+        console.log(data)
         setProducts(data);
       }
     } catch (error) {

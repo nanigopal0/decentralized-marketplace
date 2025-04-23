@@ -22,13 +22,12 @@ export default function BuyerOrderDetails() {
     );
   }
 
-  const generateDeliverOtp = async () => {
+  const handleCancelOrder = async () => {
+    setLoading(true);
     try {
-        setLoading(true); // Start loading
+
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/deliver-otp?orderId=${
-          order.orderId
-        }`,
+        `${import.meta.env.VITE_BACKEND_URL}/order/cancel-otp?orderId=${order.orderId}`,
         {
           method: "PUT",
           headers: {
@@ -38,23 +37,10 @@ export default function BuyerOrderDetails() {
         }
       );
       if (response.status === 204) {
-        toast.success("OTP sent to your email!");
-        setShowOtpInput(true); // Show OTP input after sending OTP
-      } else {
-        toast.error("Failed to send OTP. Please try again.");
+        toast.success("Order cancelled successfully!");
+        navigate("/myorders"); // Redirect to orders page
       }
-    } catch (error) {
-      console.error("Error generating OTP:", error);
-      toast.error("An error occurred. Please try again.");
-    } finally {
-        setLoading(false); // Stop loading
-    }
-  };
-
-  const handleCancelOrder = async () => {
-    setLoading(true);
-    try {
-      setShowOtpInput(true);
+      // setShowOtpInput(true);
       toast.info("OTP sent to your email for cancellation.");
     } catch (error) {
       console.error("Error sending OTP:", error);

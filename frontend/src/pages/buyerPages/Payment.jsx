@@ -7,8 +7,9 @@ import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
+import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 
-const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133";
+// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26";
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);

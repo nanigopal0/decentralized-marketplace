@@ -14,8 +14,9 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { handleFileUpload } from "../../util/CloudinaryFileUpload";
+import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 
-const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133"; //Replace with your contract_Address
+// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26"; //Replace with your contract_Address
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -43,14 +44,6 @@ const AddProduct = () => {
     console.log("Submitting product listing...");
 
     const imageUrl = await handleFileUpload(productImage);
-    // const formData = new FormData();
-    // formData.append("title", title);
-    // formData.append("description", description);
-    // formData.append("price", price);
-    // formData.append("type", productType);
-    // formData.append("stock", stock);
-    // formData.append("mediaUrl", null);
-    // formData.append("sellerId", user.id);
     const reqdata = {
       "title":title,
       "description":description,
@@ -60,8 +53,7 @@ const AddProduct = () => {
       "sellerId":user.id,
       "mediaUrl":imageUrl
     }
-    // dispatch(addProduct(formData));
-   
+  
     const data = await addProductToDB(reqdata);
     if(data == null){
       toast.error("something went wrong!");
@@ -109,15 +101,10 @@ const AddProduct = () => {
     productType
   ) => {
     try {
-      console.log("Submitting product listing...");
-      console.log("Product ID :", productId);
-      console.log("Price (wei):", price);
-      console.log("Product Type:", productType);
 
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      // price = ethers.parseEther(price.toString());
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
         SmartMarketplace,

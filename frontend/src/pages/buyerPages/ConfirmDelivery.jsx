@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
+import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 
-const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133";
+// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26";
 
 export default function ConfirmDelivery() {
   const location = useLocation();
@@ -15,6 +16,7 @@ export default function ConfirmDelivery() {
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
+  const navigate = useNavigate();
 
   const generateDeliverOtp = async () => {
     setLoading(true);
@@ -79,6 +81,7 @@ export default function ConfirmDelivery() {
   };
 
   const handleConfirmDelivery = async () => {
+    console.log(order.orderId)
     try {
       if (!window.ethereum) throw new Error("MetaMask is not installed");
       await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -95,8 +98,8 @@ export default function ConfirmDelivery() {
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
       console.log("Transaction Hash:", tx.hash);
-
       setTxStatus("Delivery confirmed successfully!");
+      navigate("/myorders"); // Redirect to orders page
     } catch (error) {
       console.error("Delivery confirmation failed:", error);
       setTxStatus("Delivery confirmation failed. Please try again.");

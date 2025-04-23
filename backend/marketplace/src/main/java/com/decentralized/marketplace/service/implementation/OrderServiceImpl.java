@@ -34,14 +34,13 @@ public class OrderServiceImpl implements OrderService {
     // OTP configuration
     private static final int OTP_EXPIRY_MINUTES = 30;
     private final ProductRepo productRepo;
-    private final ContractService contractService;
 
-    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo, ContractService contractService) {
+
+    public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo) {
         this.orderRepo = orderRepo;
         this.mailService = mailService;
         this.userRepo = userRepo;
         this.productRepo = productRepo;
-        this.contractService = contractService;
     }
 
     /**
@@ -363,6 +362,22 @@ public class OrderServiceImpl implements OrderService {
         order.setTransactionHash(txHash);
         order.setStatus(OrderStatus.Accepted);
         orderRepo.save(order);
+    }
+
+    @Override
+    public void generateCancelOTP(ObjectId orderId) {
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId.toString()));
+        if (!Objects.equals(order.getSellerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
+            throw new UnauthorizedUserException("You are not allowed to cancel this order! Only buyer can cancel");
+
+        switch (order.getStatus()) {
+            case Delivered -> throw new RuntimeException("Order delivered and cannot back to cancel phase! ");
+            case Shipped -> throw new RuntimeException("Order already shipped! ");
+            case Cancelled -> throw new RuntimeException("Order is cancelled and not cancellable again! ");
+            case Accepted, Pending -> {
+
+            }
+        }
     }
 
     private boolean verifyOtp(String otp, LocalDateTime otpExpiredAt, String expectedOtp,String orderId,String otpMode)  {
