@@ -30,8 +30,7 @@ import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
 import OrderDetails from "./pages/sellerPages/OrderDetails";
 import ProductDetails from "./pages/sellerPages/ProductDetails";
 import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
-
-
+import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
 
 function App() {
   const dispatch = useDispatch();
@@ -52,14 +51,17 @@ function App() {
           <>
             {isSeller ? (
               <>
-                <Route path="/home" element={<SellerDashboard />} />
+                <Route path="/home" element={<Navigate to={"/dashboard"} />} />
                 <Route path="/products" element={<AllProduct />} />
                 <Route path="/dashboard" element={<SellerDashboard />} />
                 <Route path="/product/add" element={<AddProduct />} />
                 <Route path="/product/update/:id" element={<UpdateProduct />} />
                 <Route path="/orders" element={<SellerOrders />} />
                 <Route path="/order/details/:id" element={<OrderDetails />} />
-                <Route path="product/details/:id" element={<ProductDetails />} />
+                <Route
+                  path="/product/details/:id"
+                  element={<ProductDetails />}
+                />
               </>
             ) : (
               <>
@@ -68,11 +70,18 @@ function App() {
                 <Route path="/product/:id" element={<SingleProduct />} />
                 <Route path="/order/product/:id" element={<PlaceOrder />} />
                 <Route path="/myorders" element={<MyOrders />} />
-                <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
-                <Route path="/blockchain/orderDetails" element={<BlockchainOrderDetails />} />
+                <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
+                <Route
+                  path="/blockchain/orderDetails"
+                  element={<BlockchainOrderDetails />}
+                />
+                <Route
+                  path="/buyer/order-details/:id"
+                  element={<BuyerOrderDetails />}
+                />
               </>
             )}
-            
+
             <Route path="/user/update/:id" element={<UpdateUser />} />
 
             <Route path="*" element={<Navigate to="/home" />} />

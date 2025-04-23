@@ -57,10 +57,8 @@ public class OrderController {
 
     @PutMapping("cancel")
     public ResponseEntity<String> cancelOrder(@RequestParam(value = "orderId") ObjectId orderId) {
-
         orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
-
     }
 
     @PutMapping("deliver-otp")
@@ -70,7 +68,7 @@ public class OrderController {
     }
 
     @PutMapping("accept-order")
-    public ResponseEntity<String> updateTheOrderStatusToAccept(@RequestParam(value = "orderId") ObjectId id,@RequestParam(value = "txHash") String txHash) throws MessagingException {
+    public ResponseEntity<String> updateTheOrderStatusToAccept(@RequestParam(value = "orderId") ObjectId id,@RequestParam(value = "txHash") String txHash) {
         orderService.acceptOrder(id,txHash);
         return ResponseEntity.noContent().build();
     }

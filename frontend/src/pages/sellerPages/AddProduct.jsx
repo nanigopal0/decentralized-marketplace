@@ -13,39 +13,39 @@ import {
 } from "@/components/ui/select";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { handleFileUpload } from "../../util/CloudinaryFileUpload";
 
 const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133"; //Replace with your contract_Address
 
 const AddProduct = () => {
-  const [productId, setProductId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState(0.0);
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
- const navigate = useNavigate();
+  const navigate = useNavigate();
   const [productImagePreview, setProductImagePreview] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
 
-  const handleFileUpload = async () => {
-    console.log(productImage);
-    const data = new FormData();
-    data.append("file", productImage);
-    data.append("upload_preset", "Banner_Upload");
-    data.append("cloud_name", "dckahd0gz");
+  // const handleFileUpload = async () => {
+  //   console.log(productImage);
+  //   const data = new FormData();
+  //   data.append("file", productImage);
+  //   data.append("upload_preset", "Banner_Upload");
+  //   data.append("cloud_name", "dckahd0gz");
 
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/dckahd0gz/image/upload`,
-      {
-        method: "POST",
-        body: data,
-      }
-    );
-    const uploadedImageURL = await res.json();
-    console.log(uploadedImageURL.url);
-    return uploadedImageURL.url;
-  };
+  //   const res = await fetch(
+  //     `https://api.cloudinary.com/v1_1/dckahd0gz/image/upload`,
+  //     {
+  //       method: "POST",
+  //       body: data,
+  //     }
+  //   );
+  //   const uploadedImageURL = await res.json();
+  //   console.log(uploadedImageURL.url);
+  //   return uploadedImageURL.url;
+  // };
 
   const handleBanner = (e) => {
     const file = e.target.files[0];
@@ -59,20 +59,34 @@ const AddProduct = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-      console.log("Submitting product listing...");
-    console.log(title,description,price,productType,stock,productImage);
-    const imageUrl = await handleFileUpload();
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("price", price);
-    formData.append("type", productType);
-    formData.append("stock", stock);
-    formData.append("mediaUrl", imageUrl);
-    formData.append("sellerId", user.id);
+    console.log("Submitting product listing...");
+
+    const imageUrl = await handleFileUpload(productImage);
+    // const formData = new FormData();
+    // formData.append("title", title);
+    // formData.append("description", description);
+    // formData.append("price", price);
+    // formData.append("type", productType);
+    // formData.append("stock", stock);
+    // formData.append("mediaUrl", null);
+    // formData.append("sellerId", user.id);
+    const reqdata = {
+      "title":title,
+      "description":description,
+      "price":price,
+      "type":productType,
+      "stock":stock,
+      "sellerId":user.id,
+      "mediaUrl":imageUrl
+    }
     // dispatch(addProduct(formData));
-    const data = await addProductToDB(formData);
-    handleAddProductToBlockchain(data.productId,data.price,data.type);
+   
+    const data = await addProductToDB(reqdata);
+    if(data == null){
+      toast.error("something went wrong!");
+      return;
+    }
+    handleAddProductToBlockchain(data.productId, data.price, data.type);
 
     setTitle("");
     setDescription("");
@@ -82,17 +96,18 @@ const AddProduct = () => {
     setProductImage("");
   };
 
-  const addProductToDB = async (formData) => {
+  const addProductToDB = async (reqData) => {
+  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/add`,
         {
-          credentials: "include",
           method: "POST",
+          body: JSON.stringify(reqData),
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
           },
-          body: formData,
         }
       );
       if (response.status == 201) {
@@ -107,7 +122,11 @@ const AddProduct = () => {
     }
   };
 
-  const handleAddProductToBlockchain = async (productId,price,productType) => {
+  const handleAddProductToBlockchain = async (
+    productId,
+    price,
+    productType
+  ) => {
     try {
       console.log("Submitting product listing...");
       console.log("Product ID :", productId);
@@ -127,12 +146,11 @@ const AddProduct = () => {
       const tx = await contract.listProduct(
         productId,
         wei.toString(),
-        productType === "PHYSICAL" ? 0 : 1,
+        productType === "PHYSICAL" ? 0 : 1
       );
       console.log("Transaction submitted:", tx.hash);
       await tx.wait();
-      console.log("Transaction confirmed");
-      toast.success("Product listed on blockchain successfully!");
+      toast.success("Transaction confirmed! Product listed on blockchain successfully!");
       navigate("/products");
     } catch (err) {
       console.error("Blockchain listing error:", err);

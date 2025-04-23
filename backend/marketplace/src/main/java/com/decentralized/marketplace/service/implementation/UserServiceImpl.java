@@ -5,7 +5,9 @@ import com.decentralized.marketplace.entity.*;
 import com.decentralized.marketplace.exception.UnauthorizedUserException;
 import com.decentralized.marketplace.exception.UserNotFoundException;
 import com.decentralized.marketplace.jwt.JwtService;
-import com.decentralized.marketplace.repository.*;
+import com.decentralized.marketplace.repository.OrderRepo;
+import com.decentralized.marketplace.repository.ProductRepo;
+import com.decentralized.marketplace.repository.UserRepo;
 import com.decentralized.marketplace.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.bson.types.ObjectId;
@@ -28,7 +30,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-//    private final BuyerRepo buyerRepo;
+    //    private final BuyerRepo buyerRepo;
 //    private final SellerRepo sellerRepo;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
+            generateJwtTokenAndSaveToCookie(userDetails.getUsername(), userDetails.getUserFullName(), userDetails.getUserId(), userDetails.getRole());
 
             UserResponseDTO responseDTO = UserResponseDTO.builder()
                     .id(userDetails.getUserId())
@@ -120,8 +122,8 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-    private void  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
-        String token = jwtService.generateToken(fullName,id,role.name(),email);
+    private void generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
+        String token = jwtService.generateToken(fullName, id, role.name(), email);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
@@ -150,20 +152,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(ObjectId userId) {
-        User user =userRepo.findById(userId).orElseThrow(UserNotFoundException::new);
-        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+        User user = userRepo.findById(userId).orElseThrow(UserNotFoundException::new);
+        if (!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()), user.getId()))
             throw new UnauthorizedUserException("Unauthorised user!");
     }
 
     @Override
-    public UserResponseDTO updateUser(UpdateUserDTO update,ObjectId userId) {
+    public UserResponseDTO updateUser(UpdateUserDTO update, ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toHexString()));
-        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+        if (!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()), user.getId()))
             throw new UnauthorizedUserException("Unauthorised user!");
-        user.setFullName(update.getFullName());
-        user.setEmail(update.getEmail());
-        user.setAvatar(update.getAvatar());
-        User saved =userRepo.save(user);
+        if (update.getFullName() != null && !update.getFullName().isBlank() && !update.getFullName().equals(user.getFullName()))
+            user.setFullName(update.getFullName());
+        if (update.getEmail() != null)
+            user.setEmail(update.getEmail());
+        if (update.getAvatar() != null && !update.getAvatar().isBlank() && !update.getAvatar().equals(user.getAvatar()))
+            user.setAvatar(update.getAvatar());
+        if (update.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(update.getPassword()));
+        }
+        User saved = userRepo.save(user);
         return UserResponseDTO.builder()
                 .createdAt(saved.getCreatedAt())
                 .email(saved.getEmail())
@@ -174,7 +182,6 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId().toHexString())
                 .build();
     }
-
 
 
     public static CustomUserDetails getCustomUserDetailsFromAuthentication() {

@@ -3,15 +3,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { handleFileUpload } from "../../util/CloudinaryFileUpload";
 
 const UpdateUser = () => {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const [fullName, setFullName] = useState(user.fullName || "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [avatar, setAvatar] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
   const [loading, setLoading] = useState(false);
+  const [showPasswordFields, setShowPasswordFields] = useState(false); // Toggle for password fields
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -26,12 +29,17 @@ const UpdateUser = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
 
-    if (!fullName || !email || !password || !confirmPassword) {
-      toast.error("All fields are required!");
+    if (!fullName) {
+      toast.error("Full Name is required!");
       return;
     }
 
-    if (password !== confirmPassword) {
+    if (showPasswordFields && (!password || !confirmPassword)) {
+      toast.error("Password fields are required!");
+      return;
+    }
+
+    if (showPasswordFields && password !== confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
@@ -39,28 +47,55 @@ const UpdateUser = () => {
     setLoading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("fullName", fullName);
-      formData.append("email", email);
-      formData.append("password", password);
+      const formData = {};
+      if(fullName !== user.fullName) 
+      formData.fullName=fullName;
+
+      if (showPasswordFields) {
+        formData.password=password;
+      }
       if (avatar) {
-        formData.append("avatar", avatar);
+        const url = await handleFileUpload(avatar)
+        formData.avatar=url;
       }
 
       // Simulate API response
       console.log("Updating profile with:", {
         fullName,
-        email,
-        password,
+        password: showPasswordFields ? password : "Not Updated",
         avatar,
       });
-
-      toast.success("Profile updated successfully!");
+      updateUser(formData);
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateUser = async (payload) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/update?userId=${user.id}`,
+        {
+          method: "PUT",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      handleUnauthorizedStatus(response);
+      if (response.ok) {
+        const updatedUser = await response.json();
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast.success("User updated successfully!");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to update user. Please try again.");
     }
   };
 
@@ -103,7 +138,10 @@ const UpdateUser = () => {
 
         {/* Full Name */}
         <div className="mb-4">
-          <Label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+          <Label
+            htmlFor="fullName"
+            className="block text-sm font-medium text-gray-700"
+          >
             Full Name
           </Label>
           <Input
@@ -117,55 +155,66 @@ const UpdateUser = () => {
         </div>
 
         {/* Email */}
+
+        {/* Toggle Password Fields */}
         <div className="mb-4">
-          <Label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            className="mt-1 w-full"
-          />
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <input
+              type="checkbox"
+              checked={showPasswordFields}
+              onChange={(e) => setShowPasswordFields(e.target.checked)}
+              className="form-checkbox"
+            />
+            Update Password
+          </label>
         </div>
 
-        {/* Password */}
-        <div className="mb-4">
-          <Label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter a new password"
-            className="mt-1 w-full"
-          />
-        </div>
+        {/* Password Fields (Conditional) */}
+        {showPasswordFields && (
+          <>
+            <div className="mb-4">
+              <Label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter a new password"
+                className="mt-1 w-full"
+              />
+            </div>
 
-        {/* Confirm Password */}
-        <div className="mb-6">
-          <Label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-            Confirm Password
-          </Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder="Confirm your password"
-            className="mt-1 w-full"
-          />
-        </div>
+            <div className="mb-6">
+              <Label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Confirm Password
+              </Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                className="mt-1 w-full"
+              />
+            </div>
+          </>
+        )}
 
         {/* Submit Button */}
         <Button
           type="submit"
           className={`w-full py-2 rounded-md ${
-            loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            loading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
           } text-white`}
           disabled={loading}
         >

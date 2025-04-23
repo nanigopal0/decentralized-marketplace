@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -17,7 +17,7 @@ export default function Payment() {
   const { product, order } = location.state || {};
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [txStatus, setTxStatus] = useState("");
-
+  const navigate = useNavigate();
 
   const updateOrderStatusToAccept = async (txHash) => {
       try {
@@ -27,20 +27,22 @@ export default function Payment() {
         const response = await fetch(
           `${import.meta.env.VITE_BACKEND_URL}/order/accept-order?orderId=${order.orderId}&txHash=${txHash}`,
           {
-            method: "POST",
+            method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
             credentials: "include"
           }
         );
+        console.log(response.status)
         if (response.status == 204) {
-          const data = await response.text();
-          console.log(data);
-          toast.success(  "Order accepted!");
+          // const data = await response.text();
+          // console.log(data);
+          toast.success( "Order accepted!");
           navigate("/myorders");
         }
       } catch (error) {
+        console.log(error)
         toast.error("Failed to place order. Try again.");
       } finally {
         setLoading(false);

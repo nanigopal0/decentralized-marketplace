@@ -25,7 +25,7 @@ public class ProductController {
 
     @PostMapping("add")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody ProductDTO product) {
-        return ResponseEntity.accepted().body(productService.addProduct(product));
+        return new ResponseEntity<>(productService.addProduct(product), HttpStatus.CREATED);
     }
 
     @PutMapping("update")

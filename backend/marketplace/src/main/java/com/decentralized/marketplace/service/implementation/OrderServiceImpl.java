@@ -217,8 +217,10 @@ public class OrderServiceImpl implements OrderService {
         switch (order.getStatus()) {
             case Delivered -> throw new RuntimeException("Order already delivered! ");
             case Shipped -> {
-                order.setStatus(OrderStatus.Delivered);
-                return orderRepo.save(order);
+                if(order.getDeliveryOtpVerified()) {
+                    order.setStatus(OrderStatus.Delivered);
+                    return orderRepo.save(order);
+                }else throw new RuntimeException("Delivery otp not verified!");
             }
             case Cancelled -> throw new RuntimeException("Order is cancelled and not deliverable! ");
             case Accepted ->
@@ -312,35 +314,18 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+
+
     @Override
     public boolean verifyShipmentOtp(ObjectId orderId, String otp) throws MessagingException {
         Order order = orderRepo.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId.toString()));
         if (!Objects.equals(order.getSellerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
             throw new UnauthorizedUserException("You are not allowed to ship this order! Only seller can ship");
 
-        // Check if OTP exists and is not expired
-        if (order.getShipmentOtp() == null || order.getShipmentOtpExpiry() == null) {
-            log.warn("Shipment OTP not found for order: {}", orderId);
-            throw new InvalidOTPException("Shipment OTP not found for order: " + orderId);
-        }
-
-        if (LocalDateTime.now().isAfter(order.getShipmentOtpExpiry())) {
-            log.warn("Shipment OTP expired for order: {}", orderId);
-            throw new InvalidOTPException("Shipment OTP expired for order: " + orderId);
-        }
-
-        // Check if OTP matches
-        if (!order.getShipmentOtp().equals(otp)) {
-            log.warn("Invalid shipment OTP provided for order: {}", orderId);
-            throw new InvalidOTPException("Invalid shipment OTP provided for order: " + orderId);
-        }
-
-        // Mark OTP as verified
-        order.setShipmentOtpVerified(true);
-//        orderRepo.save(order);
+        order.setShipmentOtpVerified(verifyOtp(otp,order.getShipmentOtpExpiry(),order.getShipmentOtp(),orderId.toHexString(),"Shipment"));
 
         order = shipOrder(order);
-        // Send regular shipment notification to the buyer
+
         sendShipmentMailToBuyer(order);
         log.info("Shipment OTP verified successfully for order: {}", orderId);
         return true;
@@ -364,25 +349,9 @@ public class OrderServiceImpl implements OrderService {
         if (!Objects.equals(order.getBuyerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
             throw new UnauthorizedUserException("You are not allowed to deliver this order! only buyer can update the status to Delivered.");
 
-        // Check if OTP exists and is not expired
-        if (order.getDeliveryOtp() == null || order.getDeliveryOtpExpiry() == null) {
-            log.warn("Delivery OTP not found for order: {}", orderId);
-            throw new InvalidOTPException("Delivery OTP not found for order: " + orderId);
-        }
-        if (LocalDateTime.now().isAfter(order.getDeliveryOtpExpiry())) {
-            log.warn("Delivery OTP expired for order: {}", orderId);
-            throw new InvalidOTPException("Delivery OTP expired for order: " + orderId);
-        }
-        // Check if OTP matches
-        if (!order.getDeliveryOtp().equals(otp)) {
-            log.warn("Invalid delivery OTP provided for order: {}", orderId);
-            throw new InvalidOTPException("Invalid delivery OTP provided for order: " + orderId);
-        }
-        // Mark OTP as verified
-        order.setDeliveryOtpVerified(true);
+        order.setDeliveryOtpVerified(verifyOtp(otp,order.getDeliveryOtpExpiry(),order.getDeliveryOtp(),orderId.toHexString(),"Delivery"));
         order = deliverOrder(order);
 
-        // Send regular delivery confirmation to seller
         sendDeliveryMailToSeller(order);
         log.info("Delivery OTP verified successfully for order: {}", orderId);
         return true;
@@ -392,7 +361,26 @@ public class OrderServiceImpl implements OrderService {
     public void acceptOrder(ObjectId id, String txHash) {
         Order order = orderRepo.findById(id).orElseThrow(() -> new OrderNotFoundException(id.toString()));
         order.setTransactionHash(txHash);
+        order.setStatus(OrderStatus.Accepted);
         orderRepo.save(order);
+    }
+
+    private boolean verifyOtp(String otp, LocalDateTime otpExpiredAt, String expectedOtp,String orderId,String otpMode)  {
+        // Check if OTP exists and is not expired
+        if (expectedOtp == null || otpExpiredAt== null) {
+            log.warn("{} OTP not found for order: {}", otpMode, orderId);
+            throw new InvalidOTPException(otpMode+" OTP not found for order: " + orderId);
+        }
+        if (LocalDateTime.now().isAfter(otpExpiredAt)) {
+            log.warn("{} OTP expired for order: {}", otpMode, orderId);
+            throw new InvalidOTPException(otpMode+" OTP expired for order: " + orderId);
+        }
+        // Check if OTP matches
+        if (!expectedOtp.equals(otp)) {
+            log.warn("Invalid {} OTP provided for order: {}", otpMode, orderId);
+            throw new InvalidOTPException("Invalid "+otpMode+" OTP provided for order: " + orderId);
+        }
+        return true;
     }
 
     private void sendDeliveryMailToSeller(Order order) throws MessagingException {

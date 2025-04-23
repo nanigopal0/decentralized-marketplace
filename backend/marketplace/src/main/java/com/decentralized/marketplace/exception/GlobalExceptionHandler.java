@@ -56,25 +56,27 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MailException.class)
     public ResponseEntity<String> handleMailException(MailException e) {
-        log.error("Exception: {}", e.getMessage());
+        log.error("Mail Exception: {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MessagingException.class)
     public ResponseEntity<String> handleMessagingException(MessagingException e) {
-        log.error("Exception: {}", e.getMessage());
+        log.error("MessagingException: {}", e.getMessage());
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
-        log.error("Exception: {}", e.getMessage());
+
+        log.error("Exception: {}", e.getMessage(),e.fillInStackTrace());
         return ResponseEntity.internalServerError().body(e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
-        log.error("Exception: {}", e.getMessage());
+
+        log.error("RuntimeException: {}", e.getMessage(),e.fillInStackTrace());
         return ResponseEntity.internalServerError().body(e.getMessage());
     }
     @ExceptionHandler(InvalidOTPException.class)

@@ -1,12 +1,82 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 
-const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
+const CONTRACT_ADDRESS = "0x6eB31fDAA29735037c03f9f2f9581e01d7a89133";
 
 export default function ConfirmDelivery() {
-  const [orderId, setOrderId] = useState("");
+  const location = useLocation();
+  const { order } = location.state || {};
+  const [otp, setOtp] = useState("");
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
+
+  const generateDeliverOtp = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/order/deliver-otp?orderId=${
+          order.orderId
+        }`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (response.status === 204) {
+        toast.success("OTP sent to your email!");
+        setShowOtpInput(true); // Show OTP input after sending OTP
+      } else {
+        toast.error("Failed to send OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error generating OTP:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/order/verify-deliver-otp?orderId=${
+          order.orderId
+        }&&otp=${otp}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+
+      if (response.status === 204) {
+        toast.success("Delivery confirmed successfully!");
+        setShowOtpInput(false); // Hide OTP input after successful verification
+        setOtp(""); // Clear OTP input
+        setTxStatus("Delivery confirmed successfully!");
+        handleConfirmDelivery(); // Call the function to confirm delivery on the blockchain
+      } else {
+        toast.error("Failed to verify OTP. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleConfirmDelivery = async () => {
     try {
@@ -21,7 +91,7 @@ export default function ConfirmDelivery() {
         signer
       );
 
-      const tx = await contract.confirmDelivery(orderId);
+      const tx = await contract.confirmDelivery(order.orderId);
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
       console.log("Transaction Hash:", tx.hash);
@@ -33,6 +103,16 @@ export default function ConfirmDelivery() {
     }
   };
 
+  if (!order) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-lg font-semibold text-red-500">
+          No order details found.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
       <div className="bg-white shadow-xl rounded-2xl p-8 max-w-xl w-full">
@@ -40,29 +120,64 @@ export default function ConfirmDelivery() {
           Confirm Product Delivery
         </h2>
 
-        <div className="space-y-6">
-          <div className="flex flex-col gap-2">
-            <label className="font-medium">Order ID</label>
-            <input
-              type="text"
-              value={orderId}
-              onChange={(e) => setOrderId(e.target.value)}
-              className="border border-gray-300 rounded-lg p-2"
-              placeholder="Enter your Order ID"
-            />
+        {/* Order Details */}
+        <div className="space-y-4 mb-6">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Order ID:</h3>
+            <p className="text-gray-600">{order.orderId}</p>
           </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Product:</h3>
+            <p className="text-gray-600">{order.productTitle}</p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Price:</h3>
+            <p className="text-gray-600">
+              {order.totalPrice} {order.priceUnit || "ETH"}
+            </p>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">Seller:</h3>
+            <p className="text-gray-600">{order.seller.fullName}</p>
+          </div>
+        </div>
 
-          <button
-            onClick={handleConfirmDelivery}
+        {/* Confirm Delivery Button */}
+        {!showOtpInput && (
+          <Button
+            onClick={generateDeliverOtp}
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
           >
-            Confirm Delivery
-          </button>
+            {loading ? "Sending OTP..." : "Confirm Delivery"}
+          </Button>
+        )}
 
-          {txStatus && (
-            <p className="text-center text-sm text-gray-700 mt-2">{txStatus}</p>
-          )}
-        </div>
+        {/* OTP Verification */}
+        {showOtpInput && (
+          <div className="mt-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Verify OTP</h3>
+            <Input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="mb-4"
+            />
+            <Button
+              onClick={handleVerifyOtp}
+              disabled={loading}
+              className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition-all"
+            >
+              {loading ? "Verifying..." : "Verify OTP"}
+            </Button>
+          </div>
+        )}
+
+        {/* Transaction Status */}
+        {txStatus && (
+          <p className="text-center text-sm text-gray-700 mt-4">{txStatus}</p>
+        )}
       </div>
     </div>
   );
