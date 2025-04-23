@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const statusMap = {
@@ -15,11 +15,11 @@ export default function OrderCard({ order, onClick }) {
   return (
     <Card
       key={order.orderId}
-      className="cursor-pointer pt-0 hover:shadow-lg transition-shadow border border-gray-400 rounded-lg overflow-hidden"
+      className="cursor-pointer pt-0 hover:shadow-2xl shadow-lg transition-shadow border border-gray-400 rounded-lg overflow-hidden"
       onClick={onClick}
     >
       {/* Product Image */}
-      <div className="w-full h-48 sm:h-56 md:h-64 bg-gray-200">
+      <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200">
         <img
           src={order.productMediaUrl || "/placeholder.jpg"}
           alt={order.productTitle}
@@ -29,12 +29,12 @@ export default function OrderCard({ order, onClick }) {
 
       {/* Card Content */}
       <CardContent className="p-4">
-        <CardTitle className="text-lg font-semibold text-gray-800 truncate">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
           {order.productTitle}
-        </CardTitle>
-        <CardDescription className="text-sm text-gray-600 mb-2 truncate">
+        </h2>
+        <p className="text-sm text-gray-600 mb-2 truncate">
           Order ID: {order.orderId}
-        </CardDescription>
+        </p>
         <div className="flex items-center justify-between mt-4">
           {/* Order Status */}
           <Badge

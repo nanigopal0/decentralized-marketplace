@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../layout/Sidebar"; // Correctly importing your manually created Sidebar
+import OrderCard from "../layout/OrderCard";
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
@@ -25,9 +21,9 @@ export default function SellerOrders() {
     const user = JSON.parse(localStorage.getItem("user"));
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/get-by-sellerId?sellerId=${user.id}${
-          status ? `&status=${status}` : ""
-        }`,
+        `${import.meta.env.VITE_BACKEND_URL}/order/get-by-sellerId?sellerId=${
+          user.id
+        }${status ? `&status=${status}` : ""}`,
         {
           method: "GET",
           headers: {
@@ -66,6 +62,12 @@ export default function SellerOrders() {
     fetchOrders(status);
   }, [location.search]);
 
+  const handleOnClick = (order) => {
+    navigate(`/order/details/${order.orderId}`, {
+      state: { order },
+    });
+  };
+
   return (
     <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
       {/* Sidebar */}
@@ -74,7 +76,7 @@ export default function SellerOrders() {
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-800">
+          <h2 className="text-2xl font-bold mb-8  text-gray-800">
             Manage Orders
           </h2>
 
@@ -157,57 +159,15 @@ export default function SellerOrders() {
           ) : filteredOrders.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredOrders.map((order) => (
-                <Card
+                <OrderCard
                   key={order.orderId}
+                  order={order}
                   onClick={() =>
                     navigate(`/order/details/${order.orderId}`, {
                       state: { order },
                     })
                   }
-                  className="cursor-pointer hover:shadow-lg transition border-gray-300 "
-                >
-                  <CardHeader>
-                    <img
-                      src={order.productMediaUrl || "/placeholder.jpg"}
-                      alt={order.productTitle}
-                      className="w-full h-40 object-cover rounded-lg"
-                    />
-                  </CardHeader>
-                  <CardContent>
-                    <CardTitle className="text-lg font-semibold text-gray-800">
-                      {order.productTitle}
-                    </CardTitle>
-                    <p className="text-sm text-gray-600 mb-2">
-                      {order.description}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-medium">Order ID:</span>{" "}
-                      {order.orderId}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-medium">Buyer mail:</span>{" "}
-                      {order.buyer.email}
-                    </p>
-                    <Separator className="my-2" />
-                    <p className="text-lg font-bold text-gray-800">
-                      Price: {order.totalPrice} ETH
-                    </p>
-                    <Badge
-                      variant={
-                        order.orderStatus === "Shipped"
-                          ? "success"
-                          : order.orderStatus === "Pending"
-                          ? "warning"
-                          : order.orderStatus === "Delivered"
-                          ? "success"
-                          : "default"
-                      }
-                      className="mt-2"
-                    >
-                      {order.orderStatus}
-                    </Badge>
-                  </CardContent>
-                </Card>
+                />
               ))}
             </div>
           ) : (

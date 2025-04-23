@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
-import { Loader2 } from "lucide-react"; // Import a spinner icon for loading
+import { Loader2 } from "lucide-react";
 import Sidebar from "../layout/Sidebar";
 
 export default function OrderDetails() {
@@ -15,12 +15,12 @@ export default function OrderDetails() {
   const { order } = location.state || {};
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState("");
-  const [isGeneratingOtp, setIsGeneratingOtp] = useState(false); // Loading state for generating OTP
-  const [isVerifying, setIsVerifying] = useState(false); // Loading state for verifying OTP
+  const [isGeneratingOtp, setIsGeneratingOtp] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const navigate = useNavigate();
 
   const generateShipmentOtp = async () => {
-    setIsGeneratingOtp(true); // Start loading
+    setIsGeneratingOtp(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/order/shipment-otp?orderId=${order.orderId}`,
@@ -34,7 +34,7 @@ export default function OrderDetails() {
       );
       if (response.status === 204) {
         toast.success("OTP sent to your email!");
-        setShowOtpInput(true); // Show OTP input after sending OTP
+        setShowOtpInput(true);
       } else {
         toast.error("Failed to send OTP. Please try again.");
       }
@@ -42,12 +42,12 @@ export default function OrderDetails() {
       console.error("Error generating OTP:", error);
       toast.error("An error occurred. Please try again.");
     } finally {
-      setIsGeneratingOtp(false); // Stop loading
+      setIsGeneratingOtp(false);
     }
   };
 
   const handleVerifyShipmentOtp = async () => {
-    setIsVerifying(true); // Start loading
+    setIsVerifying(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/order/verify-shipment-otp?orderId=${order.orderId}&&otp=${otp}`,
@@ -62,8 +62,8 @@ export default function OrderDetails() {
 
       if (response.status === 204) {
         toast.success("Order shipped successfully!");
-        setShowOtpInput(false); // Hide OTP input after successful verification
-        navigate("/orders"); // Redirect to orders page
+        setShowOtpInput(false);
+        navigate("/orders");
       } else {
         toast.error("Failed to verify OTP. Please try again.");
       }
@@ -71,7 +71,7 @@ export default function OrderDetails() {
       console.error("Error verifying OTP:", error);
       toast.error("An error occurred. Please try again.");
     } finally {
-      setIsVerifying(false); // Stop loading
+      setIsVerifying(false);
     }
   };
 
@@ -84,21 +84,18 @@ export default function OrderDetails() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100 ">
-      <Sidebar/>
-      <div className="flex-1 ">
-      <div className="max-w-5xl mx-auto">
-        {/* <Card className="shadow-lg"> */}
-          {/* <CardHeader> */}
-            <CardTitle className="text-3xl font-bold text-gray-800">
-              Order Details
-            </CardTitle>
-          {/* </CardHeader> */}
-          <CardContent className="space-y-8 p-6">
+    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
+      <Sidebar />
+      <div className="flex-1">
+        <div className="max-w-5xl mx-auto p-4 sm:p-6">
+          <CardTitle className="text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
+            Order Details
+          </CardTitle>
+          <CardContent className="space-y-8">
             {/* Product and Buyer Details */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Product Details */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Product Details
                 </h3>
@@ -117,12 +114,12 @@ export default function OrderDetails() {
               </div>
 
               {/* Buyer Details */}
-              <div className="bg-white p-6 rounded-lg shadow-md">
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Buyer Details
                 </h3>
-                <div className="flex items-center gap-4">
-                  <Avatar>
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <Avatar className="w-24 h-24">
                     <AvatarImage
                       src={order.buyer.avatar || "/placeholder-avatar.jpg"}
                       alt={order.buyer.fullName}
@@ -133,7 +130,7 @@ export default function OrderDetails() {
                         : "?"}
                     </AvatarFallback>
                   </Avatar>
-                  <div>
+                  <div className="text-center sm:text-left">
                     <p className="text-gray-600">
                       <span className="font-medium">Name:</span>{" "}
                       {order.buyer.fullName}
@@ -154,47 +151,61 @@ export default function OrderDetails() {
             <Separator />
 
             {/* Order Details */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition">
+              <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
+                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full"></span>
                 Order Details
               </h3>
-              <p className="text-gray-600">
-                <span className="font-medium">Order ID:</span> {order.orderId}
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Price per product:</span>{" "}
-                {order.pricePerItem} ETH
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Quantity:</span> {order.quantity}
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Total Price:</span>{" "}
-                {order.totalPrice} ETH
-              </p>
-              <p className="text-gray-600 flex items-center gap-2">
-                <span className="font-medium">Status:</span>{" "}
-                <Badge
-                  variant={
-                    order.orderStatus === "Shipped"
-                      ? "success"
-                      : order.orderStatus === "Pending"
-                      ? "warning"
-                      : "default"
-                  }
-                >
-                  {order.orderStatus}
-                </Badge>
-              </p>
-              <p className="text-gray-600">
-                <span className="font-medium">Date:</span>{" "}
-                {new Date(order.orderedAt).toLocaleDateString()}
-              </p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Order ID:</p>
+                  <p className="text-gray-800 font-semibold">{order.orderId}</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Price per Product:</p>
+                  <p className="text-gray-800 font-semibold">
+                    {order.pricePerItem} ETH
+                  </p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Quantity:</p>
+                  <p className="text-gray-800 font-semibold">
+                    {order.quantity}
+                  </p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Total Price:</p>
+                  <p className="text-gray-800 font-bold text-lg">
+                    {order.totalPrice} ETH
+                  </p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Status:</p>
+                  <Badge
+                    variant={
+                      order.orderStatus === "Shipped"
+                        ? "success"
+                        : order.orderStatus === "Pending"
+                        ? "warning"
+                        : "default"
+                    }
+                    className="px-3 py-1 rounded-full text-sm"
+                  >
+                    {order.orderStatus}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-600 font-medium">Date:</p>
+                  <p className="text-gray-800 font-semibold">
+                    {new Date(order.orderedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Confirm Shipment Button */}
-                        {order.orderStatus === "Accepted" && (
-              <div className="bg-white p-6 rounded-lg shadow-md">
+            {order.orderStatus === "Accepted" && (
+              <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">
                   Confirm Shipment
                 </h3>
@@ -204,7 +215,9 @@ export default function OrderDetails() {
                     disabled={isGeneratingOtp}
                     className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
                   >
-                    {isGeneratingOtp && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isGeneratingOtp && (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    )}
                     {isGeneratingOtp ? "Generating OTP..." : "Confirm Shipment"}
                   </Button>
                 ) : (
@@ -221,7 +234,9 @@ export default function OrderDetails() {
                       disabled={isVerifying}
                       className="bg-blue-600 text-white hover:bg-blue-700 flex items-center gap-2"
                     >
-                      {isVerifying && <Loader2 className="w-4 h-4 animate-spin" />}
+                      {isVerifying && (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      )}
                       {isVerifying ? "Verifying..." : "Verify OTP"}
                     </Button>
                   </div>
@@ -229,8 +244,7 @@ export default function OrderDetails() {
               </div>
             )}
           </CardContent>
-        {/* </Card> */}
-      </div>
+        </div>
       </div>
     </div>
   );
