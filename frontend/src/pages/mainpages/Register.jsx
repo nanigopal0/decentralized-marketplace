@@ -26,32 +26,33 @@ export default function Register({ className, ...props }) {
       setError("Please select a role."); // Show error if no role is selected
       return;
     }
-    const formdata = new FormData();
-    formdata.append("fullName", e.target.name.value);
-    formdata.append("email", e.target.email.value);
-    formdata.append("password", e.target.password.value);
-    formdata.append("role", role); // Use the selected role
-    formdata.append("ethereumPublicKey", e.target["ethereumPublicKey"].value);
-    registerUser(formdata);
+   
+    const payload = {
+      fullName: e.target.name.value,
+      email: e.target.email.value,
+      password: e.target.password.value,
+      role: role, // Use the selected role
+      ethereumPublicKey: e.target["ethereumPublicKey"].value,
+    };
+    registerUser(payload);
   };
 
-  const registerUser = async (formdata) => {
+  const registerUser = async (payload) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/public/register`,
+        `${import.meta.env.VITE_BACKEND_URL}/public/signup`,
         {
           method: "POST",
-          body: formdata,
+          body: JSON.stringify(payload),
           headers: {
             "Content-Type": "application/json",
           },
           credentials: "include",
         }
       );
-      const data = await response.json();
-      console.log(data);
-      if (response.ok) {
-        // Handle successful registration (e.g., redirect to login page)
+      if (response.status === 201) {
+        const data = await response.text();
+        console.log(data);
         toast.success("Registration successful! Please log in.");
       } else {
         // Handle error (e.g., show a notification)

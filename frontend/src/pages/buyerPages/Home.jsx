@@ -5,6 +5,7 @@ import { getAllProduct } from "../../../store/slices/productSlice";
 import { Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../layout/Sidebar";
+import ProductCard from "../layout/ProductCard";
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -42,35 +43,13 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex-1 p-6">
-       
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {products.map((product) => (
-            <Card
+            <ProductCard
               key={product.productId}
-              className="rounded-lg shadow-lg hover:shadow-2xl transition border p-0 border-gray-400"
+              product={product}
               onClick={() => handleCardClick(product)}
-            >
-              {/* Product Image */}
-              <img
-                src={product.mediaUrl || "/placeholder.jpg"}
-                alt={product.name}
-                className="rounded-t-lg w-full h-56 object-cover"
-              />
-
-              {/* Product Details */}
-              <CardContent className="p-4">
-                <h2 className="text-xl font-semibold mb-1 text-gray-800">
-                  {product.name}
-                </h2>
-                <p className="text-gray-600 text-sm mb-2">
-                  {product.description}
-                </p>
-                <p className="text-lg font-bold text-emerald-600">
-                  {product.price} {product.priceUnit}
-                </p>
-              </CardContent>
-            </Card>
+            />
           ))}
         </div>
       </div>

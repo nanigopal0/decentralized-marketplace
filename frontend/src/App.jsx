@@ -31,6 +31,7 @@ import OrderDetails from "./pages/sellerPages/OrderDetails";
 import ProductDetails from "./pages/sellerPages/ProductDetails";
 import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
 import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
+import SearchResults from "./pages/mainpages/SearchResults";
 
 function App() {
   const dispatch = useDispatch();
@@ -83,7 +84,7 @@ function App() {
             )}
 
             <Route path="/user/update/:id" element={<UpdateUser />} />
-
+            <Route path="/search" element={<SearchResults />}/>
             <Route path="*" element={<Navigate to="/home" />} />
             <Route path="/profile" element={<ProfileView />} />
           </>
