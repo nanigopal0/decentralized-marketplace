@@ -22,9 +22,9 @@ export default function Payment() {
             "High-quality over-ear headphones with noise cancellation.",
           image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
         },
-        productId: "1001",
-        orderId: "order-033",
-        amount: "0.003",
+        productId: "apple100",
+        orderId: "order-170",
+        amount: "0.02",
         quantity: 1,
       };
       setProduct(res.product);
