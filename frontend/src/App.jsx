@@ -32,9 +32,9 @@ function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    dispatch(pingServer());
-  }, [dispatch]); //Make it uncomment while push
+  // useEffect(() => {
+  //   dispatch(pingServer());
+  // }, [dispatch]); //Make it uncomment while push
 
   return (
     <>
