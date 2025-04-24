@@ -27,7 +27,7 @@ import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
 import ProfileView from "./pages/buyerPages/ProfileView";
 import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
-import OrderDetails from "./pages/buyerPages/OrderDetails";
+import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
 import CancelOrder from "./pages/buyerPages/cancelOrder";
 import TermsOfUse from "./pages/layout/Termsofuse";
 import PrivacyPolicy from "./pages/layout/PrivacyPolicy";
@@ -39,9 +39,9 @@ function App() {
   const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
   // console.log(isSeller);
 
-  useEffect(() => {
-    dispatch(pingServer());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(pingServer());
+  // }, [dispatch]);
 
   return (
     <>

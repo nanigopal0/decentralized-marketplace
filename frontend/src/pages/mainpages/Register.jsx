@@ -171,7 +171,7 @@ export default function Register({ className, ...props }) {
               </form>
               <div className="bg-muted relative hidden md:block">
                 <img
-                  src="/vite.svg"
+                  src="./login.jpg"
                   alt="Image"
                   className="absolute inset-0 h-full w-full dark:brightness-[0.2] dark:grayscale"
                 />
