@@ -1,6 +1,7 @@
 package com.decentralized.marketplace.service;
 
 import com.decentralized.marketplace.dto.ProductDTO;
+import com.decentralized.marketplace.dto.UpdateProduct;
 import com.decentralized.marketplace.entity.Product;
 import com.decentralized.marketplace.entity.ProductType;
 import org.bson.types.ObjectId;
@@ -28,4 +29,6 @@ public interface ProductService {
     List<ProductDTO> getAllProductsByMinPrice(Double lowerPrice);
 
     List<ProductDTO> getAllProductsWithinRangePrice(Double lowerPrice, Double upperPrice);
+
+    ProductDTO updateProduct(UpdateProduct product);
 }

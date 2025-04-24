@@ -4,7 +4,7 @@ import SmartMarketplace from "../contracts/SmartMarketplace.json";
 
 const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
 
-export default function OrderDetails() {
+export default function BlockchainOrderDetails() {
   const [orderId, setOrderId] = useState("");
   const [orderInfo, setOrderInfo] = useState(null);
   const [error, setError] = useState("");

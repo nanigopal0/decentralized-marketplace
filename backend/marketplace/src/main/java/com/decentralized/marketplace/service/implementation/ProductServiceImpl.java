@@ -2,6 +2,7 @@ package com.decentralized.marketplace.service.implementation;
 
 import com.decentralized.marketplace.contract.service.ContractService;
 import com.decentralized.marketplace.dto.ProductDTO;
+import com.decentralized.marketplace.dto.UpdateProduct;
 import com.decentralized.marketplace.entity.Product;
 import com.decentralized.marketplace.entity.ProductType;
 import com.decentralized.marketplace.exception.ProductNotFoundException;
@@ -44,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
                 .build();
         Product saved = productRepo.save(product);
         //add product to blockchain
-        contractService.addProductToBlockchain(product.getId().toHexString(),product.getPrice().intValue(),product.getType());
+//        contractService.addProductToBlockchain(product.getId().toHexString(),product.getPrice().intValue(),product.getType());
 
 
         return convertProductToProductDTO(saved);
@@ -115,5 +116,17 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDTO> getAllProductsWithinRangePrice(Double lowerPrice, Double upperPrice) {
         return productRepo.findProductsByPriceBetween(lowerPrice, upperPrice).stream().map(this::convertProductToProductDTO).toList();
+    }
+
+    @Override
+    public ProductDTO updateProduct(UpdateProduct product) {
+        Product product1 = productRepo.findById(new ObjectId(product.getProductId())).orElseThrow(() -> new ProductNotFoundException(product.getProductId()));
+        product1.setPrice(product.getPrice());
+        product1.setDescription(product.getDescription());
+        product1.setStock(product.getStock());
+        product1.setMediaUrl(product.getMediaUrl());
+        product1.setTitle(product.getTitle());
+        Product saved = productRepo.save(product1);
+        return convertProductToProductDTO(saved);
     }
 }

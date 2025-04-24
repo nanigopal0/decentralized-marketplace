@@ -1,63 +1,111 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { User } from "lucide-react";
+import { Link } from "react-router-dom";
+import Sidebar from "../layout/Sidebar";
 
 export default function ProfileView() {
-  const [profileData, setProfileData] = useState({
-    fullName: "John Doe",
-    email: "johndoe@example.com",
-    role: "Buyer", // or 'Seller'
-    walletAddress: "0x12345abcde12345abcde12345abcde12345",
-  });
+  const [profileData, setProfileData] = useState({});
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  // Fetch profile data from backend (simulated)
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      try {
-        // Example API endpoint: replace with actual API call
-        const response = await axios.get("/api/user/profile");
-        // setProfileData(response.data); // Assuming the backend returns data like demo data
-        setProfileData(profileData); // Assuming the backend returns data like demo data
-      } catch (err) {
-        console.error("Error fetching profile data", err);
+  const fetchProfileData = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/user/get?id=${user.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch profile data.");
       }
-    };
+      const data = await response.json();
+      setProfileData(data);
+    } catch (err) {
+      console.error("Error fetching profile data", err);
+    }
+  };
 
+  useEffect(() => {
     fetchProfileData();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, []);
 
   return (
-    <div className="profile-container p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">Your Profile</h1>
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex">
+      <Sidebar />
+      <div className="flex items-center justify-center flex-1 p-6">
+        <Card className="w-full max-w-3xl shadow-lg border border-gray-300 bg-white rounded-lg">
+          <CardContent className="p-6 md:p-10">
+            <div className="text-center">
+              {/* Profile Image */}
+              {profileData.avatar ? (
+                <img
+                  src={profileData.avatar}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full border-2 border-gray-300 mx-auto mb-4 shadow-md"
+                />
+              ) : (
+                <User className="w-24 h-24 rounded-full mx-auto border-2 border-gray-300 mb-4 shadow-md text-gray-500" />
+              )}
+              <h1 className="text-3xl font-bold text-gray-800">
+                {profileData.fullName || "Full Name"}
+              </h1>
+              <p className="text-gray-600">{profileData.email || "Email"}</p>
+            </div>
 
-      <div className="profile-info">
-        <div className="flex justify-between mb-4">
-          <div className="flex-1">
-            <label className="block font-medium">Full Name</label>
-            <p className="text-gray-700">{profileData.fullName}</p>
-          </div>
-          <div className="flex-1">
-            <label className="block font-medium">Email</label>
-            <p className="text-gray-700">{profileData.email}</p>
-          </div>
-        </div>
+            <Separator className="my-6" />
 
-        <div className="flex justify-between mb-4">
-          <div className="flex-1">
-            <label className="block font-medium">Role</label>
-            <p className="text-gray-700">{profileData.role}</p>
-          </div>
-          <div className="flex-1">
-            <label className="block font-medium">Wallet Address</label>
-            <p className="text-gray-700">{profileData.walletAddress}</p>
-          </div>
-        </div>
-      </div>
+            {/* Profile Information */}
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block font-medium text-gray-700">
+                    Role
+                  </label>
+                  <p className="text-gray-800">{profileData.role || "N/A"}</p>
+                </div>
+                <div>
+                  <label className="block font-medium text-gray-700">
+                    Wallet Address
+                  </label>
+                  <p className="text-gray-800 break-all">
+                    {profileData.walletAddress || "N/A"}
+                  </p>
+                </div>
+              </div>
 
-      {/* Edit Profile Button (For future functionality if needed) */}
-      <div className="mt-6 text-center">
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-          Edit Profile
-        </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block font-medium text-gray-700">
+                    Created At
+                  </label>
+                  <p className="text-gray-800">
+                    {profileData.createdAt
+                      ? new Date(profileData.createdAt).toLocaleDateString()
+                      : "N/A"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Edit Profile Button */}
+            <div className="mt-6 text-center">
+              <Link
+                to={`/user/update/${user.id}`}
+                className="bg-blue-600 text-white hover:bg-blue-700 px-6 py-2 rounded-md shadow-md"
+              >
+                Edit Profile
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

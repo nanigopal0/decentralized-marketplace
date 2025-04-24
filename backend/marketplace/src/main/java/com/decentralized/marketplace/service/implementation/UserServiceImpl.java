@@ -1,15 +1,12 @@
 package com.decentralized.marketplace.service.implementation;
 
-import com.decentralized.marketplace.dto.UpdateUserDTO;
-import com.decentralized.marketplace.dto.UserLoginRequestDTO;
-import com.decentralized.marketplace.dto.UserResponseDTO;
-import com.decentralized.marketplace.dto.UserSignupRequestDTO;
+import com.decentralized.marketplace.dto.*;
 import com.decentralized.marketplace.entity.*;
 import com.decentralized.marketplace.exception.UnauthorizedUserException;
 import com.decentralized.marketplace.exception.UserNotFoundException;
 import com.decentralized.marketplace.jwt.JwtService;
-import com.decentralized.marketplace.repository.BuyerRepo;
-import com.decentralized.marketplace.repository.SellerRepo;
+import com.decentralized.marketplace.repository.OrderRepo;
+import com.decentralized.marketplace.repository.ProductRepo;
 import com.decentralized.marketplace.repository.UserRepo;
 import com.decentralized.marketplace.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -32,19 +30,23 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final BuyerRepo buyerRepo;
-    private final SellerRepo sellerRepo;
+    //    private final BuyerRepo buyerRepo;
+//    private final SellerRepo sellerRepo;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
+    private final ProductRepo productRepo;
+    private final OrderRepo orderRepo;
 
-    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, BuyerRepo buyerRepo, SellerRepo sellerRepo, JwtService jwtService, HttpServletResponse httpServletResponse) {
+    public UserServiceImpl(UserRepo userRepo, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, HttpServletResponse httpServletResponse, ProductRepo productRepo, OrderRepo orderRepo) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.buyerRepo = buyerRepo;
-        this.sellerRepo = sellerRepo;
+//        this.buyerRepo = buyerRepo;
+//        this.sellerRepo = sellerRepo;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
+        this.productRepo = productRepo;
+        this.orderRepo = orderRepo;
     }
 
     @Override
@@ -58,10 +60,10 @@ public class UserServiceImpl implements UserService {
                 .role(userSignupRequestDTO.getRole())
                 .build();
         User saved = userRepo.save(user);
-        if (userSignupRequestDTO.getRole() == Role.SELLER)
-            sellerRepo.save(Seller.builder().userId(saved.getId()).build());
-        else
-            buyerRepo.save(Buyer.builder().userId(saved.getId()).build());
+//        if (userSignupRequestDTO.getRole() == Role.SELLER)
+//            sellerRepo.save(Seller.builder().userId(saved.getId()).build());
+//        else
+//            buyerRepo.save(Buyer.builder().userId(saved.getId()).build());
     }
 
     @Override
@@ -73,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
             CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            generateJwtTokenAndSaveToCookie(userDetails.getUsername(),userDetails.getUserFullName(),userDetails.getUserId(),userDetails.getRole());
+            generateJwtTokenAndSaveToCookie(userDetails.getUsername(), userDetails.getUserFullName(), userDetails.getUserId(), userDetails.getRole());
 
             UserResponseDTO responseDTO = UserResponseDTO.builder()
                     .id(userDetails.getUserId())
@@ -101,8 +103,27 @@ public class UserServiceImpl implements UserService {
         httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
-    private void  generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
-        String token = jwtService.generateToken(fullName,id,role.name(),email);
+    @Override
+    public SellerDashboardInfoDTO getSellerDashboardInfo(ObjectId userId) {
+        Integer totalProducts = productRepo.countProductBySellerId(userId);
+        List<Order> orders = orderRepo.findOrderBySellerId(userId);
+        List<Order> deliveredOrders = orders.stream().filter((order -> order.getStatus() == OrderStatus.Delivered)).toList();
+        double totalEarnings = deliveredOrders.stream().mapToDouble(Order::getTotalPrice).sum();
+        int cancelledOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Cancelled).toList().size();
+        int pendingOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Pending).toList().size();
+        return SellerDashboardInfoDTO.builder()
+                .totalDeliveredOrders(deliveredOrders.size())
+                .totalCancelledOrders(cancelledOrders)
+                .totalPendingOrders(pendingOrders)
+                .totalProducts(totalProducts)
+                .sellerId(userId.toHexString())
+                .totalOrders(orders.size())
+                .totalEarnings(totalEarnings)
+                .build();
+    }
+
+    private void generateJwtTokenAndSaveToCookie(String email, String fullName, String id, Role role) {
+        String token = jwtService.generateToken(fullName, id, role.name(), email);
 
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
                 .httpOnly(true)
@@ -131,20 +152,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(ObjectId userId) {
-        User user =userRepo.findById(userId).orElseThrow(UserNotFoundException::new);
-        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+        User user = userRepo.findById(userId).orElseThrow(UserNotFoundException::new);
+        if (!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()), user.getId()))
             throw new UnauthorizedUserException("Unauthorised user!");
     }
 
     @Override
-    public UserResponseDTO updateUser(UpdateUserDTO update,ObjectId userId) {
+    public UserResponseDTO updateUser(UpdateUserDTO update, ObjectId userId) {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId.toHexString()));
-        if(!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()),user.getId()))
+        if (!Objects.equals(new ObjectId(getCustomUserDetailsFromAuthentication().getUserId()), user.getId()))
             throw new UnauthorizedUserException("Unauthorised user!");
-        user.setFullName(update.getFullName());
-        user.setEmail(update.getEmail());
-        user.setAvatar(update.getAvatar());
-        User saved =userRepo.save(user);
+        if (update.getFullName() != null && !update.getFullName().isBlank() && !update.getFullName().equals(user.getFullName()))
+            user.setFullName(update.getFullName());
+        if (update.getEmail() != null)
+            user.setEmail(update.getEmail());
+        if (update.getAvatar() != null && !update.getAvatar().isBlank() && !update.getAvatar().equals(user.getAvatar()))
+            user.setAvatar(update.getAvatar());
+        if (update.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(update.getPassword()));
+        }
+        User saved = userRepo.save(user);
         return UserResponseDTO.builder()
                 .createdAt(saved.getCreatedAt())
                 .email(saved.getEmail())
@@ -155,7 +182,6 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId().toHexString())
                 .build();
     }
-
 
 
     public static CustomUserDetails getCustomUserDetailsFromAuthentication() {

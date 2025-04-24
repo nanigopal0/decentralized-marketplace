@@ -1,5 +1,6 @@
 package com.decentralized.marketplace.controller;
 
+import com.decentralized.marketplace.dto.SellerDashboardInfoDTO;
 import com.decentralized.marketplace.dto.UpdateUserDTO;
 import com.decentralized.marketplace.dto.UserResponseDTO;
 import com.decentralized.marketplace.service.UserService;
@@ -26,7 +27,7 @@ public class UserController {
 
     @PutMapping("update")
     public ResponseEntity<UserResponseDTO> updateUser(@RequestBody UpdateUserDTO updateUserDTO, @RequestParam(value = "userId") ObjectId userId) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(userService.updateUser(updateUserDTO, userId));
+        return new ResponseEntity<>(userService.updateUser(updateUserDTO, userId), HttpStatus.OK);
     }
 
     @DeleteMapping("delete")
@@ -35,7 +36,7 @@ public class UserController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping
+    @GetMapping("logout")
     public ResponseEntity<String> logout() {
         userService.logout();
         return ResponseEntity.accepted().body("Logout successful!");
@@ -44,5 +45,11 @@ public class UserController {
     @GetMapping("ping")
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("Ping successful!");
+    }
+
+    @GetMapping("seller-info")
+    public ResponseEntity<SellerDashboardInfoDTO> getSellerInfoInDashboard(@RequestParam(value = "userId") ObjectId userId) {
+        return ResponseEntity.ok(userService.getSellerDashboardInfo(userId));
+
     }
 }

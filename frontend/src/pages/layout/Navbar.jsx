@@ -1,112 +1,57 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FaUserCircle } from "react-icons/fa";
-import { useNavigate, Link } from "react-router-dom";
-import { FaMoon, FaSun } from "react-icons/fa";
-import axios from "axios";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useSelector } from "react-redux";
 
 export default function Navbar() {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
-  });
-
-  const dropdownRef = useRef(null);
+  const { isAuthenticated } = useSelector((state) => state.user);
+  const [searchQuery, setSearchQuery] = useState(""); // State to store the search query
   const navigate = useNavigate();
 
-  // Toggle dark mode class on root HTML element
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (darkMode) {
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [darkMode]);
-
-  const handleProfileClick = () => {
-    setShowDropdown((prev) => !prev);
-  };
-
-  const handleOutsideClick = (e) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-      setShowDropdown(false);
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${searchQuery}`); // Redirect to the search page with the query
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await axios.post("/api/logout");
-      navigate("/login");
-    } catch (err) {
-      console.error("Logout failed", err);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, []);
 
   return (
-    <nav className="bg-white dark:bg-gray-900 shadow-md py-4 px-6 flex items-center justify-between">
-      <Link
-        to="/"
-        className="text-2xl font-bold text-blue-600 dark:text-white cursor-pointer"
-      >
+    <nav className="shadow-md border border-b-gray-400 py-4 px-6 flex items-center justify-between bg-gradient-to-r from-yellow-100 to-pink-100">
+      <Link to="/" className="text-2xl font-bold cursor-pointer">
         SmartMarket
       </Link>
 
-      <div className="flex items-center space-x-4 relative">
-        <input
-          type="text"
-          placeholder="Search..."
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-md text-sm"
-        />
-        <button className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm hover:bg-blue-700">
-          Search
-        </button>
-
-        {/* Dark mode toggle button */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="text-xl text-gray-600 dark:text-white"
-          title="Toggle Dark Mode"
-        >
-          {darkMode ? <FaSun /> : <FaMoon />}
-        </button>
-
-        <div className="relative">
-          <button
-            onClick={handleProfileClick}
-            className="text-2xl text-gray-600 dark:text-white"
+      {/* Search Bar */}
+      {isAuthenticated && (
+        <div className="flex items-center space-x-4">
+          <Input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} // Update the search query
+            className="w-64 placeholder:text-gray-600 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <Button
+            variant="secondary"
+            className="text-white bg-blue-700 hover:bg-blue-500"
+            onClick={handleSearch} // Trigger the search
           >
-            <FaUserCircle />
-          </button>
-
-          {showDropdown && (
-            <div
-              ref={dropdownRef}
-              className="absolute top-10 right-0 bg-white dark:bg-gray-800 shadow-lg rounded-md w-40 py-2 z-50 transition-all duration-300 ease-in-out"
-            >
-              <Link
-                to="/profile"
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-gray-800 dark:text-white"
-              >
-                View Profile
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-sm text-red-500"
-              >
-                Logout
-              </button>
-            </div>
-          )}
+            Search
+          </Button>
         </div>
+      )}
+
+      <div className="relative">
+        {!isAuthenticated && (
+          <div className="flex items-center space-x-4">
+            <Link
+              to="/register"
+              className="bg-amber-800 text-white px-3 py-2 rounded-md text-sm font-semibold hover:bg-amber-700 transition"
+            >
+              Register
+            </Link>
+          </div>
+        )}
       </div>
     </nav>
   );

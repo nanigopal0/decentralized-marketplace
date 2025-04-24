@@ -35,10 +35,13 @@ import SecurityPolicy from "./pages/layout/SecurityPolicy";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
+  // console.log(isSeller);
 
-  // useEffect(() => {
-  //   dispatch(pingServer());
-  // }, [dispatch]); //Make it uncomment while push
+  useEffect(() => {
+    dispatch(pingServer());
+  }, [dispatch]);
 
   return (
     <>
@@ -46,25 +49,47 @@ function App() {
       <Routes>
         {isAuthenticated ? (
           <>
-            <Route path="/home" element={<Home />} />
-            <Route path="/seller/dashboard" element={<SellerDashboard />} />
-            <Route path="/payment" element={<Payment />} />
-            <Route path="/product/:id" element={<SingleProduct />} />
-            <Route path="/product/add" element={<AddProduct />} />
-            <Route path="/product/all" element={<AllProduct />} />
-            <Route path="/order/product/:id" element={<PlaceOrder />} />
-            <Route path="/orders/all" element={<SellerOrders />} />
-            <Route path="/product/update/:id" element={<UpdateProduct />} />
+            {isSeller ? (
+              <>
+                <Route path="/home" element={<Navigate to={"/dashboard"} />} />
+                <Route path="/products" element={<AllProduct />} />
+                <Route path="/dashboard" element={<SellerDashboard />} />
+                <Route path="/product/add" element={<AddProduct />} />
+                <Route path="/product/update/:id" element={<UpdateProduct />} />
+                <Route path="/orders" element={<SellerOrders />} />
+                <Route path="/order/details/:id" element={<OrderDetails />} />
+                <Route
+                  path="/product/details/:id"
+                  element={<ProductDetails />}
+                />
+              </>
+            ) : (
+              <>
+                <Route path="/home" element={<Home />} />
+                <Route path="/payment" element={<Payment />} />
+                <Route path="/product/:id" element={<SingleProduct />} />
+                <Route path="/order/product/:id" element={<PlaceOrder />} />
+                <Route path="/myorders" element={<MyOrders />} />
+                <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
+                <Route
+                  path="/blockchain/orderDetails"
+                  element={<BlockchainOrderDetails />}
+                />
+                <Route
+                  path="/buyer/order-details/:id"
+                  element={<BuyerOrderDetails />}
+                />
+              </>
+            )}
+
             <Route path="/user/update/:id" element={<UpdateUser />} />
-            <Route path="/myorders/all" element={<MyOrders />} />
-            <Route path="/profile" element={<ProfileView />} />
-            <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
-            <Route path="/orderDetails" element={<OrderDetails />} />
+            <Route path="/search" element={<SearchResults />} />
             <Route path="/cancelOrder" element={<CancelOrder />} />
             <Route path="/termsOfUse" element={<TermsOfUse />} />
             <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
             <Route path="/securityPolicy" element={<SecurityPolicy />} />
             <Route path="*" element={<Navigate to="/home" />} />
+            <Route path="/profile" element={<ProfileView />} />
           </>
         ) : (
           <>
@@ -75,7 +100,7 @@ function App() {
           </>
         )}
       </Routes>
-      <ToastContainer position="bottom-right" theme="light" />
+      <ToastContainer />
       <Footer />
     </>
   );

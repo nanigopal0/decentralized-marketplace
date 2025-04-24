@@ -1,8 +1,11 @@
 package com.decentralized.marketplace.controller;
 
 
+import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
+import com.decentralized.marketplace.dto.SellerOrderDTO;
+import com.decentralized.marketplace.entity.OrderStatus;
 import com.decentralized.marketplace.service.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,51 +28,54 @@ public class OrderController {
 
     @PostMapping("create")
     public ResponseEntity<OrderResponseDTO> createOrder(@RequestBody OrderRequestDTO order) throws MessagingException {
-
         return ResponseEntity.accepted().body(orderService.createOrder(order));
     }
 
 
     @GetMapping("get-by-sellerId")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId) {
-
-        return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId));
-
+    public ResponseEntity<List<SellerOrderDTO>> getAllOrdersBySellerId(@RequestParam(value = "sellerId") ObjectId sellerId, @RequestParam(value = "status", required = false) OrderStatus status,
+                                                                       @RequestParam(value = "sortBy", defaultValue = "orderedAt", required = false) String sortBy) {
+        return ResponseEntity.ok(orderService.getAllOrderBySellerId(sellerId, sortBy,status));
     }
 
     @GetMapping("get-by-buyerId")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByBuyerId(@RequestParam(value = "buyerId") ObjectId buyerId) {
-
-        return ResponseEntity.ok(orderService.getAllOrderByBuyerId(buyerId));
-
+    public ResponseEntity<List<BuyerOrderDTO>> getAllOrdersByBuyerId(@RequestParam(value = "buyerId") ObjectId buyerId,
+                                                                     @RequestParam(value = "sortBy", defaultValue = "orderedAt", required = false) String sortBy) {
+        return ResponseEntity.ok(orderService.getAllOrderByBuyerId(buyerId, sortBy));
     }
 
 
     @GetMapping("get-by-productId")
-    public ResponseEntity<List<OrderResponseDTO>> getAllOrdersByProductId(@RequestParam(value = "ProductId") ObjectId ProductId) {
-
+    public ResponseEntity<List<SellerOrderDTO>> getAllOrdersByProductId(@RequestParam(value = "productId") ObjectId ProductId) {
         return ResponseEntity.ok(orderService.getAllOrderByProductId(ProductId));
-
     }
 
     @GetMapping("get")
     public ResponseEntity<OrderResponseDTO> getOrder(@RequestParam(value = "orderId") ObjectId id) {
-
         return ResponseEntity.ok(orderService.getOrderById(id));
-
     }
 
-    @PutMapping("cancel")
+    @PutMapping("cancel-order")
     public ResponseEntity<String> cancelOrder(@RequestParam(value = "orderId") ObjectId orderId) {
-
         orderService.cancelOrder(orderId);
         return ResponseEntity.noContent().build();
+    }
 
+    @PutMapping("cancel-otp")
+    public ResponseEntity<String> generateCancelOTP(@RequestParam(value = "orderId") ObjectId orderId) {
+        orderService.generateCancelOTP(orderId);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("deliver-otp")
     public ResponseEntity<String> generateDeliveryOTP(@RequestParam(value = "orderId") ObjectId id) throws MessagingException {
         orderService.generateDeliveryOtp(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("accept-order")
+    public ResponseEntity<String> updateTheOrderStatusToAccept(@RequestParam(value = "orderId") ObjectId id,@RequestParam(value = "txHash") String txHash) {
+        orderService.acceptOrder(id,txHash);
         return ResponseEntity.noContent().build();
     }
 
@@ -99,7 +105,6 @@ public class OrderController {
 
     @DeleteMapping("delete")
     public ResponseEntity<String> deleteOrder(@RequestParam(value = "orderId") ObjectId id) {
-
         orderService.deleteOrder(id);
         return ResponseEntity.ok().build();
 

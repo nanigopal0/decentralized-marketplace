@@ -1,106 +1,101 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useDispatch, useSelector } from 'react-redux';
-import { useState } from 'react';
-import { Trash2 } from 'lucide-react';
-import { getAllProduct , deleteProduct, clearAllProductErrors, resetProduct } from '../../../store/slices/productSlice';
-import {toast} from 'react-toastify'
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import Sidebar from "../layout/Sidebar";
+import ProductCard from "../layout/ProductCard";
 
 const AllProduct = () => {
+  const navigateTo = useNavigate();
+  const [products, setProducts] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
 
-  const navigateTo = useNavigate()
-  const dispatch = useDispatch()
-  const { loading , products , error , message } = useSelector((state) => state.product)
+  const fetchAllProducts = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/product/get-by-sellerId?sellerId=${
+          user.id
+        }`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-  const handleDashboard = () => {
-    // e.preventDefault();
-    navigateTo('/')
+      handleUnauthorizedStatus(response);
+      const data = await response.json();
+      if (response.status === 200) {
+        setProducts(data);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const handleProductDelete = (id) => {
-    setProductId(id)
-    dispatch(deleteProduct(id))
-  }
-
   useEffect(() => {
-    if(error) {
-      toast.error(error)
-      dispatch(clearAllProductErrors())  
-    }
-    if(message) {
-      toast.success(message)
-      dispatch(resetProduct())
-      dispatch(getAllProduct())
-    }
-  },[  dispatch , loading , error , message])
-
- 
-
-  const [productId , setProductId] = useState('')
-
+    fetchAllProducts();
+  }, []);
 
   return (
-    <>
-      <div className='min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-20 sm:pr-6'>
-          <Tabs>
-            <TabsContent>
-              <Card>
-                <CardHeader className='flex gap-4 sm:justify-between sm:flex-row sm:items-center'>
-                  <CardTitle>Products</CardTitle>
-                </CardHeader>
-                <CardContent className='grid sm:grid-cols-2 gap-4 '>
-                  {
-                    products && products.length > 0 ? (
-                      products.map((element) => {
-                        return (
-                          <Card key={element._id} className='grid gap-2'>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Product Name :</span>
-                                {element.title}
-                              </CardDescription>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Description :</span>
-                                {element.description}
-                              </CardDescription>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Price :</span>
-                                {element.price}
-                              </CardDescription>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2' >Product Type :</span>
-                                {element.productType}
-                              </CardDescription>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2'>Stock :</span>
-                                {element.stock}
-                              </CardDescription>
-                              <CardDescription className='text-slate-950' >
-                                <span className='font-bold mr-2'>Stock :</span>
-                                {element.productImage}
-                              </CardDescription>
-                              <CardFooter className='justify-end' >
-                                {
-                                  loading && (productId === element._id) ? 
-                                  "Finding!": (
-                                    <Button className="w-32" onClick={() => handleProductDelete(element._id)} ><Trash2 />Delete</Button>
-                                  )
-                                }
-                              </CardFooter>
-                          </Card>
-                        )
-                      })
-                    ) : <CardHeader>No Product found!</CardHeader>
-                  }
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <div className="flex-1 p-6">
+        {/* <Card className="shadow-lg p-6 bg-gradient-to-r from-yellow-100 to-pink-100"> */}
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-2xl font-bold text-gray-800">Products</p>
+          <Button
+            onClick={() => navigateTo("/product/add")}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
+            Add Product
+          </Button>
+        </div>
+
+        {/* <CardContent> */}
+        {products && products.length > 0 ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((element) => (
+              <ProductCard
+                key={element.productId}
+                product={element}
+                onClick={() =>
+                  navigateTo(`/product/details/${element.productId}`, {
+                    state: { product: element },
+                  })
+                }
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-600 text-lg">No Products Found!</p>
+            <Button
+              onClick={() => navigateTo("/product/add")}
+              className="mt-4 bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Add Your First Product
+            </Button>
+          </div>
+        )}
+        {/* </CardContent> */}
+        {/* </Card> */}
       </div>
-    </>
+    </div>
   );
-}
+};
 
 export default AllProduct;

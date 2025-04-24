@@ -1,100 +1,141 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { toast } from "react-toastify";
 
 export default function PlaceOrder() {
-  const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [quantity, setQuantity] = useState(1); // Quantity state
+  const location = useLocation();
+  const { product } = location.state || {}; // Get product from location state
+  const totalPrice = (product.price || 0) * quantity;
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        // Fetch product details from backend
-        // const res = await axios.get("/api/demoProduct");
-        // setProduct(res.data);
 
-        // Demo response
-        const demoData = {
-          id: "demo123",
-          name: "Wireless Bluetooth Headphones",
-          description:
-            "High-quality wireless headphones with noise cancellation and 20-hour battery life.",
-          price: "0.05",
-          estimatedDelivery: "April 25, 2025",
-          image:
-            "https://images.unsplash.com/photo-1585386959984-a4155224c9f7?auto=format&fit=crop&w=600&q=60",
-        };
-        setProduct(demoData);
-      } catch (err) {
-        console.error("Failed to fetch product", err);
-      }
-    };
-
-    fetchProduct();
-  }, []);
-
-  const handlePlaceOrder = async () => {
+  const placeOrder = async () => {
     try {
-      if (!product) return;
       setLoading(true);
-      setMessage("");
+      setMessage("order placing in db");
 
-      await axios.post("/api/placeOrder", {
-        productId: product.id,
-        amount: product.price,
-        buyer: "0x123", // Replace with wallet address
-      });
-
-      setMessage("Order placed successfully!");
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/order/create`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productId: product.productId,
+            quantity,
+          }),
+        }
+      );
+      if (response.status == 202) {
+        const data = await response.json();
+        console.log(data);
+        toast.success(
+          "Order placed successfully, pay the amount to accept the order!"
+        );
+        navigate("/payment", { state: { order: data,product } });
+      }
     } catch (error) {
-      setMessage("Failed to place order. Try again.");
-      console.error("Order error:", error);
+      toast.error("Failed to place order. Try again.");
     } finally {
       setLoading(false);
+      setMessage("");
     }
   };
 
+  if (!product) {
+    return <p className="text-center mt-10">No product details available.</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-2xl">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Place Your Order
-        </h2>
+      <Card className="w-full max-w-3xl shadow-xl">
+        <CardContent className="p-6 md:p-10">
+          <h2 className="text-2xl font-bold text-center mb-6">
+            Place Your Order
+          </h2>
 
-        {product ? (
           <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Product Image */}
             <img
-              src={product.image}
-              alt={product.name}
-              className="w-40 h-40 object-cover rounded-xl shadow-md"
+              src={product.mediaUrl || "/placeholder.jpg"}
+              alt={product.title || "Product Image"}
+              className="w-48 h-48 object-cover rounded-lg shadow-md"
             />
 
+            {/* Product Details */}
             <div className="flex-1">
-              <h3 className="text-xl font-semibold mb-1">{product.name}</h3>
-              <p className="text-gray-600 mb-2">{product.description}</p>
-              <p className="font-bold text-lg">Price: Ξ {product.price}</p>
-              <p className="text-sm text-gray-500">
-                Expected Delivery: {product.estimatedDelivery}
+              <h3 className="text-xl font-semibold mb-2">
+                {product.title || "Product Name"}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {product.description || "No description available."}
               </p>
 
-              <button
-                onClick={() => navigate(`/payment`)}
-                disabled={loading}
-                className="mt-4 w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-all"
-              >
-                {loading ? "Placing Order..." : "Place Order"}
-              </button>
+              <Separator className="my-4" />
 
+              <p className="text-lg font-bold text-gray-800">
+                Price per unit:{" "}
+                <span className="text-green-600">
+                  {product.price || "N/A"} {product.priceUnit || ""}
+                </span>
+              </p>
+
+              {/* Quantity Field */}
+              <div className="mt-4">
+                <label
+                  htmlFor="quantity"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Quantity
+                </label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  } // Ensure quantity is at least 1
+                  className="mt-1 w-24"
+                />
+              </div>
+
+              {/* Total Price */}
+              <p className="text-lg font-bold text-gray-800 mt-4">
+                Total Price:{" "}
+                <span className="text-green-600">
+                  {totalPrice.toFixed(2)} {product.priceUnit || ""}
+                </span>
+              </p>
+
+              {/* Place Order Button */}
+              <Button
+                // asChild
+                onClick={placeOrder}
+                disabled={loading}
+                className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
+              >
+                {/* <Link to="/payment" state={{ product, quantity }}> */}
+                {loading ? "Placing Order..." : "Place Order"}
+                {/* </Link> */}
+              </Button>
+
+              {/* Message */}
               {message && (
-                <p className="mt-3 text-center text-gray-700">{message}</p>
+                <p className="mt-4 text-center text-gray-700">{message}</p>
               )}
             </div>
           </div>
-        ) : (
-          <p className="text-center">Loading product details...</p>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

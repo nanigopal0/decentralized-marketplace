@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple4;
+import org.web3j.tuples.generated.Tuple8;
 import org.web3j.tx.gas.StaticGasProvider;
 import org.web3j.utils.Convert;
 
@@ -49,6 +51,7 @@ public class ContractService {
     }
 
 
+
     public void addProductToBlockchain(String productId, int price, ProductType productType) {
         try {
             smartMarketPlace.listProduct(productId, BigInteger.valueOf(price), productType == ProductType.DIGITAL ? BigInteger.ONE : BigInteger.ZERO).send();
@@ -61,7 +64,7 @@ public class ContractService {
     public Tuple4<String, String, BigInteger, BigInteger> getProduct(String productId) {
         try {
             Tuple4<String, String, BigInteger, BigInteger> result = smartMarketPlace.products(productId).send();
-            log.info("send result = {}, {}, {}, {}", result.component1(),result.component2(),result.component3(),result.component4());
+            log.info("send result = {}, {}, {}, {}", result.component1(), result.component2(), result.component3(), result.component4());
             return result;
         } catch (Exception e) {
             log.error("Error while getting product: {}", e.getMessage(), e);
@@ -69,11 +72,22 @@ public class ContractService {
         }
     }
 
-    public void purchaseProduct(String productId, String orderId, BigInteger weiValue) {
+    public void purchaseProduct(String productId, String orderId, Double price) {
         try {
-            smartMarketPlace.purchaseProduct(productId,orderId,weiValue).send();
+            smartMarketPlace.purchaseProduct(productId, orderId, BigInteger.valueOf(price.intValue())).send();
         } catch (Exception e) {
             log.error("Error while purchasing product: {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Tuple8<String, String, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger> getOrderByOrderId(String orderId) {
+        try {
+            Tuple8<String, String, String, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger> send = smartMarketPlace.getOrder(orderId).send();
+            log.info("send result = {}, {}, {}, {}, {}, {}, {}, {}", send.component1(), send.component2(), send.component3(), send.component4(), send.component5(), send.component6(), send.component7(), send.component8());
+            return send;
+        } catch (Exception e) {
+            log.error("Error while getting order: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
     }

@@ -1,52 +1,65 @@
 import React, { useState, useEffect } from "react";
 import { ethers } from "ethers";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { toast } from "react-toastify";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
+import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_SMART_CONTRACT_ADDRESS;
+// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26";
 
 export default function Payment() {
-  const [product, setProduct] = useState(null);
-  const [productId, setProductId] = useState("product-001");
-  const [orderId, setOrderId] = useState("order-001");
-  const [quantity, setQuantity] = useState(1);
-  const [amount, setAmount] = useState("0.003");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const location = useLocation();
+  const { product, order } = location.state || {};
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [txStatus, setTxStatus] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchPaymentDetails = async () => {
-      const res = {
-        product: {
-          name: "Wireless Bluetooth Headphones",
-          description:
-            "High-quality over-ear headphones with noise cancellation.",
-          image: "https://images.unsplash.com/photo-1580894732444-3e9e60275c2f",
-        },
-        productId: "apple100",
-        orderId: "order-170",
-        amount: "0.02",
-        quantity: 1,
-      };
-      setProduct(res.product);
-      setProductId(res.productId);
-      setOrderId(res.orderId);
-      setAmount(res.amount);
-      setQuantity(res.quantity);
-    };
+  const updateOrderStatusToAccept = async (txHash) => {
+    try {
+      setLoading(true);
+      setMessage("order accepting...");
 
-    fetchPaymentDetails();
-  }, []);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/order/accept-order?orderId=${
+          order.orderId
+        }&txHash=${txHash}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      console.log(response.status);
+      if (response.status == 204) {
+        // const data = await response.text();
+        // console.log(data);
+        toast.success("Order accepted!");
+        navigate("/myorders");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to place order. Try again.");
+    } finally {
+      setLoading(false);
+      setMessage("");
+    }
+  };
 
-  const handlePayment = async () => {
+  const payWithCrypto = async () => {
     if (!isConfirmed) {
       alert("Please accept the terms and conditions.");
       return;
     }
-
+    console.log(order);
     try {
-      if (!window.ethereum) throw new Error("MetaMask is not installed");
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new ethers.Contract(
@@ -55,86 +68,126 @@ export default function Payment() {
         signer
       );
 
-      const tx = await contract.purchaseProduct(productId, orderId, quantity, {
-        // value: ethers.utils.parseEther(amount.toString()),
-        value: (amount * 1000000000000000000).toString(),
-      });
+      const tx = await contract.purchaseProduct(
+        order.productId,
+        order.orderId,
+        order.quantity,
+        {
+          // value: ethers.utils.parseEther(amount.toString()),
+          value: (order.totalPrice * 1000000000000000000).toString(),
+        }
+      );
 
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
       console.log("Transaction Hash:", tx.hash);
       setTxStatus("Payment successful!");
+      updateOrderStatusToAccept(tx.hash);
     } catch (error) {
-      console.error("Transaction failed:", error);
+      console.error("Error during payment:", error);
       setTxStatus("Payment failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (!product) {
+    return <p className="text-center mt-10">No product details available.</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 to-blue-50 p-6 flex items-center justify-center">
-      <div className="bg-white shadow-xl rounded-2xl p-8 max-w-2xl w-full">
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Confirm Your Payment
-        </h2>
+      <Card className="w-full max-w-2xl shadow-xl">
+        <CardContent className="p-6 md:p-10">
+          <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+            Confirm Your Payment
+          </h2>
 
-        {product ? (
           <div className="space-y-6">
+            {/* Product Details */}
             <div className="flex gap-6 items-center">
               <img
-                src={product.image}
-                alt={product.name}
+                src={product.mediaUrl || "/placeholder.jpg"}
+                alt={product.title}
                 className="w-32 h-32 rounded-xl object-cover shadow-md"
               />
               <div>
-                <h3 className="text-xl font-semibold">{product.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {product.title}
+                </h3>
                 <p className="text-gray-600">{product.description}</p>
               </div>
             </div>
 
-            <div className="bg-gray-100 p-4 rounded-lg">
+            <Separator className="my-4" />
+
+            {/* Payment Details */}
+            <div className="bg-gray-100 p-4 rounded-lg space-y-2">
+              {/* <p>
+                <span className="font-medium text-gray-800">
+                  Seller Address:
+                </span>{" "}
+                <span className="text-gray-600">{product.sellerId}</span>
+              </p> */}
               <p>
-                <span className="font-medium">Product ID:</span> {productId}
+                <span className="font-bold text-gray-800">Amount:</span>{" "}
+                <span className="text-green-600 font-bold">
+                  {product.price * order.quantity} {product.priceUnit || "ETH"}
+                </span>
+                <span className="font-medium">Product ID:</span>{" "}
+                {product.productId}
               </p>
               <p>
-                <span className="font-medium">Order ID:</span> {orderId}
+                <span className="font-medium">Order ID:</span> {order.orderId}
               </p>
               <p>
-                <span className="font-medium">Quantity:</span> {quantity}
+                <span className="font-medium">Quantity:</span> {order.quantity}
               </p>
               <p>
-                <span className="font-medium">Amount:</span> Ξ {amount}
+                <span className="font-medium">Amount:</span>
+                {order.totalPrice} ETH
               </p>
             </div>
 
+            {/* Terms and Conditions */}
             <div className="flex items-center gap-2">
-              <input
+              <Input
                 type="checkbox"
                 checked={isConfirmed}
                 onChange={() => setIsConfirmed(!isConfirmed)}
+                className="w-4 h-4"
               />
-              <label>
+              <label className="text-gray-700">
                 I agree to the{" "}
-                <span className="text-blue-600">terms and conditions</span>.
+                <span className="text-blue-600 cursor-pointer">
+                  terms and conditions
+                </span>
+                .
               </label>
             </div>
 
-            <button
-              onClick={handlePayment}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+            {/* Confirm Payment Button */}
+            <Button
+              onClick={payWithCrypto}
+              disabled={!isConfirmed}
+              className={`w-full py-2 rounded-lg font-semibold transition-all ${
+                isConfirmed
+                  ? "bg-green-600 hover:bg-green-700 text-white"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               Confirm Payment
-            </button>
+            </Button>
 
-            {txStatus && (
+            {/* Transaction Status */}
+            {/* {txStatus && (
               <p className="text-center text-sm text-gray-700 mt-2">
                 {txStatus}
               </p>
-            )}
+            )} */}
           </div>
-        ) : (
-          <p className="text-center">Loading payment details...</p>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

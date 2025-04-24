@@ -7,9 +7,9 @@ const LandingPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
       {/* Hero Section */}
-      <section className="text-center py-20 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+      <section className="text-center py-20 ">
         <h1 className="text-5xl font-bold mb-4">Welcome to Decentralized Marketplace</h1>
         <p className="text-lg mb-6">
           Discover, buy, and sell products securely on our decentralized platform.
@@ -22,7 +22,7 @@ const LandingPage = () => {
       </section>
 
       {/* Inspirational Quote Section */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-16 px-6 ">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-800 mb-6">
             "Empowering communities through trustless commerce and innovation."
@@ -34,7 +34,7 @@ const LandingPage = () => {
       </section>
 
       {/* Call to Action Section */}
-      <section className="text-center py-12 bg-gray-100">
+      <section className="text-center py-12 ">
         <h2 className="text-3xl font-bold mb-4">Join Us Today</h2>
         <p className="text-lg mb-6">
           Start exploring the decentralized marketplace now.

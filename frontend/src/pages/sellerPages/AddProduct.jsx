@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -12,48 +11,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  addProduct,
-  clearAllProductErrors,
-  getAllProduct,
-  resetProduct,
-} from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { handleFileUpload } from "../../util/CloudinaryFileUpload";
+import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 
-const CONTRACT_ADDRESS = import.meta.env.VITE_SMART_CONTRACT_ADDRESS; //Replace with your contract_Address
+// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26"; //Replace with your contract_Address
 
 const AddProduct = () => {
-  const [productId, setProductId] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
+  const [price, setPrice] = useState(0.0);
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
-  const { loading, error, message } = useSelector((state) => state.product);
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [productImagePreview, setProductImagePreview] = useState("");
   const user = JSON.parse(localStorage.getItem("user"));
-
-  const handleFileUpload = async () => {
-    console.log(productImage);
-    const data = new FormData();
-    data.append("file", productImage);
-    data.append("upload_preset", "Banner_Upload");
-    data.append("cloud_name", "dckahd0gz");
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/dckahd0gz/image/upload`,
-      {
-        method: "POST",
-        body: data,
-      }
-    );
-    const uploadedImageURL = await res.json();
-    console.log(uploadedImageURL.url);
-    return uploadedImageURL.url;
-  };
 
   const handleBanner = (e) => {
     const file = e.target.files[0];
@@ -67,9 +41,65 @@ const AddProduct = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    try {
-      console.log("Submitting product listing...");
+    console.log("Submitting product listing...");
 
+    const imageUrl = await handleFileUpload(productImage);
+    const reqdata = {
+      title: title,
+      description: description,
+      price: price,
+      type: productType,
+      stock: stock,
+      sellerId: user.id,
+      mediaUrl: imageUrl,
+    };
+
+    const data = await addProductToDB(reqdata);
+    if (data == null) {
+      toast.error("something went wrong!");
+      return;
+    }
+    handleAddProductToBlockchain(data.productId, data.price, data.type);
+
+    setTitle("");
+    setDescription("");
+    setPrice("");
+    setProductType("");
+    setStock("");
+    setProductImage("");
+  };
+
+  const addProductToDB = async (reqData) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/product/add`,
+        {
+          method: "POST",
+          body: JSON.stringify(reqData),
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (response.status == 201) {
+        const data = await response.json();
+        console.log(data);
+        toast.success("Product added successfully!");
+        return data;
+      }
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+
+  const handleAddProductToBlockchain = async (
+    productId,
+    price,
+    productType
+  ) => {
+    try {
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -82,53 +112,22 @@ const AddProduct = () => {
       const tx = await contract.listProduct(
         productId,
         wei.toString(),
-        productType
+        productType === "PHYSICAL" ? 0 : 1
       );
-      console.log("Product ID :", productId);
-      console.log("Price (eth):", wei.toString());
-      console.log("Product Type:", productType);
       console.log("Transaction submitted:", tx.hash);
       await tx.wait();
-      console.log("Transaction confirmed");
-      toast.success("Product listed on blockchain successfully!");
+      toast.success(
+        "Transaction confirmed! Product listed on blockchain successfully!"
+      );
+      navigate("/products");
     } catch (err) {
       console.error("Blockchain listing error:", err);
       toast.error("Blockchain product listing failed.");
     }
-
-    const imageUrl = await handleFileUpload();
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("price", price);
-    formData.append("type", productType);
-    formData.append("stock", stock);
-    formData.append("mediaUrl", imageUrl);
-    formData.append("sellerId", user.id);
-    dispatch(addProduct(formData));
-
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setProductType("");
-    setStock("");
-    setProductImage("");
   };
 
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearAllProductErrors());
-    }
-    if (message) {
-      toast.success(message);
-      dispatch(resetProduct());
-      dispatch(getAllProduct());
-    }
-  }, [loading, dispatch, error, message]);
-
   return (
-    <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14">
+    <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14 bg-gradient-to-r from-yellow-100 to-pink-100">
       <form onSubmit={handleAddProduct} className="w-[100%] px-5 md:w-[1000px]">
         <div className="space-y-12">
           <div className="border-b border-gray-900/10 pb-12">
@@ -164,7 +163,7 @@ const AddProduct = () => {
                   />
                 </div>
               </div>
-              <div className="w-full sm:col-span-4">
+              {/* <div className="w-full sm:col-span-4">
                 <Label className="block text-sm font-medium leading-6 text-gray-900">
                   Product ID
                 </Label>
@@ -177,7 +176,7 @@ const AddProduct = () => {
                     className="w-full border rounded px-3 py-2"
                   />
                 </div>
-              </div>
+              </div> */}
               <div className="w-full sm:col-span-4">
                 <Label className="block text-sm font-medium leading-6 text-gray-900">
                   Stock
@@ -206,8 +205,8 @@ const AddProduct = () => {
                       <SelectValue placeholder="Select Product Type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="0">Physical</SelectItem>
-                      <SelectItem value="1">Digital</SelectItem>
+                      <SelectItem value="PHYSICAL">Physical</SelectItem>
+                      <SelectItem value="DIGITAL">Digital</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

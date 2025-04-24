@@ -1,7 +1,10 @@
 package com.decentralized.marketplace.service.implementation;
 
+import com.decentralized.marketplace.contract.service.ContractService;
+import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
+import com.decentralized.marketplace.dto.SellerOrderDTO;
 import com.decentralized.marketplace.entity.*;
 import com.decentralized.marketplace.exception.*;
 import com.decentralized.marketplace.repository.OrderRepo;
@@ -12,6 +15,7 @@ import com.decentralized.marketplace.service.OrderService;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
     // OTP configuration
     private static final int OTP_EXPIRY_MINUTES = 30;
     private final ProductRepo productRepo;
+
 
     public OrderServiceImpl(OrderRepo orderRepo, MailService mailService, UserRepo userRepo, ProductRepo productRepo) {
         this.orderRepo = orderRepo;
@@ -88,10 +93,12 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderResponseDTO createOrder(OrderRequestDTO order) throws MessagingException {
         Product product = productRepo.findById(new ObjectId(order.getProductId())).orElseThrow(() -> new ProductNotFoundException(order.getProductId()));
+        if (product.getStock() < order.getQuantity())
+            throw new ProductOutOfStockException("Product stock is less than the requested quantity!");
         order.setPriceUnit(order.getPriceUnit() == null ? "ETH" : order.getPriceUnit());
         CustomUserDetails userDetails = UserServiceImpl.getCustomUserDetailsFromAuthentication();
         Order order1 = Order.builder()
-                .sellerId(new ObjectId(order.getSellerId()))
+                .sellerId(product.getSellerId())
                 .buyerId(new ObjectId(userDetails.getUserId()))
                 .productId(product.getId())
                 .pricePerItem(product.getPrice())
@@ -99,9 +106,9 @@ public class OrderServiceImpl implements OrderService {
                 .priceUnit(product.getPriceUnit())
                 .quantity(order.getQuantity())
                 .totalPrice(product.getPrice() * order.getQuantity())
-                .status(OrderStatus.Accepted)
+                .status(OrderStatus.Pending)
                 .build();
-        User seller = userRepo.findById(order1.getSellerId()).orElseThrow(() -> new UserNotFoundException(order.getSellerId()));
+        User seller = userRepo.findById(product.getSellerId()).orElseThrow(() -> new UserNotFoundException(product.getSellerId().toHexString()));
 
         /* 1. Pay the ordered amount by blockchain transaction */
 
@@ -120,9 +127,14 @@ public class OrderServiceImpl implements OrderService {
         */
 
         Order saved = orderRepo.save(order1);
+
+        //add product to blockchain
+//        contractService.purchaseProduct(saved.getProductId().toHexString(),saved.getId().toHexString(),saved.getTotalPrice());
+
         OrderResponseDTO orderResponseDTO = convertOrderToOrderResponseDTO(saved);
-
-
+        //save the stock update
+        product.setStock(product.getStock() - order.getQuantity());
+        productRepo.save(product);
         // Create a model with the order details
         Map<String, Object> model = new HashMap<>();
         model.put("order", orderResponseDTO);
@@ -145,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
                 .pricePerItem(order.getPricePerItem())
                 .quantity(order.getQuantity())
                 .totalPrice(order.getTotalPrice())
-                .OrderId(order.getId().toHexString())
+                .orderId(order.getId().toHexString())
                 .sellerId(order.getSellerId().toHexString())
                 .buyerId(order.getBuyerId().toHexString())
                 .productId(order.getProductId().toHexString())
@@ -158,18 +170,22 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public List<OrderResponseDTO> getAllOrderBySellerId(ObjectId sellerId) {
-        return orderRepo.findOrderBySellerId(sellerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<SellerOrderDTO> getAllOrderBySellerId(ObjectId sellerId, String sortBy, OrderStatus status) {
+        if (status != null)
+            return orderRepo.findAllSellerOrderWithProductBySellerIdAndOrderStatus(sellerId, Sort.by(Sort.Direction.DESC, sortBy), status);
+        else return orderRepo.findAllSellerOrderWithProductBySellerId(sellerId, Sort.by(Sort.Direction.DESC, sortBy));
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrderByBuyerId(ObjectId buyerId) {
-        return orderRepo.findOrderByBuyerId(buyerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<BuyerOrderDTO> getAllOrderByBuyerId(ObjectId buyerId, String sortBy) {
+        return orderRepo.findAllBuyerOrderWithProductByBuyerId(buyerId, Sort.by(Sort.Direction.DESC, sortBy));
+//        return orderRepo.findOrderByBuyerId(buyerId).stream().map(this::convertOrderToOrderResponseDTO).toList();
     }
 
     @Override
-    public List<OrderResponseDTO> getAllOrderByProductId(ObjectId productId) {
-        return orderRepo.findOrderByProductId(productId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+    public List<SellerOrderDTO> getAllOrderByProductId(ObjectId productId) {
+//        return orderRepo.findOrderByProductId(productId).stream().map(this::convertOrderToOrderResponseDTO).toList();
+        return orderRepo.findAllOrderWithBuyerByProductId(productId,Sort.by(Sort.Direction.DESC,"orderedAt"));
     }
 
     @Override
@@ -200,8 +216,10 @@ public class OrderServiceImpl implements OrderService {
         switch (order.getStatus()) {
             case Delivered -> throw new RuntimeException("Order already delivered! ");
             case Shipped -> {
-                order.setStatus(OrderStatus.Delivered);
-                return orderRepo.save(order);
+                if(order.getDeliveryOtpVerified()) {
+                    order.setStatus(OrderStatus.Delivered);
+                    return orderRepo.save(order);
+                }else throw new RuntimeException("Delivery otp not verified!");
             }
             case Cancelled -> throw new RuntimeException("Order is cancelled and not deliverable! ");
             case Accepted ->
@@ -295,35 +313,18 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+
+
     @Override
     public boolean verifyShipmentOtp(ObjectId orderId, String otp) throws MessagingException {
         Order order = orderRepo.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId.toString()));
         if (!Objects.equals(order.getSellerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
             throw new UnauthorizedUserException("You are not allowed to ship this order! Only seller can ship");
 
-        // Check if OTP exists and is not expired
-        if (order.getShipmentOtp() == null || order.getShipmentOtpExpiry() == null) {
-            log.warn("Shipment OTP not found for order: {}", orderId);
-            throw new InvalidOTPException("Shipment OTP not found for order: " + orderId);
-        }
-
-        if (LocalDateTime.now().isAfter(order.getShipmentOtpExpiry())) {
-            log.warn("Shipment OTP expired for order: {}", orderId);
-            throw new InvalidOTPException("Shipment OTP expired for order: " + orderId);
-        }
-
-        // Check if OTP matches
-        if (!order.getShipmentOtp().equals(otp)) {
-            log.warn("Invalid shipment OTP provided for order: {}", orderId);
-            throw new InvalidOTPException("Invalid shipment OTP provided for order: " + orderId);
-        }
-
-        // Mark OTP as verified
-        order.setShipmentOtpVerified(true);
-//        orderRepo.save(order);
+        order.setShipmentOtpVerified(verifyOtp(otp,order.getShipmentOtpExpiry(),order.getShipmentOtp(),orderId.toHexString(),"Shipment"));
 
         order = shipOrder(order);
-        // Send regular shipment notification to the buyer
+
         sendShipmentMailToBuyer(order);
         log.info("Shipment OTP verified successfully for order: {}", orderId);
         return true;
@@ -347,27 +348,53 @@ public class OrderServiceImpl implements OrderService {
         if (!Objects.equals(order.getBuyerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
             throw new UnauthorizedUserException("You are not allowed to deliver this order! only buyer can update the status to Delivered.");
 
-        // Check if OTP exists and is not expired
-        if (order.getDeliveryOtp() == null || order.getDeliveryOtpExpiry() == null) {
-            log.warn("Delivery OTP not found for order: {}", orderId);
-            throw new InvalidOTPException("Delivery OTP not found for order: " + orderId);
-        }
-        if (LocalDateTime.now().isAfter(order.getDeliveryOtpExpiry())) {
-            log.warn("Delivery OTP expired for order: {}", orderId);
-            throw new InvalidOTPException("Delivery OTP expired for order: " + orderId);
-        }
-        // Check if OTP matches
-        if (!order.getDeliveryOtp().equals(otp)) {
-            log.warn("Invalid delivery OTP provided for order: {}", orderId);
-            throw new InvalidOTPException("Invalid delivery OTP provided for order: " + orderId);
-        }
-        // Mark OTP as verified
-        order.setDeliveryOtpVerified(true);
+        order.setDeliveryOtpVerified(verifyOtp(otp,order.getDeliveryOtpExpiry(),order.getDeliveryOtp(),orderId.toHexString(),"Delivery"));
         order = deliverOrder(order);
 
-        // Send regular delivery confirmation to seller
         sendDeliveryMailToSeller(order);
         log.info("Delivery OTP verified successfully for order: {}", orderId);
+        return true;
+    }
+
+    @Override
+    public void acceptOrder(ObjectId id, String txHash) {
+        Order order = orderRepo.findById(id).orElseThrow(() -> new OrderNotFoundException(id.toString()));
+        order.setTransactionHash(txHash);
+        order.setStatus(OrderStatus.Accepted);
+        orderRepo.save(order);
+    }
+
+    @Override
+    public void generateCancelOTP(ObjectId orderId) {
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId.toString()));
+        if (!Objects.equals(order.getSellerId(), new ObjectId(UserServiceImpl.getCustomUserDetailsFromAuthentication().getUserId())))
+            throw new UnauthorizedUserException("You are not allowed to cancel this order! Only buyer can cancel");
+
+        switch (order.getStatus()) {
+            case Delivered -> throw new RuntimeException("Order delivered and cannot back to cancel phase! ");
+            case Shipped -> throw new RuntimeException("Order already shipped! ");
+            case Cancelled -> throw new RuntimeException("Order is cancelled and not cancellable again! ");
+            case Accepted, Pending -> {
+
+            }
+        }
+    }
+
+    private boolean verifyOtp(String otp, LocalDateTime otpExpiredAt, String expectedOtp,String orderId,String otpMode)  {
+        // Check if OTP exists and is not expired
+        if (expectedOtp == null || otpExpiredAt== null) {
+            log.warn("{} OTP not found for order: {}", otpMode, orderId);
+            throw new InvalidOTPException(otpMode+" OTP not found for order: " + orderId);
+        }
+        if (LocalDateTime.now().isAfter(otpExpiredAt)) {
+            log.warn("{} OTP expired for order: {}", otpMode, orderId);
+            throw new InvalidOTPException(otpMode+" OTP expired for order: " + orderId);
+        }
+        // Check if OTP matches
+        if (!expectedOtp.equals(otp)) {
+            log.warn("Invalid {} OTP provided for order: {}", otpMode, orderId);
+            throw new InvalidOTPException("Invalid "+otpMode+" OTP provided for order: " + orderId);
+        }
         return true;
     }
 

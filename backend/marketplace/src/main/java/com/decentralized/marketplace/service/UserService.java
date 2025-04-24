@@ -1,9 +1,6 @@
 package com.decentralized.marketplace.service;
 
-import com.decentralized.marketplace.dto.UpdateUserDTO;
-import com.decentralized.marketplace.dto.UserLoginRequestDTO;
-import com.decentralized.marketplace.dto.UserResponseDTO;
-import com.decentralized.marketplace.dto.UserSignupRequestDTO;
+import com.decentralized.marketplace.dto.*;
 import com.decentralized.marketplace.entity.CustomUserDetails;
 import org.bson.types.ObjectId;
 
@@ -21,4 +18,7 @@ public interface UserService {
     UserResponseDTO updateUser(UpdateUserDTO update, ObjectId userId);
 
     void logout();
+
+    SellerDashboardInfoDTO getSellerDashboardInfo(ObjectId userId);
+
 }

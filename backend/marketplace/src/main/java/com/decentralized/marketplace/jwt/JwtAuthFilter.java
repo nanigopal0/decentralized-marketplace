@@ -4,7 +4,6 @@ import com.decentralized.marketplace.entity.CustomUserDetails;
 import com.decentralized.marketplace.entity.Role;
 import com.decentralized.marketplace.entity.User;
 import com.decentralized.marketplace.service.CustomUserDetailsService;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -19,7 +18,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -38,7 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return excludedMatchers.stream().anyMatch(
-                matcher-> matcher.matches(request)
+                matcher -> matcher.matches(request)
         );
     }
 
@@ -52,7 +50,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         this.userDetailService = userDetailService;
         this.jwtService = jwtService;
     }
-
 
 
     @Override
@@ -71,10 +68,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 //        }
 
         String token = null;
-        for (Cookie cookie : request.getCookies()) {
-            if (cookie.getName().equals("jwt")) {
-                token = cookie.getValue();
-                break;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) { // Add a null check for cookies
+
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("jwt")) {
+                    token = cookie.getValue();
+                    break;
+                }
             }
         }
 
@@ -84,8 +85,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String username = jwtService.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-//                UserDetails userDetails = userDetailService.loadUserByUsername(username);
-//                if (userDetails != null && jwtService.isTokenValid(token)) {
                 if (jwtService.isTokenValid(token)) {
                     User user = new User();
                     user.setId(new ObjectId(jwtClaims.get("id", String.class)));
@@ -94,14 +93,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     user.setEmail(username);
                     CustomUserDetails customUserDetails = new CustomUserDetails(user);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                            customUserDetails,null,customUserDetails.getAuthorities());
+                            customUserDetails, null, customUserDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 //                    System.out.println(authentication.getPrincipal());
                 } else {
                     response.setStatus(401);
-                    log.error("Token is not valid: {}" ,response.getStatus());
+                    log.error("Token is not valid: {}", response.getStatus());
                 }
             }
 

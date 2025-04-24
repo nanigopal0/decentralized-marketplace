@@ -1,5 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { handleUnauthorizedStatus } from "../../src/util/HandleUnauthorizedStatus";
 
 const productSlice = createSlice({
     name: "product",
@@ -97,7 +98,7 @@ export const getAllProduct = () => async(dispatch) => {
                 headers: { "Content-Type": "application/json" },
             }
         )
-    
+        handleUnauthorizedStatus(data);
         dispatch(productSlice.actions.getAllProductSuccess(data.data))
         dispatch(productSlice.actions.clearAllErrors())
     } catch (error) {
