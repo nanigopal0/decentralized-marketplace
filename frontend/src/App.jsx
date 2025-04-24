@@ -28,13 +28,17 @@ import Footer from "./pages/layout/Footer";
 import ProfileView from "./pages/buyerPages/ProfileView";
 import ConfirmDelivery from "./pages/buyerPages/ConfirmDelivery";
 import OrderDetails from "./pages/buyerPages/OrderDetails";
+import CancelOrder from "./pages/buyerPages/cancelOrder";
+import TermsOfUse from "./pages/layout/Termsofuse";
+import PrivacyPolicy from "./pages/layout/PrivacyPolicy";
+import SecurityPolicy from "./pages/layout/SecurityPolicy";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    dispatch(pingServer());
-  }, [dispatch]); //Make it uncomment while push
+  // useEffect(() => {
+  //   dispatch(pingServer());
+  // }, [dispatch]); //Make it uncomment while push
 
   return (
     <>
@@ -56,6 +60,10 @@ function App() {
             <Route path="/profile" element={<ProfileView />} />
             <Route path="/confirmDelivery" element={<ConfirmDelivery />} />
             <Route path="/orderDetails" element={<OrderDetails />} />
+            <Route path="/cancelOrder" element={<CancelOrder />} />
+            <Route path="/termsOfUse" element={<TermsOfUse />} />
+            <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+            <Route path="/securityPolicy" element={<SecurityPolicy />} />
             <Route path="*" element={<Navigate to="/home" />} />
           </>
         ) : (

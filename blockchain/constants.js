@@ -1,0 +1,5 @@
+const ALCHEMY_TESTNET_RPC_URL =
+  "https://eth-sepolia.g.alchemy.com/v2/WYtvGK3JG9m7Iw2jDJCUtmsNfQOIm24l";
+
+const TESTNET_PRIVATE_KEY =
+  "b2f05c37d2d601b192b99614ab326357a01f2b82ce753647186b9d27f35f19b4";

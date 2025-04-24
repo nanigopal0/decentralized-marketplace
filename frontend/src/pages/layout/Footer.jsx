@@ -40,7 +40,7 @@ export default function Footer() {
               <a href="#">Shipping</a>
             </li>
             <li>
-              <a href="#">Cancellation & Returns</a>
+              <a href="../buyerPages/CancelOrder.jsx">Cancellation & Returns</a>
             </li>
             <li>
               <a href="#">FAQ</a>

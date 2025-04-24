@@ -21,7 +21,7 @@ import {
 } from "../../../store/slices/productSlice";
 import { toast } from "react-toastify";
 
-const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF"; //Replace with your contract_Address
+const CONTRACT_ADDRESS = import.meta.env.VITE_SMART_CONTRACT_ADDRESS; //Replace with your contract_Address
 
 const AddProduct = () => {
   const [productId, setProductId] = useState("");

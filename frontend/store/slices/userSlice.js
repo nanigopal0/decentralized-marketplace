@@ -6,7 +6,7 @@ const userSlice = createSlice({
   initialState: {
     loading: false,
     user: {},
-    isAuthenticated: false, //while push make it False
+    isAuthenticated: true, //while push make it False
     error: null,
     message: null,
     isUpdated: false,
