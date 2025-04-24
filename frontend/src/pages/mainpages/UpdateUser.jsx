@@ -48,23 +48,16 @@ const UpdateUser = () => {
 
     try {
       const formData = {};
-      if(fullName !== user.fullName) 
-      formData.fullName=fullName;
+      if (fullName !== user.fullName) formData.fullName = fullName;
 
       if (showPasswordFields) {
-        formData.password=password;
+        formData.password = password;
       }
       if (avatar) {
-        const url = await handleFileUpload(avatar)
-        formData.avatar=url;
+        const url = await handleFileUpload(avatar);
+        formData.avatar = url;
       }
 
-      // Simulate API response
-      console.log("Updating profile with:", {
-        fullName,
-        password: showPasswordFields ? password : "Not Updated",
-        avatar,
-      });
       updateUser(formData);
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -100,17 +93,17 @@ const UpdateUser = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
       <form
         onSubmit={handleUpdateProfile}
-        className="bg-white border-gray-400 border shadow-lg rounded-lg p-8 w-full max-w-lg"
+        className="bg-white border-gray-400 border shadow-lg rounded-lg p-6 sm:p-8 w-full max-w-lg space-y-6"
       >
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        <h1 className="text-2xl font-bold text-gray-800 text-center">
           Update Profile
         </h1>
 
         {/* Avatar Upload */}
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center">
           {avatarPreview ? (
             <img
               src={avatarPreview}
@@ -137,7 +130,7 @@ const UpdateUser = () => {
         </div>
 
         {/* Full Name */}
-        <div className="mb-4">
+        <div>
           <Label
             htmlFor="fullName"
             className="block text-sm font-medium text-gray-700"
@@ -150,14 +143,12 @@ const UpdateUser = () => {
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Enter your full name"
-            className="mt-1 w-full"
+            className="mt-2 w-full"
           />
         </div>
 
-        {/* Email */}
-
         {/* Toggle Password Fields */}
-        <div className="mb-4">
+        <div>
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
             <input
               type="checkbox"
@@ -172,7 +163,7 @@ const UpdateUser = () => {
         {/* Password Fields (Conditional) */}
         {showPasswordFields && (
           <>
-            <div className="mb-4">
+            <div>
               <Label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
@@ -185,11 +176,11 @@ const UpdateUser = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter a new password"
-                className="mt-1 w-full"
+                className="mt-2 w-full"
               />
             </div>
 
-            <div className="mb-6">
+            <div>
               <Label
                 htmlFor="confirmPassword"
                 className="block text-sm font-medium text-gray-700"
@@ -202,7 +193,7 @@ const UpdateUser = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm your password"
-                className="mt-1 w-full"
+                className="mt-2 w-full"
               />
             </div>
           </>

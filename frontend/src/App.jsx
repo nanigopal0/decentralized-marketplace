@@ -21,7 +21,7 @@ import MyOrders from "./pages/buyerPages/MyOrders";
 import PlaceOrder from "./pages/buyerPages/PlaceOrder";
 import LandingPage from "./pages/mainpages/LandingPage";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { pingServer } from "../store/slices/userSlice";
 import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
@@ -32,13 +32,18 @@ import ProductDetails from "./pages/sellerPages/ProductDetails";
 import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
 import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
 import SearchResults from "./pages/mainpages/SearchResults";
+import Sidebar from "./pages/layout/Sidebar";
 
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
   const user = JSON.parse(localStorage.getItem("user"));
   const isSeller = isAuthenticated ? user && user.role == "SELLER" : false;
-  // console.log(isSeller);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
 
   useEffect(() => {
     dispatch(pingServer());
@@ -46,59 +51,88 @@ function App() {
 
   return (
     <>
-      <Navbar />
-      <Routes>
-        {isAuthenticated ? (
-          <>
-            {isSeller ? (
-              <>
-                <Route path="/home" element={<Navigate to={"/dashboard"} />} />
-                <Route path="/products" element={<AllProduct />} />
-                <Route path="/dashboard" element={<SellerDashboard />} />
-                <Route path="/product/add" element={<AddProduct />} />
-                <Route path="/product/update/:id" element={<UpdateProduct />} />
-                <Route path="/orders" element={<SellerOrders />} />
-                <Route path="/order/details/:id" element={<OrderDetails />} />
-                <Route
-                  path="/product/details/:id"
-                  element={<ProductDetails />}
-                />
-              </>
-            ) : (
-              <>
-                <Route path="/home" element={<Home />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/product/:id" element={<SingleProduct />} />
-                <Route path="/order/product/:id" element={<PlaceOrder />} />
-                <Route path="/myorders" element={<MyOrders />} />
-                <Route path="/confirm-delivery" element={<ConfirmDelivery />} />
-                <Route
-                  path="/blockchain/orderDetails"
-                  element={<BlockchainOrderDetails />}
-                />
-                <Route
-                  path="/buyer/order-details/:id"
-                  element={<BuyerOrderDetails />}
-                />
-              </>
-            )}
+      <div className="flex flex-col min-h-screen ">
+        <header className="bg-white shadow-md">
+          <Navbar isOpen={isOpen} onSidebarToggle={toggleSidebar} />
+        </header>
 
-            <Route path="/user/update/:id" element={<UpdateUser />} />
-            <Route path="/search" element={<SearchResults />}/>
-            <Route path="*" element={<Navigate to="/home" />} />
-            <Route path="/profile" element={<ProfileView />} />
-          </>
-        ) : (
-          <>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/" element={<LandingPage />} />
-            <Route path="*" element={<Navigate to="/" />} />
-          </>
-        )}
-      </Routes>
-      <ToastContainer />
-      <Footer />
+        <main className="flex w-full transition-all duration-300 ease-in-out">
+          {isOpen && <Sidebar isOpen={isOpen} />}
+          <div className={`transition-all w-full duration-300 ease-in-out `}>
+            <Routes>
+              {isAuthenticated ? (
+                <>
+                  {isSeller ? (
+                    <>
+                      <Route
+                        path="/home"
+                        element={<Navigate to={"/dashboard"} />}
+                      />
+                      <Route path="/products" element={<AllProduct />} />
+                      <Route path="/dashboard" element={<SellerDashboard />} />
+                      <Route path="/product/add" element={<AddProduct />} />
+                      <Route
+                        path="/product/update/:id"
+                        element={<UpdateProduct />}
+                      />
+                      <Route path="/orders" element={<SellerOrders />} />
+                      <Route
+                        path="/order/details/:id"
+                        element={<OrderDetails />}
+                      />
+                      <Route
+                        path="/product/details/:id"
+                        element={<ProductDetails />}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Route path="/home" element={<Home />} />
+                      <Route path="/payment" element={<Payment />} />
+                      <Route path="/product/:id" element={<SingleProduct />} />
+                      <Route
+                        path="/order/product/:id"
+                        element={<PlaceOrder />}
+                      />
+                      <Route path="/myorders" element={<MyOrders />} />
+                      <Route
+                        path="/confirm-delivery"
+                        element={<ConfirmDelivery />}
+                      />
+                      <Route
+                        path="/blockchain/orderDetails"
+                        element={<BlockchainOrderDetails />}
+                      />
+                      <Route
+                        path="/buyer/order-details/:id"
+                        element={<BuyerOrderDetails />}
+                      />
+                    </>
+                  )}
+                  <Route path="/user/update/:id" element={<UpdateUser />} />
+                  <Route path="/search" element={<SearchResults />} />
+                  <Route path="*" element={<Navigate to="/home" />} />
+                  <Route path="/profile" element={<ProfileView />} />
+                </>
+              ) : (
+                <>
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </>
+              )}
+            </Routes>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer>
+          <Footer />
+        </footer>
+
+        <ToastContainer />
+      </div>
     </>
   );
 }

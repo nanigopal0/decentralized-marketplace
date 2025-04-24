@@ -3,8 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSelector } from "react-redux";
+import { SidebarIcon, Menu, X } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ onSidebarToggle }) {
   const { isAuthenticated } = useSelector((state) => state.user);
   const [searchQuery, setSearchQuery] = useState(""); // State to store the search query
   const navigate = useNavigate();
@@ -17,13 +18,22 @@ export default function Navbar() {
 
   return (
     <nav className="shadow-md border border-b-gray-400 py-4 px-6 flex items-center justify-between bg-gradient-to-r from-yellow-100 to-pink-100">
-      <Link to="/" className="text-2xl font-bold cursor-pointer">
-        SmartMarket
-      </Link>
+      {/* Logo and Sidebar Toggle */}
+      <div className="flex items-center space-x-4">
+        {isAuthenticated && (
+          <SidebarIcon
+            onClick={onSidebarToggle}
+            className="cursor-pointer w-6 h-6 text-gray-800"
+          />
+        )}
+        <Link to="/" className="text-2xl font-bold cursor-pointer">
+          SmartMarket
+        </Link>
+      </div>
 
-      {/* Search Bar */}
+      {/* Search Bar (Hidden on Small Screens) */}
       {isAuthenticated && (
-        <div className="flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-4">
           <Input
             type="text"
             placeholder="Search products..."
@@ -41,16 +51,15 @@ export default function Navbar() {
         </div>
       )}
 
-      <div className="relative">
+      {/* Register Button for Desktop */}
+      <div className="hidden md:flex items-center space-x-4">
         {!isAuthenticated && (
-          <div className="flex items-center space-x-4">
-            <Link
-              to="/register"
-              className="bg-amber-800 text-white px-3 py-2 rounded-md text-sm font-semibold hover:bg-amber-700 transition"
-            >
-              Register
-            </Link>
-          </div>
+          <Link
+            to="/register"
+            className="bg-amber-800 text-white px-3 py-2 rounded-md text-sm font-semibold hover:bg-amber-700 transition"
+          >
+            Register
+          </Link>
         )}
       </div>
     </nav>

@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Sidebar from "../layout/Sidebar"; // Correctly importing your manually created Sidebar
 import OrderCard from "../layout/OrderCard";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
@@ -32,6 +33,7 @@ export default function SellerOrders() {
           credentials: "include",
         }
       );
+      handleUnauthorizedStatus(response);
       if (!response.ok) {
         throw new Error("Failed to fetch orders.");
       }
@@ -62,121 +64,110 @@ export default function SellerOrders() {
     fetchOrders(status);
   }, [location.search]);
 
-  const handleOnClick = (order) => {
-    navigate(`/order/details/${order.orderId}`, {
-      state: { order },
-    });
-  };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+      <h2 className="text-2xl font-bold mb-8 text-gray-800">Manage Orders</h2>
 
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8  text-gray-800">
-            Manage Orders
-          </h2>
-
-          {/* Filter Buttons */}
-          <div className="flex justify-center gap-4 mb-6">
-            <Button
-              variant={activeStatus === "" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("")}
-              className={`${
-                activeStatus === ""
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              All
-            </Button>
-            <Button
-              variant={activeStatus === "Pending" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("Pending")}
-              className={`${
-                activeStatus === "Pending"
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              Pending
-            </Button>
-            <Button
-              variant={activeStatus === "Accepted" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("Accepted")}
-              className={`${
-                activeStatus === "Accepted"
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              Accepted
-            </Button>
-            <Button
-              variant={activeStatus === "Shipped" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("Shipped")}
-              className={`${
-                activeStatus === "Shipped"
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              Shipped
-            </Button>
-            <Button
-              variant={activeStatus === "Delivered" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("Delivered")}
-              className={`${
-                activeStatus === "Delivered"
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              Delivered
-            </Button>
-            <Button
-              variant={activeStatus === "Cancelled" ? "solid" : "outline"}
-              onClick={() => handleFilterChange("Cancelled")}
-              className={`${
-                activeStatus === "Cancelled"
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-gray-200"
-              }`}
-            >
-              Cancelled
-            </Button>
-          </div>
-
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
-                <Skeleton key={index} className="h-40 w-full rounded-lg" />
-              ))}
-            </div>
-          ) : filteredOrders.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredOrders.map((order) => (
-                <OrderCard
-                  key={order.orderId}
-                  order={order}
-                  onClick={() =>
-                    navigate(`/order/details/${order.orderId}`, {
-                      state: { order },
-                    })
-                  }
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center text-gray-600">
-              No orders found for the selected status.
-            </p>
-          )}
-        </div>
+      {/* Filter Buttons */}
+      <div className="flex gap-4 mb-6 overflow-x-auto scrollbar-hide">
+        <Button
+          variant={activeStatus === "" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("")}
+          className={`${
+            activeStatus === ""
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          All
+        </Button>
+        <Button
+          variant={activeStatus === "Pending" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("Pending")}
+          className={`${
+            activeStatus === "Pending"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          Pending
+        </Button>
+        <Button
+          variant={activeStatus === "Accepted" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("Accepted")}
+          className={`${
+            activeStatus === "Accepted"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          Accepted
+        </Button>
+        <Button
+          variant={activeStatus === "Shipped" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("Shipped")}
+          className={`${
+            activeStatus === "Shipped"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          Shipped
+        </Button>
+        <Button
+          variant={activeStatus === "Delivered" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("Delivered")}
+          className={`${
+            activeStatus === "Delivered"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          Delivered
+        </Button>
+        <Button
+          variant={activeStatus === "Cancelled" ? "solid" : "outline"}
+          onClick={() => handleFilterChange("Cancelled")}
+          className={`${
+            activeStatus === "Cancelled"
+              ? "bg-blue-600 text-white"
+              : "hover:bg-gray-200"
+          }`}
+        >
+          Cancelled
+        </Button>
       </div>
+
+      {/* Orders Grid */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, index) => (
+            <Skeleton key={index} className="h-40 w-full rounded-lg" />
+          ))}
+        </div>
+      ) : filteredOrders.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredOrders.map((order) => (
+            <OrderCard
+              key={order.orderId}
+              order={order}
+              onClick={() =>
+                navigate(`/order/details/${order.orderId}`, {
+                  state: { order },
+                })
+              }
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-center text-gray-600">
+          No orders found for the selected status.
+        </p>
+      )}
     </div>
+  </div>
+    
   );
 }

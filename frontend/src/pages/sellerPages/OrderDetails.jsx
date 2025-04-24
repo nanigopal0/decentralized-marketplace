@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
-import Sidebar from "../layout/Sidebar";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 
 export default function OrderDetails() {
   const location = useLocation();
@@ -32,6 +32,7 @@ export default function OrderDetails() {
           credentials: "include",
         }
       );
+      handleUnauthorizedStatus(response);
       if (response.status === 204) {
         toast.success("OTP sent to your email!");
         setShowOtpInput(true);
@@ -59,7 +60,7 @@ export default function OrderDetails() {
           credentials: "include",
         }
       );
-
+handleUnauthorizedStatus(response);
       if (response.status === 204) {
         toast.success("Order shipped successfully!");
         setShowOtpInput(false);
@@ -84,8 +85,7 @@ export default function OrderDetails() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      <Sidebar />
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
       <div className="flex-1">
         <div className="max-w-5xl mx-auto p-4 sm:p-6">
           <CardTitle className="text-3xl font-bold text-gray-800 mb-6 text-center sm:text-left">
@@ -159,7 +159,9 @@ export default function OrderDetails() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <p className="text-gray-600 font-medium">Order ID:</p>
-                  <p className="text-gray-800 font-semibold">{order.orderId}</p>
+                  <p className="text-gray-800 font-semibold truncate">
+                    {order.orderId}
+                  </p>
                 </div>
                 <div className="flex justify-between items-center">
                   <p className="text-gray-600 font-medium">Price per Product:</p>

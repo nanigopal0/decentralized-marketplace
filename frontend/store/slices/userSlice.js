@@ -137,7 +137,7 @@ export const login = (email, password) => async (dispatch) => {
 
     dispatch(userSlice.actions.clearAllErrors());
   } catch (error) {
-    dispatch(userSlice.actions.loginFailed(error.response.data.message));
+    dispatch(userSlice.actions.loginFailed(error));
     console.log(error);
   }
 };
@@ -152,12 +152,13 @@ export const pingServer = () => async (dispatch) => {
         headers: { "Content-Type": "application/json" },
       }
     );
+    if(data.status  == 401) localStorage.removeItem("user");
     if (data.status === 200) dispatch(userSlice.actions.loadUserSuccess(null));
     else throw new Error("Not logged in!");
   } catch (error) {
     dispatch(
       userSlice.actions.loadUserFailed(
-        error.response?.data?.message || "Failed to load user"
+        error?.response?.data?.message || "Failed to load user"
       )
     );
   }

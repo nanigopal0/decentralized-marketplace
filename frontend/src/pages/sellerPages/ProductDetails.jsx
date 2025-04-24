@@ -12,7 +12,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Trash2, Edit3 } from "lucide-react";
 import { toast } from "react-toastify";
-import Sidebar from "../layout/Sidebar";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 
 const ProductDetails = () => {
   const location = useLocation();
@@ -41,6 +41,7 @@ const ProductDetails = () => {
           },
         }
       );
+      handleUnauthorizedStatus(response);
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
@@ -68,6 +69,7 @@ const ProductDetails = () => {
           },
         }
       );
+      handleUnauthorizedStatus(response)
       if (response.status === 202) {
         toast.success("Product deleted successfully!");
         navigate("/products"); // Redirect to All Products page
@@ -85,15 +87,12 @@ const ProductDetails = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      {/* Sidebar */}
-      <Sidebar />
-
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
       {/* Main Content */}
-      <div className="flex-1 p-6">
-        <Card className="shadow-lg p-6 bg-gradient-to-r from-yellow-100 to-pink-100 border-gray-300">
+      <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto">
+        <Card className="shadow-lg bg-white border-gray-300">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-gray-800">
+            <CardTitle className="text-2xl text-center font-bold text-gray-800">
               {product.title}
             </CardTitle>
           </CardHeader>
@@ -110,10 +109,12 @@ const ProductDetails = () => {
             {/* Product Details */}
             <div className="space-y-2">
               <CardDescription className="text-gray-800 text-sm">
-                <span className="font-bold">Description:</span> {product.description}
+                <span className="font-bold">Description:</span>{" "}
+                {product.description}
               </CardDescription>
               <CardDescription className="text-gray-800 text-sm">
-                <span className="font-bold">Price:</span> {product.price} {product.priceUnit}
+                <span className="font-bold">Price:</span> {product.price}{" "}
+                {product.priceUnit}
               </CardDescription>
               <CardDescription className="text-gray-800 text-sm">
                 <span className="font-bold">Product Type:</span> {product.type}
@@ -122,11 +123,12 @@ const ProductDetails = () => {
                 <span className="font-bold">Stock:</span> {product.stock}
               </CardDescription>
               <CardDescription className="text-gray-800 text-sm">
-                <span className="font-bold">Delivered Orders:</span> {deliveredCount}
+                <span className="font-bold">Delivered Orders:</span>{" "}
+                {deliveredCount}
               </CardDescription>
             </div>
           </CardContent>
-          <CardFooter className="flex justify-end gap-4">
+          <CardFooter className="flex flex-wrap justify-end gap-4">
             <Button
               variant="outline"
               onClick={() =>
@@ -155,7 +157,7 @@ const ProductDetails = () => {
           <h3 className="text-xl font-bold text-gray-800 mb-4">
             Pending/Accepted/Shipped Orders
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {orders
               .filter(
                 (order) =>
@@ -185,19 +187,24 @@ const ProductDetails = () => {
                           : "?"}
                       </AvatarFallback>
                     </Avatar>
-                    <CardTitle className="text-lg font-bold text-gray-800">
-                      Order ID: {order.orderId}
-                    </CardTitle>
+                    <div className="flex-1 overflow-hidden">
+                      <CardTitle className="text-md font-bold text-gray-800 truncate">
+                        Order ID: {order.orderId}
+                      </CardTitle>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <CardDescription className="text-gray-800 text-sm">
-                      <span className="font-bold">Buyer:</span> {order.buyer.fullName}
+                      <span className="font-bold">Buyer:</span>{" "}
+                      {order.buyer.fullName}
                     </CardDescription>
                     <CardDescription className="text-gray-800 text-sm">
-                      <span className="font-bold">Quantity:</span> {order.quantity}
+                      <span className="font-bold">Quantity:</span>{" "}
+                      {order.quantity}
                     </CardDescription>
                     <CardDescription className="text-gray-800 text-sm">
-                      <span className="font-bold">Status:</span> {order.orderStatus}
+                      <span className="font-bold">Status:</span>{" "}
+                      {order.orderStatus}
                     </CardDescription>
                   </CardContent>
                 </Card>

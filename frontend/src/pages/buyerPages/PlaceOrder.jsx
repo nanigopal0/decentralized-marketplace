@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
+import { pingServer } from "../../../store/slices/userSlice";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { useDispatch } from "react-redux";
 
 export default function PlaceOrder() {
   const [loading, setLoading] = useState(false);
@@ -14,11 +17,12 @@ export default function PlaceOrder() {
   const { product } = location.state || {}; // Get product from location state
   const totalPrice = (product.price || 0) * quantity;
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   const placeOrder = async () => {
     try {
       setLoading(true);
-      setMessage("order placing in db");
+      setMessage("Placing order...");
 
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/order/create`,
@@ -34,16 +38,19 @@ export default function PlaceOrder() {
           }),
         }
       );
-      if (response.status == 202) {
+      handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
+      if (response.status === 202) {
         const data = await response.json();
-        console.log(data);
         toast.success(
-          "Order placed successfully, pay the amount to accept the order!"
+          "Order placed successfully! Pay the amount to accept the order."
         );
-        navigate("/payment", { state: { order: data,product } });
+        navigate("/payment", { state: { order: data, product } });
       }
     } catch (error) {
-      toast.error("Failed to place order. Try again.");
+      toast.error("Failed to place order. Please try again.");
     } finally {
       setLoading(false);
       setMessage("");
@@ -55,10 +62,10 @@ export default function PlaceOrder() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center p-6">
-      <Card className="w-full max-w-3xl shadow-xl">
-        <CardContent className="p-6 md:p-10">
-          <h2 className="text-2xl font-bold text-center mb-6">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <Card className="w-full max-w-4xl shadow-xl rounded-lg">
+        <CardContent className="p-6 sm:p-8 lg:p-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 text-gray-800">
             Place Your Order
           </h2>
 
@@ -67,12 +74,12 @@ export default function PlaceOrder() {
             <img
               src={product.mediaUrl || "/placeholder.jpg"}
               alt={product.title || "Product Image"}
-              className="w-48 h-48 object-cover rounded-lg shadow-md"
+              className="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-lg shadow-md"
             />
 
             {/* Product Details */}
             <div className="flex-1">
-              <h3 className="text-xl font-semibold mb-2">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-2 text-gray-800">
                 {product.title || "Product Name"}
               </h3>
               <p className="text-gray-600 mb-4">
@@ -118,14 +125,11 @@ export default function PlaceOrder() {
 
               {/* Place Order Button */}
               <Button
-                // asChild
                 onClick={placeOrder}
                 disabled={loading}
                 className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
               >
-                {/* <Link to="/payment" state={{ product, quantity }}> */}
                 {loading ? "Placing Order..." : "Place Order"}
-                {/* </Link> */}
               </Button>
 
               {/* Message */}

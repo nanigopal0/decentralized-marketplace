@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import ProductCard from "../layout/ProductCard";
 
@@ -13,7 +12,6 @@ export default function SearchResults() {
   const query = new URLSearchParams(location.search).get("query");
 
   async function fetchSearchResults() {
-    console.log(query)
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/search?keyword=${query}`,
@@ -25,11 +23,9 @@ export default function SearchResults() {
           credentials: "include",
         }
       );
-      console.log(response.status)
       handleUnauthorizedStatus(response);
       if (response.ok) {
         const data = await response.json();
-        console.log(data)
         setProducts(data);
       }
     } catch (error) {
@@ -48,19 +44,29 @@ export default function SearchResults() {
   }, [query]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
-        Search Results for "{query}"
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-4 sm:p-6 lg:p-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
+        Search Results for "<span className="text-blue-600">{query}</span>"
       </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-        {products.map((product) => (
-          <ProductCard
-            key={product.productId}
-            product={product}
-            onClick={() => handleCardClick(product)}
-          />
-        ))}
-      </div>
+
+      {products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {products.map((product) => (
+            <ProductCard
+              key={product.productId}
+              product={product}
+              onClick={() => handleCardClick(product)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-10">
+          <p className="text-gray-600 text-lg">No products found for "{query}"</p>
+          <p className="text-gray-500 mt-2">
+            Try searching with a different keyword.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,10 +1,8 @@
 import React, { useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProduct } from "../../../store/slices/productSlice";
 import { Loader } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../layout/Sidebar";
 import ProductCard from "../layout/ProductCard";
 
 export default function Home() {
@@ -37,14 +35,12 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        <h2 className="text-4xl font-bold mb-8  text-gray-800">Products</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8">
+        <h2 className="text-2xl sm:text-3xl lg:text-3xl font-bold mb-6 lg:mb-8 text-center  text-gray-800">
+          Explore Our Products
+        </h2>
+        <div className="grid max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6  mx-auto">
           {products.map((product) => (
             <ProductCard
               key={product.productId}

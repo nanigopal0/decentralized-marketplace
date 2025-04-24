@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../layout/Sidebar";
 import OrderCard from "../layout/OrderCard";
-
+import { useDispatch } from "react-redux";
+import { handleUnauthorizedStatus } from "@/util/handleUnauthorizedStatus";
+import { pingServer } from "../../../store/slices/userSlice";
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  
   async function fetchOrders() {
     try {
       const response = await fetch(
@@ -21,6 +23,11 @@ export default function MyOrders() {
           credentials: "include",
         }
       );
+
+      handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
       if (!response.ok) throw new Error("Failed to fetch orders.");
 
       const data = await response.json();
@@ -39,24 +46,27 @@ export default function MyOrders() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
       <div className="flex-1 p-4 lg:p-6">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 lg:mb-8 text-center lg:text-left text-gray-800">
           My Orders
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 max-w-7xl mx-auto">
-          {orders.map((order) => (
-            <OrderCard
-              key={order.orderId}
-              order={order}
-              onClick={() => handleCardClick(order)}
-            />
-          ))}
-        </div>
+
+        {orders.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto">
+            {orders.map((order) => (
+              <OrderCard
+                key={order.orderId}
+                order={order}
+                onClick={() => handleCardClick(order)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10">
+            <p className="text-gray-600 text-lg">No orders found!</p>
+          </div>
+        )}
       </div>
     </div>
   );

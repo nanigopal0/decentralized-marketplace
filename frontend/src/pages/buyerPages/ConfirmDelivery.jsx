@@ -6,8 +6,9 @@ import { toast } from "react-toastify";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
-
-// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26";
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { useDispatch } from "react-redux";
+import { pingServer } from "../../../store/slices/userSlice";
 
 export default function ConfirmDelivery() {
   const location = useLocation();
@@ -17,14 +18,13 @@ export default function ConfirmDelivery() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const generateDeliverOtp = async () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/deliver-otp?orderId=${
-          order.orderId
-        }`,
+        `${import.meta.env.VITE_BACKEND_URL}/order/deliver-otp?orderId=${order.orderId}`,
         {
           method: "PUT",
           headers: {
@@ -33,9 +33,14 @@ export default function ConfirmDelivery() {
           credentials: "include",
         }
       );
+
+      handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
       if (response.status === 204) {
         toast.success("OTP sent to your email!");
-        setShowOtpInput(true); // Show OTP input after sending OTP
+        setShowOtpInput(true);
       } else {
         toast.error("Failed to send OTP. Please try again.");
       }
@@ -51,9 +56,7 @@ export default function ConfirmDelivery() {
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/verify-deliver-otp?orderId=${
-          order.orderId
-        }&&otp=${otp}`,
+        `${import.meta.env.VITE_BACKEND_URL}/order/verify-deliver-otp?orderId=${order.orderId}&&otp=${otp}`,
         {
           method: "PUT",
           headers: {
@@ -62,13 +65,16 @@ export default function ConfirmDelivery() {
           credentials: "include",
         }
       );
-
+      handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
       if (response.status === 204) {
         toast.success("Delivery confirmed successfully!");
-        setShowOtpInput(false); // Hide OTP input after successful verification
-        setOtp(""); // Clear OTP input
+        setShowOtpInput(false);
+        setOtp("");
         setTxStatus("Delivery confirmed successfully!");
-        handleConfirmDelivery(); // Call the function to confirm delivery on the blockchain
+        handleConfirmDelivery();
       } else {
         toast.error("Failed to verify OTP. Please try again.");
       }
@@ -81,7 +87,6 @@ export default function ConfirmDelivery() {
   };
 
   const handleConfirmDelivery = async () => {
-    console.log(order.orderId)
     try {
       if (!window.ethereum) throw new Error("MetaMask is not installed");
       await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -97,9 +102,8 @@ export default function ConfirmDelivery() {
       const tx = await contract.confirmDelivery(order.orderId);
       setTxStatus("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
-      console.log("Transaction Hash:", tx.hash);
       setTxStatus("Delivery confirmed successfully!");
-      navigate("/myorders"); // Redirect to orders page
+      navigate("/myorders");
     } catch (error) {
       console.error("Delivery confirmation failed:", error);
       setTxStatus("Delivery confirmation failed. Please try again.");
@@ -117,9 +121,9 @@ export default function ConfirmDelivery() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-6 flex items-center justify-center">
       <div className="bg-white shadow-xl rounded-2xl p-8 max-w-xl w-full">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
           Confirm Product Delivery
         </h2>
 

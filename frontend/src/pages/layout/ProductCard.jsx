@@ -12,7 +12,7 @@ export default function ProductCard({ product, onClick }) {
       <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200">
         <img
           src={product.mediaUrl || "/placeholder.jpg"}
-          alt={product.name}
+          alt={product.title}
           className="w-full h-full object-cover"
         />
       </div>
@@ -25,9 +25,14 @@ export default function ProductCard({ product, onClick }) {
         <p className="text-sm text-gray-600 mb-2 line-clamp-2">
           {product.description}
         </p>
-        <p className="text-lg font-bold text-emerald-600">
-          {product.price} {product.priceUnit}
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-lg font-bold text-emerald-600">
+            {product.price} {product.priceUnit}
+          </p>
+          <p className="text-xs text-gray-500">
+            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

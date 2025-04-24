@@ -1,23 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
-import Sidebar from "../layout/Sidebar";
 import ProductCard from "../layout/ProductCard";
+import { pingServer } from "../../../store/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 const AllProduct = () => {
   const navigateTo = useNavigate();
   const [products, setProducts] = useState([]);
   const user = JSON.parse(localStorage.getItem("user"));
-
+  const dispatch = useDispatch();
   const fetchAllProducts = async () => {
     try {
       const response = await fetch(
@@ -34,6 +27,9 @@ const AllProduct = () => {
       );
 
       handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
       const data = await response.json();
       if (response.status === 200) {
         setProducts(data);
@@ -48,26 +44,24 @@ const AllProduct = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-r from-yellow-100 to-pink-100">
-      {/* Sidebar */}
-      <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        {/* <Card className="shadow-lg p-6 bg-gradient-to-r from-yellow-100 to-pink-100"> */}
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-2xl font-bold text-gray-800">Products</p>
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
+      <div className="p-4 sm:p-6 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+          <p className="text-2xl font-bold text-gray-800 text-center sm:text-left">
+            Products
+          </p>
           <Button
             onClick={() => navigateTo("/product/add")}
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
           >
             Add Product
           </Button>
         </div>
 
-        {/* <CardContent> */}
+        {/* Product Grid */}
         {products && products.length > 0 ? (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((element) => (
               <ProductCard
                 key={element.productId}
@@ -85,14 +79,12 @@ const AllProduct = () => {
             <p className="text-gray-600 text-lg">No Products Found!</p>
             <Button
               onClick={() => navigateTo("/product/add")}
-              className="mt-4 bg-blue-600 text-white hover:bg-blue-700"
+              className="mt-4 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
             >
               Add Your First Product
             </Button>
           </div>
         )}
-        {/* </CardContent> */}
-        {/* </Card> */}
       </div>
     </div>
   );

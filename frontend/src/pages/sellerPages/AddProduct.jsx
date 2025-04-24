@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
 import { Label } from "@/components/ui/Label";
 import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -15,8 +16,9 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { handleFileUpload } from "../../util/CloudinaryFileUpload";
 import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
-
-// const CONTRACT_ADDRESS = "0xfd32099CfA3cd4037A9Ea4961057De1beD433e26"; //Replace with your contract_Address
+import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { pingServer } from "../../../store/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -25,10 +27,10 @@ const AddProduct = () => {
   const [productType, setProductType] = useState("");
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
-  const navigate = useNavigate();
   const [productImagePreview, setProductImagePreview] = useState("");
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
-
+  const dispatch = useDispatch();
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -45,18 +47,18 @@ const AddProduct = () => {
 
     const imageUrl = await handleFileUpload(productImage);
     const reqdata = {
-      "title":title,
-      "description":description,
-      "price":price,
-      "type":productType,
-      "stock":stock,
-      "sellerId":user.id,
-      "mediaUrl":imageUrl
-    }
-  
+      title,
+      description,
+      price,
+      type: productType,
+      stock,
+      sellerId: user.id,
+      mediaUrl: imageUrl,
+    };
+
     const data = await addProductToDB(reqdata);
-    if(data == null){
-      toast.error("something went wrong!");
+    if (data == null) {
+      toast.error("Something went wrong!");
       return;
     }
     handleAddProductToBlockchain(data.productId, data.price, data.type);
@@ -70,7 +72,6 @@ const AddProduct = () => {
   };
 
   const addProductToDB = async (reqData) => {
-  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/add`,
@@ -83,7 +84,11 @@ const AddProduct = () => {
           },
         }
       );
-      if (response.status == 201) {
+      handleUnauthorizedStatus(response);
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
+      if (response.status === 201) {
         const data = await response.json();
         console.log(data);
         toast.success("Product added successfully!");
@@ -95,13 +100,8 @@ const AddProduct = () => {
     }
   };
 
-  const handleAddProductToBlockchain = async (
-    productId,
-    price,
-    productType
-  ) => {
+  const handleAddProductToBlockchain = async (productId, price, productType) => {
     try {
-
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -118,7 +118,9 @@ const AddProduct = () => {
       );
       console.log("Transaction submitted:", tx.hash);
       await tx.wait();
-      toast.success("Transaction confirmed! Product listed on blockchain successfully!");
+      toast.success(
+        "Transaction confirmed! Product listed on blockchain successfully!"
+      );
       navigate("/products");
     } catch (err) {
       console.error("Blockchain listing error:", err);
@@ -127,167 +129,121 @@ const AddProduct = () => {
   };
 
   return (
-    <div className="flex mt-7 justify-center items-center min-h-[100vh] sm:gap-4 sm:py-4 sm:pl-14 bg-gradient-to-r from-yellow-100 to-pink-100">
-      <form onSubmit={handleAddProduct} className="w-[100%] px-5 md:w-[1000px]">
-        <div className="space-y-12">
-          <div className="border-b border-gray-900/10 pb-12">
-            <h2 className="font-semibold leading-7 text-gray-900 text-3xl">
-              Add New Project
-            </h2>
-            <div className="mt-10 flex flex-col gap-5">
-              <div className="w-full sm:col-span-4">
-                <label className="block text-sm font-medium leading-6 text-gray-900">
-                  Project Title
-                </label>
-                <div className="mt-2">
-                  <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300">
-                    <Input
-                      type="text"
-                      placeholder="Title of the product..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 px-4 sm:px-6 lg:px-8">
+      <form
+        onSubmit={handleAddProduct}
+        className="w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg space-y-6"
+      >
+        <h2 className="text-2xl font-bold text-gray-800 text-center">
+          Add New Product
+        </h2>
 
-              <div className="w-full sm:col-span-4">
-                <Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Description
-                </Label>
-                <div className="mt-2">
-                  <Textarea
-                    placeholder="Feature 1. Feature 2. Feature 3."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-              </div>
-              {/* <div className="w-full sm:col-span-4">
-                <Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Product ID
-                </Label>
-                <div className="mt-2">
-                  <Input
-                    type="text"
-                    value={productId}
-                    onChange={(e) => setProductId(e.target.value)}
-                    required
-                    className="w-full border rounded px-3 py-2"
-                  />
-                </div>
-              </div> */}
-              <div className="w-full sm:col-span-4">
-                <Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Stock
-                </Label>
-                <div className="mt-2">
-                  <Input
-                    placeholder="Stock count"
-                    value={stock}
-                    onChange={(e) => setStock(e.target.value)}
-                  />
-                </div>
-              </div>
+        {/* Product Title */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Product Title
+          </Label>
+          <Input
+            type="text"
+            placeholder="Enter product title..."
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-2 w-full"
+          />
+        </div>
 
-              <div className="w-full sm:col-span-4">
-                <Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Product Type
-                </Label>
-                <div className="mt-2">
-                  <Select
-                    value={productType}
-                    onValueChange={(selectedValue) =>
-                      setProductType(selectedValue)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Product Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="PHYSICAL">Physical</SelectItem>
-                      <SelectItem value="DIGITAL">Digital</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+        {/* Description */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Description
+          </Label>
+          <Textarea
+            placeholder="Enter product description..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-2 w-full"
+          />
+        </div>
 
-              <div className="w-full sm:col-span-4">
-                <Label className="block text-sm font-medium leading-6 text-gray-900">
-                  Price
-                </Label>
-                <div className="mt-2">
-                  <Input
-                    type="text"
-                    placeholder="Price in ETH"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                  />
-                </div>
-              </div>
+        {/* Stock */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Stock
+          </Label>
+          <Input
+            type="number"
+            placeholder="Enter stock count..."
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            className="mt-2 w-full"
+          />
+        </div>
 
-              <div className="w-full col-span-full">
-                <Label
-                  htmlFor="cover-photo"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Project Banner
-                </Label>
-                <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                  <div className="text-center">
-                    {productImagePreview ? (
-                      <img
-                        className="mx-auto h-[250px] w-full"
-                        src={productImagePreview}
-                      />
-                    ) : (
-                      <svg
-                        className="mx-auto h-12 w-12 text-gray-300"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
+        {/* Product Type */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Product Type
+          </Label>
+          <Select
+            value={productType}
+            onValueChange={(selectedValue) => setProductType(selectedValue)}
+            className="mt-2"
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select Product Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PHYSICAL">Physical</SelectItem>
+              <SelectItem value="DIGITAL">Digital</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-                    <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                      <Label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 hover:text-indigo-500"
-                      >
-                        <span>Upload a file</span>
-                        <Input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          onChange={handleBanner}
-                        />
-                      </Label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs leading-5 text-gray-600">
-                      PNG, JPG, GIF up to 10MB
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
+        {/* Price */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Price (ETH)
+          </Label>
+          <Input
+            type="number"
+            placeholder="Enter price in ETH..."
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="mt-2 w-full"
+          />
+        </div>
+
+        {/* Product Image */}
+        <div>
+          <Label className="block text-sm font-medium text-gray-700">
+            Product Image
+          </Label>
+          <div className="mt-2 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4">
+            {productImagePreview ? (
+              <img
+                src={productImagePreview}
+                alt="Product Preview"
+                className="h-48 w-full object-cover rounded-lg"
+              />
+            ) : (
+              <p className="text-gray-500">No image selected</p>
+            )}
+            <Input
+              type="file"
+              onChange={handleBanner}
+              className="mt-4 w-full"
+            />
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-end gap-x-6">
-          <button
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <Button
             type="submit"
-            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 w-56"
+            className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
           >
-            Add Project
-          </button>
+            Add Product
+          </Button>
         </div>
       </form>
     </div>
