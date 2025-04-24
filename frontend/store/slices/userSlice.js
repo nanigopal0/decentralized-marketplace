@@ -8,7 +8,7 @@ const userSlice = createSlice({
   initialState: {
     loading: false,
     user: {},
-    isAuthenticated: false,
+    isAuthenticated: true,
     error: null,
     message: null,
     isUpdated: false,

@@ -21,7 +21,7 @@ import MyOrders from "./pages/buyerPages/MyOrders";
 import PlaceOrder from "./pages/buyerPages/PlaceOrder";
 import LandingPage from "./pages/mainpages/LandingPage";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { pingServer } from "../store/slices/userSlice";
 import Navbar from "./pages/layout/Navbar";
 import Footer from "./pages/layout/Footer";
@@ -33,7 +33,10 @@ import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
 import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
 import SearchResults from "./pages/mainpages/SearchResults";
 import Sidebar from "./pages/layout/Sidebar";
-
+import CancelOrder from "./pages/buyerPages/cancelOrder";
+import TermsOfUse from "./pages/layout/Termsofuse";
+import PrivacyPolicy from "./pages/layout/PrivacyPolicy";
+import SecurityPolicy from "./pages/layout/SecurityPolicy";
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);

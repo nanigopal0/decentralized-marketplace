@@ -131,7 +131,7 @@ const Sidebar = ({ isOpen }) => {
             Profile
           </NavLink>
 
-      
+
           <Button
             onClick={handleLogout}
             className="w-full bg-red-500 hover:bg-red-600 text-white"
