@@ -26,7 +26,7 @@ export default function Register({ className, ...props }) {
       setError("Please select a role."); // Show error if no role is selected
       return;
     }
-   
+
     const payload = {
       fullName: e.target.name.value,
       email: e.target.email.value,

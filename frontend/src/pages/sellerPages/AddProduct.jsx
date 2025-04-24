@@ -47,11 +47,11 @@ const AddProduct = () => {
 
     const imageUrl = await handleFileUpload(productImage);
     const reqdata = {
-      title,
-      description,
-      price,
+      title: title,
+      description: description,
+      price: price,
       type: productType,
-      stock,
+      stock: stock,
       sellerId: user.id,
       mediaUrl: imageUrl,
     };
@@ -72,6 +72,7 @@ const AddProduct = () => {
   };
 
   const addProductToDB = async (reqData) => {
+  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/add`,
@@ -102,6 +103,7 @@ const AddProduct = () => {
 
   const handleAddProductToBlockchain = async (productId, price, productType) => {
     try {
+
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
