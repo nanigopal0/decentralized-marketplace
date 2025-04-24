@@ -13,6 +13,8 @@ import {
 import { toast } from "react-toastify";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { useDispatch } from "react-redux";
+import { pingServer } from "../../../store/slices/userSlice";
 
 const UpdateProduct = () => {
   const [title, setTitle] = useState("");
@@ -25,7 +27,7 @@ const UpdateProduct = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-
+  const dispatch = useDispatch(); // Import useDispatch from react-redux
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -47,6 +49,10 @@ const UpdateProduct = () => {
         }
       );
       handleUnauthorizedStatus(response);
+  
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (response.status === 204) {
         toast.success("Product updated successfully");
         navigate("/products");

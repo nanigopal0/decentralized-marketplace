@@ -1,6 +1,6 @@
 package com.decentralized.marketplace.service.implementation;
 
-import com.decentralized.marketplace.contract.service.ContractService;
+
 import com.decentralized.marketplace.dto.ProductDTO;
 import com.decentralized.marketplace.dto.UpdateProduct;
 import com.decentralized.marketplace.entity.Product;
@@ -21,11 +21,10 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepo productRepo;
-    private final ContractService contractService;
 
-    public ProductServiceImpl(ProductRepo productRepo, ContractService contractService) {
+    public ProductServiceImpl(ProductRepo productRepo) {
         this.productRepo = productRepo;
-        this.contractService = contractService;
+
     }
 
 

@@ -56,9 +56,9 @@ function App() {
           <Navbar isOpen={isOpen} onSidebarToggle={toggleSidebar} />
         </header>
 
-        <main className="flex w-full transition-all duration-300 ease-in-out">
+        <main className="flex w-full min-h-screen transition-all duration-300 ease-in-out">
           {isOpen && <Sidebar isOpen={isOpen} />}
-          <div className={`transition-all w-full duration-300 ease-in-out `}>
+          <div className={`flex-1 transition-all duration-300 ease-in-out `}>
             <Routes>
               {isAuthenticated ? (
                 <>

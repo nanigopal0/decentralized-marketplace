@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Edit3 } from "lucide-react";
 import { toast } from "react-toastify";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { useDispatch } from "react-redux";
+import { pingServer } from "../../../store/slices/userSlice";
 
 const ProductDetails = () => {
   const location = useLocation();
@@ -20,7 +22,7 @@ const ProductDetails = () => {
   const { product } = location.state || {};
   const [orders, setOrders] = useState([]);
   const [deliveredCount, setDeliveredCount] = useState(0);
-
+  const dispatch = useDispatch();
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -42,6 +44,10 @@ const ProductDetails = () => {
         }
       );
       handleUnauthorizedStatus(response);
+   
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
@@ -69,7 +75,10 @@ const ProductDetails = () => {
           },
         }
       );
-      handleUnauthorizedStatus(response)
+      handleUnauthorizedStatus(response);
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (response.status === 202) {
         toast.success("Product deleted successfully!");
         navigate("/products"); // Redirect to All Products page

@@ -40,7 +40,6 @@ private final JwtAuthEntryPoint jwtAuthEntryPoint;
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/public/**","/contract/**").permitAll()
-//                        .requestMatchers("buyer/**").hasRole("USER")
                         .requestMatchers("/product/add","/product/delete").hasRole("SELLER")
                         .anyRequest().authenticated()
                 )

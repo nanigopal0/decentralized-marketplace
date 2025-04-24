@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Loader2 } from "lucide-react"; // Import spinner icon for loading
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { useDispatch } from "react-redux";
+import { pingServer } from "../../../store/slices/userSlice";
 
 const SellerDashboard = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [sellerDashboardData, setSellerDashboardData] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
-
+  const dispatch = useDispatch(); // Redux dispatch function
   const fetchSellerDashboardData = async () => {
     setLoading(true); // Start loading
     try {
@@ -22,6 +24,10 @@ const SellerDashboard = () => {
         }
       );
       handleUnauthorizedStatus(response);
+  
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (response.ok) {
         const data = await response.json();
         setSellerDashboardData(data);

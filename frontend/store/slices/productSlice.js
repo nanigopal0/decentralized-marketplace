@@ -102,7 +102,8 @@ export const getAllProduct = () => async(dispatch) => {
         dispatch(productSlice.actions.getAllProductSuccess(data.data))
         dispatch(productSlice.actions.clearAllErrors())
     } catch (error) {
-        dispatch(productSlice.actions.getAllProductFailed(error.response.data.message))
+        console.log(error)
+        dispatch(productSlice.actions.getAllProductFailed(error?.message || "Something went wrong"))
     }
 }
 

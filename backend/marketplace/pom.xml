@@ -59,11 +59,11 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.web3j</groupId>
-			<artifactId>core</artifactId>
-			<version>4.10.3</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.web3j</groupId>-->
+<!--			<artifactId>core</artifactId>-->
+<!--			<version>4.10.3</version>-->
+<!--		</dependency>-->
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
@@ -123,39 +123,39 @@
 				</configuration>
 			</plugin>
 
-			<plugin>
-				<groupId>org.web3j</groupId>
-				<artifactId>web3j-maven-plugin</artifactId>
-				<version>4.10.3</version>
-				<configuration>
-					<packageName>java</packageName>
-					<sourceDestination>src/main/java/generated</sourceDestination>
-					<nativeJavaType>true</nativeJavaType>
-					<outputFormat>java,bin,abi</outputFormat>
-					<soliditySourceFiles>
-						<directory>src/main/resources/web3</directory>
-						<includes>
-							<include>**/*.sol</include>
-						</includes>
-					</soliditySourceFiles>
-					<outputDirectory>
-						<java>src/main/java/com/decentralized/marketplace/contract/</java>
-						<bin>src/main/java/com/decentralized/marketplace/contract/bin</bin>
-						<abi>src/main/java/com/decentralized/marketplace/contract/abi</abi>
-					</outputDirectory>
-					<contract>
-						<includes>
-							<include>greeter</include>
-						</includes>
-						<excludes>
-							<exclude>mortal</exclude>
-						</excludes>
-					</contract>
-					<pathPrefixes>
-						<pathPrefix>dep=../dependencies</pathPrefix>
-					</pathPrefixes>
-				</configuration>
-			</plugin>
+<!--			<plugin>-->
+<!--				<groupId>org.web3j</groupId>-->
+<!--				<artifactId>web3j-maven-plugin</artifactId>-->
+<!--				<version>4.10.3</version>-->
+<!--				<configuration>-->
+<!--					<packageName>java</packageName>-->
+<!--					<sourceDestination>src/main/java/generated</sourceDestination>-->
+<!--					<nativeJavaType>true</nativeJavaType>-->
+<!--					<outputFormat>java,bin,abi</outputFormat>-->
+<!--					<soliditySourceFiles>-->
+<!--						<directory>src/main/resources/web3</directory>-->
+<!--						<includes>-->
+<!--							<include>**/*.sol</include>-->
+<!--						</includes>-->
+<!--					</soliditySourceFiles>-->
+<!--					<outputDirectory>-->
+<!--						<java>src/main/java/com/decentralized/marketplace/contract/</java>-->
+<!--						<bin>src/main/java/com/decentralized/marketplace/contract/bin</bin>-->
+<!--						<abi>src/main/java/com/decentralized/marketplace/contract/abi</abi>-->
+<!--					</outputDirectory>-->
+<!--					<contract>-->
+<!--						<includes>-->
+<!--							<include>greeter</include>-->
+<!--						</includes>-->
+<!--						<excludes>-->
+<!--							<exclude>mortal</exclude>-->
+<!--						</excludes>-->
+<!--					</contract>-->
+<!--					<pathPrefixes>-->
+<!--						<pathPrefix>dep=../dependencies</pathPrefix>-->
+<!--					</pathPrefixes>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
 		</plugins>
 	</build>
 

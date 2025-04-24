@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import Sidebar from "../layout/Sidebar"; // Correctly importing your manually created Sidebar
 import OrderCard from "../layout/OrderCard";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { pingServer } from "../../../store/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
@@ -16,7 +18,7 @@ export default function SellerOrders() {
   const [activeStatus, setActiveStatus] = useState(""); // Track active status
   const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch(); // Import useDispatch from react-redux
   const fetchOrders = async (status) => {
     setLoading(true);
     const user = JSON.parse(localStorage.getItem("user"));
@@ -34,6 +36,9 @@ export default function SellerOrders() {
         }
       );
       handleUnauthorizedStatus(response);
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (!response.ok) {
         throw new Error("Failed to fetch orders.");
       }

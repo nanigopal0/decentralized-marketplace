@@ -129,7 +129,7 @@ public class UserServiceImpl implements UserService {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(15 * 60)
+                .maxAge(60 * 60)
                 .sameSite("Strict")
                 .build();
 

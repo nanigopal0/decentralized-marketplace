@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "react-toastify";
 import { Loader2 } from "lucide-react";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
+import { pingServer } from "../../../store/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 export default function OrderDetails() {
   const location = useLocation();
@@ -18,6 +20,7 @@ export default function OrderDetails() {
   const [isGeneratingOtp, setIsGeneratingOtp] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const generateShipmentOtp = async () => {
     setIsGeneratingOtp(true);
@@ -33,6 +36,10 @@ export default function OrderDetails() {
         }
       );
       handleUnauthorizedStatus(response);
+     
+            if (response.status === 401) {
+              dispatch(pingServer())
+            }
       if (response.status === 204) {
         toast.success("OTP sent to your email!");
         setShowOtpInput(true);
@@ -61,6 +68,10 @@ export default function OrderDetails() {
         }
       );
 handleUnauthorizedStatus(response);
+
+      if (response.status === 401) {
+        dispatch(pingServer())
+      }
       if (response.status === 204) {
         toast.success("Order shipped successfully!");
         setShowOtpInput(false);

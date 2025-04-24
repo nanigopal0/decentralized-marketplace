@@ -1,6 +1,5 @@
 package com.decentralized.marketplace.service.implementation;
 
-import com.decentralized.marketplace.contract.service.ContractService;
 import com.decentralized.marketplace.dto.BuyerOrderDTO;
 import com.decentralized.marketplace.dto.OrderRequestDTO;
 import com.decentralized.marketplace.dto.OrderResponseDTO;
