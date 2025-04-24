@@ -94,7 +94,7 @@ const Sidebar = ({ isOpen }) => {
             </>
           ) : (
             <>
-              {/* Home (Default Active for Buyers) */}
+
               <NavLink
                 to="/"
                 className={({ isActive }) =>
@@ -131,7 +131,7 @@ const Sidebar = ({ isOpen }) => {
             Profile
           </NavLink>
 
-          {/* Logout Button */}
+      
           <Button
             onClick={handleLogout}
             className="w-full bg-red-500 hover:bg-red-600 text-white"
