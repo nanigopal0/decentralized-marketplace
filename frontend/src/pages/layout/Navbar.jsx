@@ -27,7 +27,12 @@ export default function Navbar({ onSidebarToggle }) {
           />
         )}
         <Link to="/" className="text-2xl font-bold cursor-pointer">
-          SmartMarket
+          {/* SmartMarket */}
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-8 w-auto object-cover"
+          />
         </Link>
       </div>
 

@@ -37,17 +37,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.cors(c -> c.configurationSource(corsConfigurationSource()))
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(registry -> registry
-                        .requestMatchers("/public/**", "/contract/**").permitAll()
-                        .requestMatchers("/product/add", "/product/delete").hasRole("SELLER")
-                        .anyRequest().authenticated()
-                )
-                .httpBasic(Customizer.withDefaults())
-                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthEntryPoint))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
+        return http.cors(c -> c.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry -> registry.requestMatchers("/public/**", "/contract/**").permitAll().requestMatchers("/product/add", "/product/delete").hasRole("SELLER").anyRequest().authenticated()).httpBasic(Customizer.withDefaults()).exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthEntryPoint)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
     }
 
     @Bean
