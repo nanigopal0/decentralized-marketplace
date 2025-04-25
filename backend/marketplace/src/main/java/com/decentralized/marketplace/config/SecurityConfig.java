@@ -37,7 +37,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.cors(c -> c.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(registry -> registry.requestMatchers("/public/**", "/contract/**").permitAll().requestMatchers("/product/add", "/product/delete").hasRole("SELLER").anyRequest().authenticated()).httpBasic(Customizer.withDefaults()).exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthEntryPoint)).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
+        return http.cors(c -> c.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(registry ->
+                        registry.requestMatchers("/public/**", "/contract/**").permitAll()
+                                .requestMatchers("/product/add", "/product/delete").hasRole("SELLER")
+                                .anyRequest().authenticated()).httpBasic(Customizer.withDefaults())
+                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthEntryPoint))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 
     @Bean
@@ -45,7 +54,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://decentralized-marketplace-beta.vercel.app/", "https://decentralized-marketplace-git-main-abcs-projects-883dea03.vercel.app/", "https://decentralized-marketplace-abcs-projects-883dea03.vercel.app/"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

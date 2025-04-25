@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
                 .secure(true)
                 .path("/")
                 .maxAge(60 * 60)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
