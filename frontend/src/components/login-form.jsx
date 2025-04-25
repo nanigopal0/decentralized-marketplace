@@ -22,6 +22,13 @@ export function LoginForm({ className, ...props }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
+
+    // Check if MetaMask is installed
+    if (!window.ethereum) {
+      toast.error("MetaMask must be installed in your browser.");
+      return;
+    }
+
     dispatch(login(email, password));
   };
 
@@ -48,6 +55,11 @@ export function LoginForm({ className, ...props }) {
                 <p className="text-muted-foreground text-balance">
                   Login to your account
                 </p>
+              </div>
+
+              {/* Highlighted MetaMask Message */}
+              <div className="bg-yellow-200 text-yellow-800 p-3 rounded-md text-sm font-medium">
+                MetaMask must be installed in your browser.
               </div>
 
               <div className="grid gap-3">

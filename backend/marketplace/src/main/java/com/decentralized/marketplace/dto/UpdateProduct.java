@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,7 +15,7 @@ public class UpdateProduct {
     private String productId;
     private String title;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private String mediaUrl;
     private Integer stock;
 }

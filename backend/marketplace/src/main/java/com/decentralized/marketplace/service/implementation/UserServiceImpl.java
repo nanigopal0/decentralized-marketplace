@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -30,8 +31,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    //    private final BuyerRepo buyerRepo;
-//    private final SellerRepo sellerRepo;
     private final JwtService jwtService;
     private final HttpServletResponse httpServletResponse;
     private final ProductRepo productRepo;
@@ -41,8 +40,6 @@ public class UserServiceImpl implements UserService {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-//        this.buyerRepo = buyerRepo;
-//        this.sellerRepo = sellerRepo;
         this.jwtService = jwtService;
         this.httpServletResponse = httpServletResponse;
         this.productRepo = productRepo;
@@ -59,11 +56,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(userSignupRequestDTO.getFullName())
                 .role(userSignupRequestDTO.getRole())
                 .build();
-        User saved = userRepo.save(user);
-//        if (userSignupRequestDTO.getRole() == Role.SELLER)
-//            sellerRepo.save(Seller.builder().userId(saved.getId()).build());
-//        else
-//            buyerRepo.save(Buyer.builder().userId(saved.getId()).build());
+         userRepo.save(user);
     }
 
     @Override
@@ -108,7 +101,7 @@ public class UserServiceImpl implements UserService {
         Integer totalProducts = productRepo.countProductBySellerId(userId);
         List<Order> orders = orderRepo.findOrderBySellerId(userId);
         List<Order> deliveredOrders = orders.stream().filter((order -> order.getStatus() == OrderStatus.Delivered)).toList();
-        double totalEarnings = deliveredOrders.stream().mapToDouble(Order::getTotalPrice).sum();
+        double totalEarnings = deliveredOrders.stream().mapToDouble(o->o.getTotalPrice().doubleValue()).sum();
         int cancelledOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Cancelled).toList().size();
         int pendingOrders = orders.stream().filter(order -> order.getStatus() == OrderStatus.Pending).toList().size();
         return SellerDashboardInfoDTO.builder()
@@ -118,7 +111,7 @@ public class UserServiceImpl implements UserService {
                 .totalProducts(totalProducts)
                 .sellerId(userId.toHexString())
                 .totalOrders(orders.size())
-                .totalEarnings(totalEarnings)
+                .totalEarnings(BigDecimal.valueOf(totalEarnings))
                 .build();
     }
 

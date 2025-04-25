@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.IndexDirection;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -24,7 +25,7 @@ public class Product {
     @Indexed(direction = IndexDirection.ASCENDING)
     private String title;
     private String description;
-    private Double price;
+    private BigDecimal price;
     private ProductType type;
     private String priceUnit; //asset
     private String mediaUrl;

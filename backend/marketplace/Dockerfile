@@ -2,9 +2,9 @@
 
 FROM maven:3.9.9-sapmachine-22 AS build
 WORKDIR /home/app
-COPY pom.xml ./
+COPY backend/marketplace/pom.xml ./
 COPY backend/marketplace/src ./src
-RUN mvn -f backend/marketplace/pom.xml clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 
 # Stage 2: Create the final image

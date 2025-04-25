@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { ethers } from "ethers";
 import SmartMarketplace from "../contracts/SmartMarketplace.json";
-
-const CONTRACT_ADDRESS = "0x476EAcb99E1fdba714F18B473A08FdBCCCedb4EF";
+import { CONTRACT_ADDRESS } from "@/util/GetContractAddress";
 
 export default function BlockchainOrderDetails() {
   const [orderId, setOrderId] = useState("");
@@ -19,7 +18,7 @@ export default function BlockchainOrderDetails() {
       const signer = await provider.getSigner();
 
       const contract = new ethers.Contract(
-        CONTRACT_ADDRESS,
+        CONTRACT_ADDRESS ,
         SmartMarketplace,
         signer
       );

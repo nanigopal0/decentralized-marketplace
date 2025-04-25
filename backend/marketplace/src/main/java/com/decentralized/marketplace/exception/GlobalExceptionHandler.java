@@ -68,14 +68,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleException(Exception e) {
-
         log.error("Exception: {}", e.getMessage(),e.fillInStackTrace());
         return ResponseEntity.internalServerError().body(e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e) {
-
         log.error("RuntimeException: {}", e.getMessage(),e.fillInStackTrace());
         return ResponseEntity.internalServerError().body(e.getMessage());
     }

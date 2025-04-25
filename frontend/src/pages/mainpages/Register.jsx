@@ -16,22 +16,42 @@ import {
 import { toast } from "react-toastify";
 
 export default function Register({ className, ...props }) {
-  const [role, setRole] = useState(null); // Default role is "buyer"
+  const [role, setRole] = useState(null);
   const [error, setError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
-    // Handle registration logic here
+
+    // Check if MetaMask is installed
+    if (!window.ethereum) {
+      toast.error("MetaMask must be installed in your browser.");
+      return;
+    }
+
+    // Validate password
+    const password = e.target.password.value;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setPasswordError(
+        "Password must be at least 8 characters long, contain at least 1 letter, 1 number, and 1 special character."
+      );
+      return;
+    } else {
+      setPasswordError("");
+    }
+
     if (!role) {
-      setError("Please select a role."); // Show error if no role is selected
+      setError("Please select a role.");
       return;
     }
 
     const payload = {
       fullName: e.target.name.value,
       email: e.target.email.value,
-      password: e.target.password.value,
-      role: role, // Use the selected role
+      password: password,
+      role: role,
       ethereumPublicKey: e.target["ethereumPublicKey"].value,
     };
     registerUser(payload);
@@ -55,13 +75,12 @@ export default function Register({ className, ...props }) {
         console.log(data);
         toast.success("Registration successful! Please log in.");
       } else {
-        // Handle error (e.g., show a notification)
+        const data = await response.json();
         setError(data.message || "Registration failed. Please try again.");
         toast.error(data.message || "Registration failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      // Handle error (e.g., show a notification)
       setError("Registration failed. Please try again.");
       toast.error("Registration failed. Please try again.");
     }
@@ -80,6 +99,11 @@ export default function Register({ className, ...props }) {
                     <p className="text-muted-foreground text-balance">
                       Register to get started
                     </p>
+                  </div>
+
+                  {/* Highlighted MetaMask Message */}
+                  <div className="bg-yellow-200 text-yellow-800 p-3 rounded-md text-sm font-medium">
+                    MetaMask must be installed in your browser.
                   </div>
 
                   <div className="grid gap-3">
@@ -108,6 +132,11 @@ export default function Register({ className, ...props }) {
                       placeholder="Enter Password"
                       required
                     />
+                    {passwordError && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {passwordError}
+                      </p>
+                    )}
                   </div>
                   <div className="grid gap-3">
                     <Label htmlFor="ethereumPublicKey">
@@ -180,7 +209,8 @@ export default function Register({ className, ...props }) {
           </Card>
           <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
             By clicking continue, you agree to our{" "}
-            <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+            <Link to="terms-of-use">Terms of Service</Link> and{" "}
+            <Link to={"/privacy-policy"}>Privacy Policy</Link>.
           </div>
         </div>
       </div>

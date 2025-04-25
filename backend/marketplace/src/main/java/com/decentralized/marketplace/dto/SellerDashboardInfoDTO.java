@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @Builder
@@ -12,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class SellerDashboardInfoDTO {
     private String sellerId;
     private Integer totalProducts;
-    private Double totalEarnings;
+    private BigDecimal totalEarnings;
     private Integer totalOrders;
     private Integer totalPendingOrders;
     private Integer totalDeliveredOrders;

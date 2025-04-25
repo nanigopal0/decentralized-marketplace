@@ -17,6 +17,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -104,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderedAt(LocalDateTime.now())
                 .priceUnit(product.getPriceUnit())
                 .quantity(order.getQuantity())
-                .totalPrice(product.getPrice() * order.getQuantity())
+                .totalPrice(product.getPrice().multiply(BigDecimal.valueOf(order.getQuantity())))
                 .status(OrderStatus.Pending)
                 .build();
         User seller = userRepo.findById(product.getSellerId()).orElseThrow(() -> new UserNotFoundException(product.getSellerId().toHexString()));

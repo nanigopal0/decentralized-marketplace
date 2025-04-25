@@ -29,12 +29,13 @@ export default function ProfileView() {
       if (response.status === 401) {
         dispatch(pingServer())
       }
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch profile data.");
+      if (response.ok) {
+        const data = await response.json();
+        setProfileData(data);
+        localStorage.setItem("user", JSON.stringify(data));
+      }else{
+      throw new Error(response.status+" Failed to fetch profile data.");
       }
-      const data = await response.json();
-      setProfileData(data);
     } catch (err) {
       console.error("Error fetching profile data", err);
     }
@@ -79,7 +80,7 @@ export default function ProfileView() {
                   Wallet Address
                 </label>
                 <p className="text-gray-800 break-all">
-                  {profileData.walletAddress || "N/A"}
+                  {profileData.ethereumPublicKey || "N/A"}
                 </p>
               </div>
             </div>

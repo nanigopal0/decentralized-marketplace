@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 //seller order request
@@ -22,8 +23,8 @@ public class SellerOrderDTO {
     private String orderId;
     private PublicUserProfileDTO buyer;
     private Integer quantity;
-    private Double pricePerItem;
-    private Double totalPrice;
+    private BigDecimal pricePerItem;
+    private BigDecimal totalPrice;
     private String transactionHash;
     private LocalDateTime orderedAt;
     private ProductType productType;

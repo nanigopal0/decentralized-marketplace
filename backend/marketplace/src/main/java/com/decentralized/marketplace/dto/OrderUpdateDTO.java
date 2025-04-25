@@ -1,9 +1,11 @@
 package com.decentralized.marketplace.dto;
 
 
+import java.math.BigDecimal;
+
 public class OrderUpdateDTO {
     private String orderId;
     private Integer quantity;
-    private Double pricePerItem;
+    private BigDecimal pricePerItem;
     private String priceUnit;
 }

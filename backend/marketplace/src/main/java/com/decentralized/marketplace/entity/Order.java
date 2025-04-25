@@ -8,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,8 +23,8 @@ public class Order {
     private ObjectId buyerId;
     private ObjectId productId;
     private Integer quantity;
-    private Double pricePerItem;
-    private Double totalPrice;
+    private BigDecimal pricePerItem;
+    private BigDecimal totalPrice;
     private OrderStatus status;
     private LocalDateTime orderedAt;
     private String receiptUrl;
