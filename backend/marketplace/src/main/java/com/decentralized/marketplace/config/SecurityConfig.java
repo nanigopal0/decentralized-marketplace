@@ -27,7 +27,8 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthFilter jwtAuthFilter;
-private final JwtAuthEntryPoint jwtAuthEntryPoint;
+    private final JwtAuthEntryPoint jwtAuthEntryPoint;
+
     public SecurityConfig(CustomUserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter, JwtAuthEntryPoint jwtAuthEntryPoint) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
@@ -36,15 +37,15 @@ private final JwtAuthEntryPoint jwtAuthEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http.cors(c->c.configurationSource(corsConfigurationSource()))
+        return http.cors(c -> c.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(registry -> registry
-                        .requestMatchers("/public/**","/contract/**").permitAll()
-                        .requestMatchers("/product/add","/product/delete").hasRole("SELLER")
+                        .requestMatchers("/public/**", "/contract/**").permitAll()
+                        .requestMatchers("/product/add", "/product/delete").hasRole("SELLER")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .exceptionHandling(e->e.authenticationEntryPoint(jwtAuthEntryPoint))
+                .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthEntryPoint))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).build();
     }
@@ -55,7 +56,7 @@ private final JwtAuthEntryPoint jwtAuthEntryPoint;
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://decentralized-marketplace-beta.vercel.app/", "https://decentralized-marketplace-git-main-abcs-projects-883dea03.vercel.app/", "https://decentralized-marketplace-abcs-projects-883dea03.vercel.app/"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
