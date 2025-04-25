@@ -19,6 +19,7 @@ import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 const AddProduct = () => {
   const [title, setTitle] = useState("");
@@ -28,9 +29,11 @@ const AddProduct = () => {
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
   const [productImagePreview, setProductImagePreview] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
   const dispatch = useDispatch();
+
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -43,36 +46,49 @@ const AddProduct = () => {
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    console.log("Submitting product listing...");
 
-    const imageUrl = await handleFileUpload(productImage);
-    const reqdata = {
-      title: title,
-      description: description,
-      price: price,
-      type: productType,
-      stock: stock,
-      sellerId: user.id,
-      mediaUrl: imageUrl,
-    };
-
-    const data = await addProductToDB(reqdata);
-    if (data == null) {
-      toast.error("Something went wrong!");
+    if (!title || !description || !price || !productType || !stock) {
+      toast.error("All fields are required!");
       return;
     }
-    handleAddProductToBlockchain(data.productId, data.price, data.type);
 
-    setTitle("");
-    setDescription("");
-    setPrice("");
-    setProductType("");
-    setStock("");
-    setProductImage("");
+    setLoading(true); // Start loading
+    try {
+      const imageUrl = await handleFileUpload(productImage);
+      const reqdata = {
+        title,
+        description,
+        price,
+        type: productType,
+        stock,
+        sellerId: user.id,
+        mediaUrl: imageUrl,
+      };
+
+      const data = await addProductToDB(reqdata);
+      if (data == null) {
+        toast.error("Something went wrong!");
+        return;
+      }
+      await handleAddProductToBlockchain(data.productId, data.price, data.type);
+
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setPrice("");
+      setProductType("");
+      setStock("");
+      setProductImage("");
+      setProductImagePreview("");
+    } catch (error) {
+      console.error("Error adding product:", error);
+      toast.error("Failed to add product. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
 
   const addProductToDB = async (reqData) => {
-  
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/add`,
@@ -87,23 +103,21 @@ const AddProduct = () => {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.status === 201) {
         const data = await response.json();
-        console.log(data);
         toast.success("Product added successfully!");
         return data;
       }
     } catch (error) {
-      console.log(error);
-      return null;
+      console.error("Error adding product to DB:", error);
     }
+    return null;
   };
 
   const handleAddProductToBlockchain = async (productId, price, productType) => {
     try {
-
       if (!window.ethereum) throw new Error("MetaMask not detected");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -112,17 +126,15 @@ const AddProduct = () => {
         SmartMarketplace,
         signer
       );
-      const wei = price * 1000000000000000000;
+      const wei = ethers.utils.parseEther(price.toString());
       const tx = await contract.listProduct(
         productId,
         wei.toString(),
         productType === "PHYSICAL" ? 0 : 1
       );
-      console.log("Transaction submitted:", tx.hash);
+      toast.info("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
-      toast.success(
-        "Transaction confirmed! Product listed on blockchain successfully!"
-      );
+      toast.success("Product listed on blockchain successfully!");
       navigate("/products");
     } catch (err) {
       console.error("Blockchain listing error:", err);
@@ -134,7 +146,7 @@ const AddProduct = () => {
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleAddProduct}
-        className="w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg space-y-6"
+        className="w-full max-w-3xl bg-white p-6 sm:p-8 lg:p-10 rounded-lg shadow-lg space-y-6"
       >
         <h2 className="text-2xl font-bold text-gray-800 text-center">
           Add New Product
@@ -242,9 +254,21 @@ const AddProduct = () => {
         <div className="flex justify-end">
           <Button
             type="submit"
-            className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
+            disabled={loading}
+            className={`px-4 py-2 rounded-md flex items-center justify-center ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
           >
-            Add Product
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Adding Product...
+              </>
+            ) : (
+              "Add Product"
+            )}
           </Button>
         </div>
       </form>

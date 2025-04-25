@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { pingServer } from "../../../store/slices/userSlice";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 export default function PlaceOrder() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +19,7 @@ export default function PlaceOrder() {
   const totalPrice = (product.price || 0) * quantity;
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const placeOrder = async () => {
     try {
       setLoading(true);
@@ -40,7 +41,7 @@ export default function PlaceOrder() {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.status === 202) {
         const data = await response.json();
@@ -48,9 +49,12 @@ export default function PlaceOrder() {
           "Order placed successfully! Pay the amount to accept the order."
         );
         navigate("/payment", { state: { order: data, product } });
+      } else {
+        toast.error("Failed to place order. Please try again.");
       }
     } catch (error) {
-      toast.error("Failed to place order. Please try again.");
+      console.error("Error placing order:", error);
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
       setMessage("");
@@ -58,7 +62,13 @@ export default function PlaceOrder() {
   };
 
   if (!product) {
-    return <p className="text-center mt-10">No product details available.</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-lg font-semibold text-red-500">
+          No product details available.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -127,9 +137,16 @@ export default function PlaceOrder() {
               <Button
                 onClick={placeOrder}
                 disabled={loading}
-                className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700"
+                className="mt-6 w-full bg-blue-600 text-white hover:bg-blue-700 flex items-center justify-center"
               >
-                {loading ? "Placing Order..." : "Place Order"}
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Placing Order...
+                  </>
+                ) : (
+                  "Place Order"
+                )}
               </Button>
 
               {/* Message */}

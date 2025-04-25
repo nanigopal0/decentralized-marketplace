@@ -16,6 +16,7 @@ import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
 import { pingServer } from "../../../store/slices/userSlice";
 import { handleFileUpload } from "../../util/CloudinaryFileUpload";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 const UpdateProduct = () => {
   const [title, setTitle] = useState("");
@@ -25,10 +26,12 @@ const UpdateProduct = () => {
   const [stock, setStock] = useState(0);
   const [productImage, setProductImage] = useState("");
   const [productImagePreview, setProductImagePreview] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
-  const dispatch = useDispatch(); // Import useDispatch from react-redux
+  const dispatch = useDispatch();
+
   const handleBanner = (e) => {
     const file = e.target.files[0];
     const reader = new FileReader();
@@ -40,6 +43,7 @@ const UpdateProduct = () => {
   };
 
   const updateProduct = async (formData) => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/update`,
@@ -60,9 +64,14 @@ const UpdateProduct = () => {
       if (response.status === 204) {
         toast.success("Product updated successfully");
         navigate("/products");
+      } else {
+        toast.error("Failed to update product. Please try again.");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error updating product:", error);
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -75,8 +84,12 @@ const UpdateProduct = () => {
       price,
       stock,
     };
-    const url =await handleFileUpload(productImage);
-    reqData.mediaUrl = url;
+
+    if (productImage) {
+      const url = await handleFileUpload(productImage);
+      reqData.mediaUrl = url;
+    }
+
     updateProduct(reqData);
   };
 
@@ -89,13 +102,13 @@ const UpdateProduct = () => {
     setStock(initialProduct.stock);
     setProductImage(initialProduct.mediaUrl);
     setProductImagePreview(initialProduct.mediaUrl);
-  }, []);
+  }, [location.state]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={handleUpdateProduct}
-        className="w-full max-w-3xl bg-white p-6 rounded-lg shadow-lg space-y-6"
+        className="w-full max-w-3xl bg-white p-6 sm:p-8 lg:p-10 rounded-lg shadow-lg space-y-6"
       >
         <h2 className="text-2xl font-bold text-gray-800 text-center">
           Update Product
@@ -198,9 +211,21 @@ const UpdateProduct = () => {
         <div className="flex justify-end">
           <Button
             type="submit"
-            className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
+            disabled={loading}
+            className={`px-4 py-2 rounded-md flex items-center justify-center ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
+            }`}
           >
-            Update Product
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Updating Product...
+              </>
+            ) : (
+              "Update Product"
+            )}
           </Button>
         </div>
       </form>

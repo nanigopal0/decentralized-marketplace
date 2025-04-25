@@ -23,6 +23,7 @@ const ProductDetails = () => {
   const [orders, setOrders] = useState([]);
   const [deliveredCount, setDeliveredCount] = useState(0);
   const dispatch = useDispatch();
+
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -44,10 +45,10 @@ const ProductDetails = () => {
         }
       );
       handleUnauthorizedStatus(response);
-   
-            if (response.status === 401) {
-              dispatch(pingServer())
-            }
+
+      if (response.status === 401) {
+        dispatch(pingServer());
+      }
       if (response.ok) {
         const data = await response.json();
         setOrders(data);
@@ -76,9 +77,10 @@ const ProductDetails = () => {
         }
       );
       handleUnauthorizedStatus(response);
-            if (response.status === 401) {
-              dispatch(pingServer())
-            }
+
+      if (response.status === 401) {
+        dispatch(pingServer());
+      }
       if (response.status === 202) {
         toast.success("Product deleted successfully!");
         navigate("/products"); // Redirect to All Products page
@@ -107,7 +109,7 @@ const ProductDetails = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Product Image */}
-            <div className="w-full h-64 bg-gray-200 rounded-md overflow-hidden">
+            <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200 rounded-md overflow-hidden">
               <img
                 src={product.mediaUrl || "/placeholder.jpg"}
                 alt={product.title}
@@ -203,6 +205,13 @@ const ProductDetails = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
+                    <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200 rounded-md overflow-hidden">
+                      <img
+                        src={order.buyer.avatar || "/placeholder.jpg"}
+                        alt={order.buyer.fullName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                     <CardDescription className="text-gray-800 text-sm">
                       <span className="font-bold">Buyer:</span>{" "}
                       {order.buyer.fullName}

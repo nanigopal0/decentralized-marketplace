@@ -5,13 +5,17 @@ import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import ProductCard from "../layout/ProductCard";
 import { pingServer } from "../../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 const AllProduct = () => {
   const navigateTo = useNavigate();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false); // Loading state
   const user = JSON.parse(localStorage.getItem("user"));
   const dispatch = useDispatch();
+
   const fetchAllProducts = async () => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/product/get-by-sellerId?sellerId=${
@@ -28,14 +32,16 @@ const AllProduct = () => {
 
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       const data = await response.json();
       if (response.status === 200) {
         setProducts(data);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -59,31 +65,40 @@ const AllProduct = () => {
           </Button>
         </div>
 
-        {/* Product Grid */}
-        {products && products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((element) => (
-              <ProductCard
-                key={element.productId}
-                product={element}
-                onClick={() =>
-                  navigateTo(`/product/details/${element.productId}`, {
-                    state: { product: element },
-                  })
-                }
-              />
-            ))}
+        {/* Loading Indicator */}
+        {loading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
           </div>
         ) : (
-          <div className="text-center py-10">
-            <p className="text-gray-600 text-lg">No Products Found!</p>
-            <Button
-              onClick={() => navigateTo("/product/add")}
-              className="mt-4 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
-            >
-              Add Your First Product
-            </Button>
-          </div>
+          <>
+            {/* Product Grid */}
+            {products && products.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((element) => (
+                  <ProductCard
+                    key={element.productId}
+                    product={element}
+                    onClick={() =>
+                      navigateTo(`/product/details/${element.productId}`, {
+                        state: { product: element },
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <p className="text-gray-600 text-lg">No Products Found!</p>
+                <Button
+                  onClick={() => navigateTo("/product/add")}
+                  className="mt-4 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
+                >
+                  Add Your First Product
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

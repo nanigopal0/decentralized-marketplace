@@ -9,6 +9,7 @@ import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
 import { pingServer } from "../../../store/slices/userSlice";
+import { Loader2 } from "lucide-react"; // Import a spinner icon
 
 export default function ConfirmDelivery() {
   const location = useLocation();
@@ -36,7 +37,7 @@ export default function ConfirmDelivery() {
 
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.status === 204) {
         toast.success("OTP sent to your email!");
@@ -67,7 +68,7 @@ export default function ConfirmDelivery() {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.status === 204) {
         toast.success("Delivery confirmed successfully!");
@@ -87,6 +88,7 @@ export default function ConfirmDelivery() {
   };
 
   const handleConfirmDelivery = async () => {
+    setLoading(true);
     try {
       if (!window.ethereum) throw new Error("MetaMask is not installed");
       await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -107,6 +109,8 @@ export default function ConfirmDelivery() {
     } catch (error) {
       console.error("Delivery confirmation failed:", error);
       setTxStatus("Delivery confirmation failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,8 +125,8 @@ export default function ConfirmDelivery() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-6 flex items-center justify-center">
-      <div className="bg-white shadow-xl rounded-2xl p-8 max-w-xl w-full">
+    <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 p-4 sm:p-6 flex items-center justify-center">
+      <div className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 max-w-lg w-full">
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-gray-800">
           Confirm Product Delivery
         </h2>
@@ -154,9 +158,16 @@ export default function ConfirmDelivery() {
           <Button
             onClick={generateDeliverOtp}
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all flex items-center justify-center"
           >
-            {loading ? "Sending OTP..." : "Confirm Delivery"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Sending OTP...
+              </>
+            ) : (
+              "Confirm Delivery"
+            )}
           </Button>
         )}
 
@@ -174,9 +185,16 @@ export default function ConfirmDelivery() {
             <Button
               onClick={handleVerifyOtp}
               disabled={loading}
-              className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition-all"
+              className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition-all flex items-center justify-center"
             >
-              {loading ? "Verifying..." : "Verify OTP"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Verifying...
+                </>
+              ) : (
+                "Verify OTP"
+              )}
             </Button>
           </div>
         )}

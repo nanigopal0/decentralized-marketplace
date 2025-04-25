@@ -6,13 +6,16 @@ import { Link } from "react-router-dom";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 export default function ProfileView() {
   const [profileData, setProfileData] = useState({});
+  const [loading, setLoading] = useState(false); // Loading state
   const user = JSON.parse(localStorage.getItem("user"));
   const dispatch = useDispatch();
-  
+
   const fetchProfileData = async () => {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/user/get?id=${user.id}`,
@@ -26,23 +29,33 @@ export default function ProfileView() {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.ok) {
         const data = await response.json();
         setProfileData(data);
         localStorage.setItem("user", JSON.stringify(data));
-      }else{
-      throw new Error(response.status+" Failed to fetch profile data.");
+      } else {
+        throw new Error(response.status + " Failed to fetch profile data.");
       }
     } catch (err) {
       console.error("Error fetching profile data", err);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   useEffect(() => {
     fetchProfileData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-100 to-pink-100">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">

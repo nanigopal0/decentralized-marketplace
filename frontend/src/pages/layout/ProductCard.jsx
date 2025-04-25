@@ -5,15 +5,16 @@ export default function ProductCard({ product, onClick }) {
   return (
     <Card
       key={product.productId}
-      className="rounded-lg pt-0 shadow-md hover:shadow-2xl transition-shadow border border-gray-400 overflow-hidden cursor-pointer"
+      className="rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-300 overflow-hidden cursor-pointer"
       onClick={onClick}
     >
       {/* Product Image */}
-      <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200">
+      <div className="w-full bg-gray-200 h-40 sm:h-48 flex items-center justify-center">
         <img
           src={product.mediaUrl || "/placeholder.jpg"}
           alt={product.title}
           className="w-full h-full object-cover"
+          loading="lazy"
         />
       </div>
 
@@ -22,12 +23,10 @@ export default function ProductCard({ product, onClick }) {
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {product.title}
         </h2>
-        <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-          {product.description}
-        </p>
+       
         <div className="flex items-center justify-between">
           <p className="text-lg font-bold text-emerald-600">
-            {product.price} {product.priceUnit}
+            {product.price} {product.priceUnit || "ETH"}
           </p>
           <p className="text-xs text-gray-500">
             {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}

@@ -11,6 +11,7 @@ import { CONTRACT_ADDRESS } from "../../util/GetContractAddress";
 import { useDispatch } from "react-redux";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 export default function Payment() {
   const [loading, setLoading] = useState(false);
@@ -22,8 +23,8 @@ export default function Payment() {
   const dispatch = useDispatch();
 
   const updateOrderStatusToAccept = async (txHash) => {
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/order/accept-order?orderId=${order.orderId}&txHash=${txHash}`,
         {
@@ -36,15 +37,17 @@ export default function Payment() {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (response.status === 204) {
         toast.success("Order accepted!");
         navigate("/myorders");
+      } else {
+        toast.error("Failed to update order status. Please try again.");
       }
     } catch (error) {
       console.error("Error updating order status:", error);
-      toast.error("Failed to update order status. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -52,9 +55,10 @@ export default function Payment() {
 
   const payWithCrypto = async () => {
     if (!isConfirmed) {
-      alert("Please accept the terms and conditions.");
+      toast.error("Please accept the terms and conditions.");
       return;
     }
+    setLoading(true);
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -69,7 +73,7 @@ export default function Payment() {
         order.orderId,
         order.quantity,
         {
-          value: (order.totalPrice * 1e18).toString(),
+          value: ethers.utils.parseEther(order.totalPrice.toString()),
         }
       );
 
@@ -86,7 +90,13 @@ export default function Payment() {
   };
 
   if (!product) {
-    return <p className="text-center mt-10">No product details available.</p>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p className="text-lg font-semibold text-red-500">
+          No product details available.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -154,13 +164,20 @@ export default function Payment() {
           <Button
             onClick={payWithCrypto}
             disabled={!isConfirmed || loading}
-            className={`w-full py-2 rounded-lg font-semibold transition-all ${
+            className={`w-full py-2 rounded-lg font-semibold transition-all flex items-center justify-center ${
               isConfirmed
                 ? "bg-green-600 hover:bg-green-700 text-white"
                 : "bg-gray-300 text-gray-500 cursor-not-allowed"
             }`}
           >
-            {loading ? "Processing..." : "Confirm Payment"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Processing...
+              </>
+            ) : (
+              "Confirm Payment"
+            )}
           </Button>
 
           {/* Transaction Status */}

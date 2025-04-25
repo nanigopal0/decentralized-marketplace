@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { handleFileUpload } from "../../util/CloudinaryFileUpload";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 const UpdateUser = () => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -85,9 +86,11 @@ const UpdateUser = () => {
         const updatedUser = await response.json();
         localStorage.setItem("user", JSON.stringify(updatedUser));
         toast.success("User updated successfully!");
+      } else {
+        toast.error("Failed to update user. Please try again.");
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error updating user:", error);
       toast.error("Failed to update user. Please try again.");
     }
   };
@@ -202,14 +205,21 @@ const UpdateUser = () => {
         {/* Submit Button */}
         <Button
           type="submit"
-          className={`w-full py-2 rounded-md ${
+          className={`w-full py-2 rounded-md flex items-center justify-center ${
             loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-blue-600 hover:bg-blue-700"
           } text-white`}
           disabled={loading}
         >
-          {loading ? "Updating..." : "Update Profile"}
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              Updating...
+            </>
+          ) : (
+            "Update Profile"
+          )}
         </Button>
       </form>
     </div>
