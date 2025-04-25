@@ -2,8 +2,8 @@
 
 FROM maven:3.9.9-sapmachine-22 AS build
 WORKDIR /home/app
-COPY backend/marketplace/pom.xml ./
-COPY backend/marketplace/src ./src
+COPY marketplace/pom.xml ./
+COPY marketplace/src ./src
 RUN mvn clean package -DskipTests
 
 
