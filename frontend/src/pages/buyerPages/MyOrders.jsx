@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import OrderCard from "../layout/OrderCard";
 import { useDispatch } from "react-redux";
-import { handleUnauthorizedStatus } from "@/util/handleUnauthorizedStatus";
+import { handleUnauthorizedStatus } from "@/util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
 
 export default function MyOrders() {

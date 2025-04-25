@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-import { handleUnauthorizedStatus } from "@/util/handleUnauthorizedStatus";
+import { handleUnauthorizedStatus } from "@/util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
 import { pingServer } from "../../../store/slices/userSlice";
 
