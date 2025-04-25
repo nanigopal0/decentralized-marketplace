@@ -1,11 +1,8 @@
 import React from "react";
 import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaLinkedinIn,
   FaGithub,
 } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -18,13 +15,13 @@ export default function Footer() {
           <h3 className="text-lg font-semibold mb-3">Policy</h3>
           <ul className="space-y-2 text-sm text-gray-300">
             <li>
-              <a href="#">Terms of Use</a>
+              <Link to="/terms-of-use">Terms of Use</Link>
             </li>
             <li>
-              <a href="#">Security</a>
+              <Link to="/security-policy">Security</Link>
             </li>
             <li>
-              <a href="#">Privacy</a>
+              <Link to="/privacy-policy">Privacy</Link>
             </li>
           </ul>
         </div>
@@ -33,9 +30,9 @@ export default function Footer() {
         <div>
           <h3 className="text-lg font-semibold mb-3">Connect with Us</h3>
           <div className="flex space-x-4 text-gray-300 text-xl">
-            <a href="#">
+            <Link to="https://github.com/nanigopal0/decentralized-marketplace.git">
               <FaGithub />
-            </a>
+            </Link>
           </div>
         </div>
       </div>

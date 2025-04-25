@@ -36,6 +36,7 @@ import Sidebar from "./pages/layout/Sidebar";
 import TermsOfUse from "./pages/layout/Termsofuse";
 import PrivacyPolicy from "./pages/layout/PrivacyPolicy";
 import SecurityPolicy from "./pages/layout/SecurityPolicy";
+
 function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.user);
