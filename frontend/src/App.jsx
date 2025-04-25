@@ -33,7 +33,7 @@ import BlockchainOrderDetails from "./pages/buyerPages/BlockchainOrderDetails";
 import BuyerOrderDetails from "./pages/buyerPages/BuyerOrderDetails";
 import SearchResults from "./pages/mainpages/SearchResults";
 import Sidebar from "./pages/layout/Sidebar";
-import TermsOfUse from "./pages/layout/Termsofuse";
+import TermsOfUse from "./pages/layout/TermsOfUse";
 import PrivacyPolicy from "./pages/layout/PrivacyPolicy";
 import SecurityPolicy from "./pages/layout/SecurityPolicy";
 
