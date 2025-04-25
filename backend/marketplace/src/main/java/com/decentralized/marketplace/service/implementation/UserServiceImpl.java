@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
                 .secure(true)
                 .path("/")
                 .maxAge(0) // Set maxAge to 0 to remove the cookie
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
 
         httpServletResponse.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
