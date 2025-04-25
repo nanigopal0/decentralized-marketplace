@@ -14,12 +14,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
 
 export default function Register({ className, ...props }) {
   const [role, setRole] = useState(null);
   const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-
+  const { backendNotResponding } = useSelector((state) => state.user);
   const handleRegister = (e) => {
     e.preventDefault();
 
@@ -105,6 +107,15 @@ export default function Register({ className, ...props }) {
                   <div className="bg-yellow-200 text-yellow-800 p-3 rounded-md text-sm font-medium">
                     MetaMask must be installed in your browser.
                   </div>
+
+                  {backendNotResponding && (
+                    <div className="flex items-center gap-2 bg-blue-100 text-blue-800  p-3 rounded-md text-sm font-medium">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>
+                        Please hold on while we try to connect to the server!
+                      </span>
+                    </div>
+                  )}
 
                   <div className="grid gap-3">
                     <Label htmlFor="name">Full Name</Label>

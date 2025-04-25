@@ -15,30 +15,31 @@ export default function OrderCard({ order, onClick }) {
   return (
     <Card
       key={order.orderId}
-      className="cursor-pointer pt-0 hover:shadow-2xl shadow-lg transition-shadow border border-gray-400 rounded-lg overflow-hidden"
+      className="cursor-pointer hover:shadow-2xl shadow-lg transition-shadow border border-gray-400 rounded-lg overflow-hidden"
       onClick={onClick}
     >
       {/* Product Image */}
-      <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200">
+      <div className="w-full h-40 sm:h-48 bg-gray-200 flex items-center justify-center">
         <img
           src={order.productMediaUrl || "/placeholder.jpg"}
           alt={order.productTitle}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain" // Ensure the image fits within the container
+          // loading="lazy" // Optimize image loading
         />
       </div>
 
       {/* Card Content */}
       <CardContent className="p-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
           {order.productTitle}
         </h2>
-        <p className="text-sm text-gray-600 mb-2 truncate">
+        <p className="text-xs sm:text-sm text-gray-600 mb-2 truncate">
           Order ID: {order.orderId}
         </p>
         <div className="flex items-center justify-between mt-4">
           {/* Order Status */}
           <Badge
-            className={`px-3 py-1 rounded-full text-xs font-medium ${
+            className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
               statusMap[order.orderStatus]?.color || "bg-gray-300 text-gray-800"
             }`}
           >

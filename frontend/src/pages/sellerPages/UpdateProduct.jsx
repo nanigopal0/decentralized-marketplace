@@ -15,6 +15,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
 import { pingServer } from "../../../store/slices/userSlice";
+import { handleFileUpload } from "../../util/CloudinaryFileUpload";
 
 const UpdateProduct = () => {
   const [title, setTitle] = useState("");
@@ -45,14 +46,17 @@ const UpdateProduct = () => {
         {
           method: "PUT",
           credentials: "include",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         }
       );
       handleUnauthorizedStatus(response);
-  
-            if (response.status === 401) {
-              dispatch(pingServer())
-            }
+
+      if (response.status === 401) {
+        dispatch(pingServer());
+      }
       if (response.status === 204) {
         toast.success("Product updated successfully");
         navigate("/products");
@@ -62,17 +66,18 @@ const UpdateProduct = () => {
     }
   };
 
-  const handleUpdateProduct = (e) => {
+  const handleUpdateProduct = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("productId", id);
-    formData.append("title", title);
-    formData.append("description", description);
-    formData.append("price", price);
-    formData.append("stock", stock);
-    formData.append("mediaUrl", productImage);
-
-    updateProduct(formData);
+    const reqData = {
+      productId: id,
+      title,
+      description,
+      price,
+      stock,
+    };
+    const url =await handleFileUpload(productImage);
+    reqData.mediaUrl = url;
+    updateProduct(reqData);
   };
 
   useEffect(() => {

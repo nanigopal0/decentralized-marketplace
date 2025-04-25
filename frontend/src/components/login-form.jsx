@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react"; // Import a spinner icon
 export function LoginForm({ className, ...props }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { loading, isAuthenticated, error } = useSelector(
+  const { loading, isAuthenticated, error, backendNotResponding } = useSelector(
     (state) => state.user
   );
   const dispatch = useDispatch();
@@ -61,6 +61,16 @@ export function LoginForm({ className, ...props }) {
               <div className="bg-yellow-200 text-yellow-800 p-3 rounded-md text-sm font-medium">
                 MetaMask must be installed in your browser.
               </div>
+
+              {/* Show Message with Loading Indicator */}
+              {backendNotResponding && (
+                <div className="flex items-center gap-2 bg-blue-100 text-blue-800  p-3 rounded-md text-sm font-medium">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>
+                    Please hold on while we try to connect to the server!
+                  </span>
+                </div>
+              )}
 
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -124,8 +134,9 @@ export function LoginForm({ className, ...props }) {
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <Link to="/terms-of-use">Terms of Service</Link>{" "}
-        and <Link to="/privacy-policy">Privacy Policy</Link>.
+        By clicking continue, you agree to our{" "}
+        <Link to="/terms-of-use">Terms of Service</Link> and{" "}
+        <Link to="/privacy-policy">Privacy Policy</Link>.
       </div>
     </div>
   );

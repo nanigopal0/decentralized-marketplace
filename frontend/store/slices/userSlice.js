@@ -12,6 +12,7 @@ const userSlice = createSlice({
     error: null,
     message: null,
     isUpdated: false,
+    backendNotResponding: false,
   },
   reducers: {
     loginRequest(state, action) {
@@ -97,11 +98,13 @@ const userSlice = createSlice({
       (state.error = null), (state.user = state.user);
     },
     loadUserRequest(state) {
-      state.loading = true;
+      state.backendNotResponding = true;
+      
     },
     loadUserSuccess(state, action) {
       state.loading = false;
       state.isAuthenticated = true;
+      state.backendNotResponding = false;
       state.user = action.payload || {}; // Set user to an empty object if no data is returned
       state.error = null;
     },
@@ -109,6 +112,7 @@ const userSlice = createSlice({
       state.loading = false;
       state.isAuthenticated = false;
       state.user = null;
+      state.backendNotResponding = false;
       state.error = action.payload;
     },
     clearErrors(state) {

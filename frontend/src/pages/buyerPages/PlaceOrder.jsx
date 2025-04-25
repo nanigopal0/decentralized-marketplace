@@ -119,7 +119,7 @@ export default function PlaceOrder() {
               <p className="text-lg font-bold text-gray-800 mt-4">
                 Total Price:{" "}
                 <span className="text-green-600">
-                  {totalPrice.toFixed(2)} {product.priceUnit || ""}
+                  {totalPrice} {product.priceUnit || ""}
                 </span>
               </p>
 

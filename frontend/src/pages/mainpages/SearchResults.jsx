@@ -7,6 +7,8 @@ export default function SearchResults() {
   const [products, setProducts] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isSeller = user?.role === "SELLER";
 
   // Extract the search query from the URL
   const query = new URLSearchParams(location.search).get("query");
@@ -34,7 +36,12 @@ export default function SearchResults() {
   }
 
   const handleCardClick = (product) => {
-    navigate(`/product/${product.productId}`, { state: { product } }); // Navigate to SingleProduct with product data
+ 
+    if (isSeller)
+      navigate(`/product/details/${product.productId}`, {
+        state: { product },
+      }); 
+    else navigate(`/product/${product.productId}`); // Navigate to SingleProduct with product data
   };
 
   useEffect(() => {
@@ -61,7 +68,9 @@ export default function SearchResults() {
         </div>
       ) : (
         <div className="text-center py-10">
-          <p className="text-gray-600 text-lg">No products found for "{query}"</p>
+          <p className="text-gray-600 text-lg">
+            No products found for "{query}"
+          </p>
           <p className="text-gray-500 mt-2">
             Try searching with a different keyword.
           </p>

@@ -61,7 +61,7 @@ function App() {
 
         <main className="flex w-full min-h-screen transition-all duration-300 ease-in-out">
           {isOpen && <Sidebar isOpen={isOpen} />}
-          <div className={`flex-1 transition-all duration-300 ease-in-out `}>
+          <div className={`flex-1 `}>
             <Routes>
               {isAuthenticated ? (
                 <>

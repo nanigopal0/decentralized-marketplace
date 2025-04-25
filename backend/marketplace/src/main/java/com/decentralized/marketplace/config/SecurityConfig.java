@@ -55,8 +55,12 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        configuration.setExposedHeaders(List.of("Authorization"));
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://decentralized-marketplace-beta.vercel.app", "https://decentralized-marketplace-git-main-abcs-projects-883dea03.vercel.app", "https://decentralized-marketplace-abcs-projects-883dea03.vercel.app"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "https://decentralized-marketplace-beta.vercel.app",
+                "https://decentralized-marketplace-git-main-abcs-projects-883dea03.vercel.app",
+                "https://decentralized-marketplace-abcs-projects-883dea03.vercel.app")
+        );
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

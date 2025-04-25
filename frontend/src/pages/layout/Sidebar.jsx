@@ -33,10 +33,10 @@ const Sidebar = ({ isOpen }) => {
   return (
     <>
       <aside
-        className={` bg-yellow-100 border-r border-gray-300 shadow-md 
+        className={`hidden md:block w-64 bg-yellow-100 border-r border-gray-300 shadow-md 
         z-40  transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } w-full sm:w-64
+        } 
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
       >
