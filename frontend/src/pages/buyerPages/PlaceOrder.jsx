@@ -9,6 +9,7 @@ import { pingServer } from "../../../store/slices/userSlice";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react"; // Spinner for loading indicator
+import Big from "big.js";
 
 export default function PlaceOrder() {
   const [loading, setLoading] = useState(false);
@@ -16,7 +17,7 @@ export default function PlaceOrder() {
   const [quantity, setQuantity] = useState(1); // Quantity state
   const location = useLocation();
   const { product } = location.state || {}; // Get product from location state
-  const totalPrice = (product.price || 0) * quantity;
+  const totalPrice = Big(product.price || 0).times(quantity).toString(); // Calculate total price using Big.js
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

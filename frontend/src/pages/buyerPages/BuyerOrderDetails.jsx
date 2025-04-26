@@ -146,6 +146,55 @@ export default function BuyerOrderDetails() {
             </p>
           </div>
 
+    {/* Seller Details */}
+    <div className="mb-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Seller Details
+            </h3>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-gray-200 rounded-full overflow-hidden">
+                <img
+                  src={order.seller.avatar || "/placeholder-avatar.jpg"}
+                  alt={order.seller.fullName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-gray-600 text-sm mb-2">
+                  <span className="font-medium">Name:</span>{" "}
+                  {order.seller.fullName}
+                </p>
+                <p className="text-gray-600 text-sm mb-2">
+                  <span className="font-medium">Email:</span>{" "}
+                  {order.seller.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Order Details */}
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Order Information
+            </h3>
+            <p className="text-gray-600 text-sm mb-2">
+              <span className="font-medium">Order ID:</span> {order.orderId}
+            </p>
+            <p className="text-gray-600 text-sm mb-2">
+              <span className="font-medium">Status:</span> {order.orderStatus}
+            </p>
+            {order.transactionHash && (
+              <p className="text-gray-600 text-sm mb-2 truncate">
+                <span className="font-medium">Transaction Hash:</span>{" "}
+                {order.transactionHash}
+              </p>
+            )}
+            <p className="text-gray-600 text-sm mb-2">
+              <span className="font-medium">Ordered At:</span>{" "}
+              {new Date(order.orderedAt).toLocaleString()}
+            </p>
+          </div>
+          
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4">
             {order.orderStatus === "Pending" && (
