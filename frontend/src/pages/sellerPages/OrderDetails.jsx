@@ -132,6 +132,7 @@ handleUnauthorizedStatus(response);
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                   <Avatar className="w-24 h-24">
                     <AvatarImage
+                      className=" object-cover"
                       src={order.buyer.avatar || "/placeholder-avatar.jpg"}
                       alt={order.buyer.fullName}
                     />

@@ -67,10 +67,10 @@ export default function ProfileView() {
               <img
                 src={profileData.avatar}
                 alt="Profile"
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-2 border-gray-300 mx-auto mb-4 shadow-md"
+                className="w-32 h-32 sm:w-40 object-cover sm:h-40 rounded-full border-2 border-gray-300 mx-auto mb-4 shadow-md"
               />
             ) : (
-              <User className="w-24 h-24 sm:w-32 sm:h-32 rounded-full mx-auto border-2 border-gray-300 mb-4 shadow-md text-gray-500" />
+              <User className="w-32 h-32 sm:w-40 sm:h-40 rounded-full mx-auto border-2 border-gray-300 mb-4 shadow-md text-gray-500" />
             )}
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               {profileData.fullName || "Full Name"}

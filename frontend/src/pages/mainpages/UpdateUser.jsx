@@ -111,7 +111,7 @@ const UpdateUser = () => {
             <img
               src={avatarPreview}
               alt="Avatar Preview"
-              className="w-24 h-24 rounded-full mb-4 shadow-md hover:opacity-90 transition"
+              className="w-32 h-32 sm:w-40 transition object-cover sm:h-40 rounded-full border-2 border-gray-300 mx-auto mb-4 shadow-md"
             />
           ) : (
             <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4 shadow-md">

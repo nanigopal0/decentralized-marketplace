@@ -4,14 +4,17 @@ import OrderCard from "../layout/OrderCard";
 import { useDispatch } from "react-redux";
 import { handleUnauthorizedStatus } from "@/util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
+import { Loader2 } from "lucide-react"; // Spinner for loading indicator
 
 export default function MyOrders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false); // Loading state
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   async function fetchOrders() {
+    setLoading(true); // Start loading
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/order/get-by-buyerId?buyerId=${user.id}`,
@@ -26,7 +29,7 @@ export default function MyOrders() {
 
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (!response.ok) throw new Error("Failed to fetch orders.");
 
@@ -34,6 +37,8 @@ export default function MyOrders() {
       setOrders(data);
     } catch (error) {
       console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   }
 
@@ -52,7 +57,12 @@ export default function MyOrders() {
           My Orders
         </h2>
 
-        {orders.length > 0 ? (
+        {/* Loading Indicator */}
+        {loading ? (
+          <div className="flex justify-center items-center py-10">
+            <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+          </div>
+        ) : orders.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 max-w-6xl mx-auto">
             {orders.map((order) => (
               <OrderCard

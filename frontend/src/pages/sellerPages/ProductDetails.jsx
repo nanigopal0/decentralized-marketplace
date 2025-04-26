@@ -187,8 +187,9 @@ const ProductDetails = () => {
                   }
                 >
                   <CardHeader className="flex items-center gap-4">
-                    <Avatar>
+                    <Avatar className="w-16 h-16 rounded-full overflow-hidden">
                       <AvatarImage
+                        className="object-cover"
                         src={order.buyer.avatar || "/placeholder-avatar.jpg"}
                         alt={order.buyer.fullName}
                       />
@@ -198,20 +199,20 @@ const ProductDetails = () => {
                           : "?"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1 overflow-hidden">
-                      <CardTitle className="text-md font-bold text-gray-800 truncate">
+                    <div className="flex-1 overflow-hidden " >
+                      <CardTitle className="text-md font-medium text-gray-800 truncate">
                         Order ID: {order.orderId}
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200 rounded-md overflow-hidden">
+                    {/* <div className="w-full aspect-w-16 aspect-h-9 bg-gray-200 rounded-md overflow-hidden">
                       <img
                         src={order.buyer.avatar || "/placeholder.jpg"}
                         alt={order.buyer.fullName}
                         className="w-full h-full object-cover"
                       />
-                    </div>
+                    </div> */}
                     <CardDescription className="text-gray-800 text-sm">
                       <span className="font-bold">Buyer:</span>{" "}
                       {order.buyer.fullName}
