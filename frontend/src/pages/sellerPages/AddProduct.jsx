@@ -126,7 +126,7 @@ const AddProduct = () => {
         SmartMarketplace,
         signer
       );
-      const wei = ethers.utils.parseEther(price.toString());
+      const wei = price * 1000000000000000000;
       const tx = await contract.listProduct(
         productId,
         wei.toString(),
