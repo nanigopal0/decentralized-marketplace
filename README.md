@@ -1,53 +1,53 @@
-# 🛒 Decentralized SmartMarketplace (D-SMP)
+# 🛒 Decentralized SmartMarketplace 
 
-A full-stack **Decentralized Marketplace Web Application** built with React, Tailwind CSS,Spring Boot, MongoDB, Solidity, and Ethereum smart contracts. It empowers buyers and sellers to interact in a trustless environment, with on-chain escrow mechanisms and transparent order handling.
+A full-stack **Decentralized Marketplace Web Application** built with **React**, **Tailwind CSS**, **Spring Boot**, **MongoDB**, **Solidity**, and **Ethereum Smart Contracts**. It empowers buyers and sellers to interact in a trustless environment with on-chain escrow mechanisms and transparent order handling.
 
 ---
 
 ## 🚀 Features
 
-- ✅ **User Authentication**
-- 🧾 **List & Browse Products**
-- 🔐 **On-Chain Escrow for Payments**
-- 📦 **Order Management System (Shipped, Delivered, Cancelled)**
-- 🔐 **OTP-Based Delivery Confirmation**
-- 🕓 **Auto Refunds or Fund Releases Based on Timeout**
-- 🌓 **Dark Mode Support**
-- 📱 **Responsive UI for All Devices**
+- ✅ **User Role-Based Authentication** (Buyer / Seller) with Spring Security.
+- 🧾 **List & Browse Products** with ease.
+- 🔐 **On-Chain Escrow for Payments** (ETH).
+- 📦 **Order Management System**: Pending, Accepted, Shipped, Delivered, Cancelled.
+- 🔐 **OTP-Based Shipment and Delivery Confirmation**.
+- 📱 **Responsive UI** for all devices.
 
 ---
 
 ## 🛠 Tech Stack
 
-| Frontend     | Backend     | Blockchain           |
-| ------------ | ----------- | -------------------- |
-| React.js     | Spring Boot | Solidity             |
-| Tailwind CSS | MongoDB     | (Smart Contracts)    |
-| Redux        | REST APIs   | Ethers.js + MetaMask |
+| **Frontend**      | **Backend**     | **Blockchain**         |
+| ----------------- | --------------- | ---------------------- |
+| React.js          | Spring Boot     | Solidity               |
+| Tailwind CSS      | MongoDB         | (Smart Contracts)      |
+| Redux             | REST APIs       | Ethers.js + MetaMask   |
 
 ---
 
 ## 📦 Installation
 
+### Clone the Repository
 ```bash
 git clone https://github.com/nanigopal0/decentralized-marketplace.git
 cd decentralized-marketplace
+cd frontend
 npm install
 ```
 
-To run locally:
-
+### Run Locally
 ```bash
 npm run dev
 ```
+`
 
-Make sure your **MetaMask** wallet is connected and set to the correct **Ethereum test network** (Sepolia).
+> **Note:** Ensure your **MetaMask** wallet is connected and set to the correct **Ethereum test network** (Sepolia).
 
 ---
 
 ## ⚙️ Environment Variables
 
-Create a `.env` file in the root directory and add:
+Create a `.env` file in the root directory and add the following:
 
 ```env
 VITE_CONTRACT_ADDRESS=YOUR_DEPLOYED_CONTRACT_ADDRESS
@@ -71,7 +71,7 @@ function getOrder(string memory orderId) external view returns (
 )
 ```
 
-- ⛓ Fully implemented `Escrow`, `Order Confirmation` functionality.
+- ⛓ Fully implemented **Escrow** and **Order Confirmation** functionality.
 
 ---
 
@@ -79,8 +79,8 @@ function getOrder(string memory orderId) external view returns (
 
 ```
 /frontend            --> React Frontend
-/contracts         --> Solidity Smart Contracts
-/backend   --> Spring-Boot Backend API MongoDB (e.g., for OTPs or timeout logic)
+/contracts           --> Solidity Smart Contracts
+/backend             --> Spring-Boot Backend API with MongoDB
 ```
 
 ---
@@ -89,10 +89,10 @@ function getOrder(string memory orderId) external view returns (
 
 > Add screenshots of:
 >
-> - Product listing
-> - Buyer dashboard
-> - Order tracking
-> - MetaMask integration
+> - Product Listing
+> - Buyer Dashboard
+> - Order Tracking
+> - MetaMask Integration
 
 ---
 
@@ -114,13 +114,13 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## 🌐 Live Demo
 
-Soon to be hosted on: **Vercel / Ethereum testnet Sepoila**
+Check out the live demo here: [Decentralized Marketplace](https://decentralized-marketplace-beta.vercel.app)
 
 ---
 
 ## 📬 Contact
 
-Created with ❤️ by [Nanigopal Rana, Debkanta Dutta]
+Created with ❤️ by **Nanigopal Rana** and **Debkanta Dutta**.
 
-🐙 GitHub: https://github.com/Debkanta-Dutta
-🐙 GitHub: https://github.com/nanigopal0
+- 🐙 GitHub: [Debkanta Dutta](https://github.com/Debkanta-Dutta)
+- 🐙 GitHub: [Nanigopal Rana](https://github.com/nanigopal0)
