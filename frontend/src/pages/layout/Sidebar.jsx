@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { HomeIcon, Package2, FolderPen, User2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../store/slices/userSlice";
 import { Input } from "@/components/ui/input";
 

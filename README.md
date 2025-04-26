@@ -122,5 +122,5 @@ Check out the live demo here: [Decentralized Marketplace](https://decentralized-
 
 Created with ❤️ by **Nanigopal Rana** and **Debkanta Dutta**.
 
-- 🐙 GitHub: [Debkanta Dutta](https://github.com/Debkanta-Dutta)
 - 🐙 GitHub: [Nanigopal Rana](https://github.com/nanigopal0)
+- 🐙 GitHub: [Debkanta Dutta](https://github.com/Debkanta-Dutta)
