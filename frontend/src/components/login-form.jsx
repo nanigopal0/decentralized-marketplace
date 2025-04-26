@@ -22,13 +22,7 @@ export function LoginForm({ className, ...props }) {
 
   const handleLogin = (e) => {
     e.preventDefault();
-
-    // Check if MetaMask is installed
-    if (!window.ethereum) {
-      toast.error("MetaMask must be installed in your browser.");
-      return;
-    }
-
+    
     dispatch(login(email, password));
   };
 
@@ -37,7 +31,6 @@ export function LoginForm({ className, ...props }) {
       toast.error(error);
       dispatch(clearAllUserErrors());
     }
-
     if (!loading && isAuthenticated) {
       toast.success("Login Successfully");
       navigateTo("/home");
@@ -46,6 +39,9 @@ export function LoginForm({ className, ...props }) {
 
   return (
     <div className={cn("flex flex-col gap-6 ", className)} {...props}>
+      <div className="bg-red-100 text-red-800 p-3 rounded-md text-sm font-medium text-center">
+    Cookies must be enabled in your browser to log in.
+  </div>
       <Card className="overflow-hidden p-0 ">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form className="h-full p-6 md:p-8 " onSubmit={handleLogin}>
@@ -138,6 +134,8 @@ export function LoginForm({ className, ...props }) {
         <Link to="/terms-of-use">Terms of Service</Link> and{" "}
         <Link to="/privacy-policy">Privacy Policy</Link>.
       </div>
+
+    
     </div>
   );
 }

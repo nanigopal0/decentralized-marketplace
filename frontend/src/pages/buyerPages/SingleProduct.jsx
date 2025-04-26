@@ -9,9 +9,18 @@ import { toast } from "react-toastify";
 import { handleUnauthorizedStatus } from "../../util/HandleUnauthorizedStatus";
 import { pingServer } from "../../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
 
 const SingleProduct = () => {
   const [product, setProduct] = useState({});
+  const [showMetaMaskAlert, setShowMetaMaskAlert] = useState(false); // State for MetaMask alert
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -47,6 +56,14 @@ const SingleProduct = () => {
   useEffect(() => {
     getProduct();
   }, [id]);
+
+  const handleBuyNow = () => {
+    if (!window.ethereum) {
+      setShowMetaMaskAlert(true); // Show MetaMask alert if not installed
+      return;
+    }
+    navigate(`/order/product/${product.productId}`, { state: { product } });
+  };
 
   return (
     <div className="bg-gradient-to-r from-yellow-100 to-pink-100 py-10 px-4 sm:px-6 lg:px-8">
@@ -102,14 +119,13 @@ const SingleProduct = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-4 mt-6">
-              <Link
-                to={`/order/product/${product.productId}`}
-                state={{ product }}
+              <Button
+                onClick={handleBuyNow}
                 className="bg-blue-600 text-white hover:bg-blue-700 text-base sm:text-lg px-6 py-2 rounded-md flex items-center gap-2"
               >
                 <ShoppingCart className="w-5 h-5" />
                 Buy Now
-              </Link>
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate("/")}
@@ -122,6 +138,33 @@ const SingleProduct = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* MetaMask Alert Dialog */}
+      <AlertDialog open={showMetaMaskAlert} onOpenChange={setShowMetaMaskAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>MetaMask Not Detected</AlertDialogTitle>
+            <AlertDialogDescription>
+              MetaMask is required to perform this action. Please install MetaMask and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button onClick={() => setShowMetaMaskAlert(false)}>Close</Button>
+            <Button
+              asChild
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <a
+                href="https://metamask.io/download/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Install MetaMask
+              </a>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

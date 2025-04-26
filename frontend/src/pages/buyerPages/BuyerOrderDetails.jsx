@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "react-toastify";
 import { handleUnauthorizedStatus } from "@/util/HandleUnauthorizedStatus";
 import { useDispatch } from "react-redux";
@@ -11,6 +12,7 @@ export default function BuyerOrderDetails() {
   const location = useLocation();
   const { order } = location.state || {};
   const [loading, setLoading] = useState(false);
+  const [showMetaMaskAlert, setShowMetaMaskAlert] = useState(false); // State for MetaMask alert
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [product, setProduct] = useState([]);
@@ -26,12 +28,15 @@ export default function BuyerOrderDetails() {
   }
 
   const handleCancelOrder = async () => {
+    if (!window.ethereum) {
+      setShowMetaMaskAlert(true); // Show MetaMask alert
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/order/cancel-otp?orderId=${
-          order.orderId
-        }`,
+        `${import.meta.env.VITE_BACKEND_URL}/order/cancel-otp?orderId=${order.orderId}`,
         {
           method: "PUT",
           headers: {
@@ -56,6 +61,22 @@ export default function BuyerOrderDetails() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleConfirmPayment = () => {
+    if (!window.ethereum) {
+      setShowMetaMaskAlert(true); // Show MetaMask alert
+      return;
+    }
+    navigate("/payment", { state: { product, order } });
+  };
+
+  const handleConfirmDelivery = () => {
+    if (!window.ethereum) {
+      setShowMetaMaskAlert(true); // Show MetaMask alert
+      return;
+    }
+    navigate("/confirm-delivery", { state: { order } });
   };
 
   const getProductForPendingOrder = async () => {
@@ -125,65 +146,15 @@ export default function BuyerOrderDetails() {
             </p>
           </div>
 
-          {/* Seller Details */}
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Seller Details
-            </h3>
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gray-200 rounded-full overflow-hidden">
-                <img
-                  src={order.seller.avatar || "/placeholder-avatar.jpg"}
-                  alt={order.seller.fullName}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <p className="text-gray-600 text-sm mb-2">
-                  <span className="font-medium">Name:</span>{" "}
-                  {order.seller.fullName}
-                </p>
-                <p className="text-gray-600 text-sm mb-2">
-                  <span className="font-medium">Email:</span>{" "}
-                  {order.seller.email}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Order Details */}
-          <div className="mb-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              Order Information
-            </h3>
-            <p className="text-gray-600 text-sm mb-2">
-              <span className="font-medium">Order ID:</span> {order.orderId}
-            </p>
-            <p className="text-gray-600 text-sm mb-2">
-              <span className="font-medium">Status:</span> {order.orderStatus}
-            </p>
-            {order.transactionHash && (
-              <p className="text-gray-600 text-sm mb-2 truncate">
-                <span className="font-medium">Transaction Hash:</span>{" "}
-                {order.transactionHash}
-              </p>
-            )}
-            <p className="text-gray-600 text-sm mb-2">
-              <span className="font-medium">Ordered At:</span>{" "}
-              {new Date(order.orderedAt).toLocaleString()}
-            </p>
-          </div>
-
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-4">
             {order.orderStatus === "Pending" && (
               <Button
+                onClick={handleConfirmPayment}
                 disabled={loading}
                 className="bg-green-500 text-white hover:bg-green-600 w-full sm:w-auto"
               >
-                <Link to="/payment" state={{ product, order }}>
-                  Confirm Payment
-                </Link>
+                Confirm Payment
               </Button>
             )}
             {(order.orderStatus === "Pending" ||
@@ -198,18 +169,43 @@ export default function BuyerOrderDetails() {
             )}
             {order.orderStatus === "Shipped" && (
               <Button
-                asChild
+                onClick={handleConfirmDelivery}
                 disabled={loading}
                 className="bg-blue-500 text-white hover:bg-blue-600 w-full sm:w-auto"
               >
-                <Link to="/confirm-delivery" state={{ order }}>
-                  {loading ? "Processing..." : "Deliver Order"}
-                </Link>
+                {loading ? "Processing..." : "Deliver Order"}
               </Button>
             )}
           </div>
         </CardContent>
       </Card>
+
+      {/* MetaMask Alert Dialog */}
+      <AlertDialog open={showMetaMaskAlert} onOpenChange={setShowMetaMaskAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>MetaMask Not Detected</AlertDialogTitle>
+            <AlertDialogDescription>
+              MetaMask is required to perform this action. Please install MetaMask and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button onClick={() => setShowMetaMaskAlert(false)}>Close</Button>
+            <Button
+              asChild
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <a
+                href="https://metamask.io/download/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Install MetaMask
+              </a>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

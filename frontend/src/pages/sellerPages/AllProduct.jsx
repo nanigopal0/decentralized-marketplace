@@ -6,11 +6,20 @@ import ProductCard from "../layout/ProductCard";
 import { pingServer } from "../../../store/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { Loader2 } from "lucide-react"; // Spinner for loading indicator
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from "@/components/ui/alert-dialog";
 
 const AllProduct = () => {
   const navigateTo = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false); // Loading state
+  const [showMetaMaskAlert, setShowMetaMaskAlert] = useState(false); // State for MetaMask alert
   const user = JSON.parse(localStorage.getItem("user"));
   const dispatch = useDispatch();
 
@@ -49,6 +58,14 @@ const AllProduct = () => {
     fetchAllProducts();
   }, []);
 
+  const handleMetaMaskCheck = (callback) => {
+    if (!window.ethereum) {
+      setShowMetaMaskAlert(true); // Show MetaMask alert if not installed
+      return;
+    }
+    callback();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-r from-yellow-100 to-pink-100">
       <div className="p-4 sm:p-6 max-w-6xl mx-auto">
@@ -58,7 +75,9 @@ const AllProduct = () => {
             Products
           </p>
           <Button
-            onClick={() => navigateTo("/product/add")}
+            onClick={() =>
+              handleMetaMaskCheck(() => navigateTo("/product/add"))
+            }
             className="bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
           >
             Add Product
@@ -80,9 +99,11 @@ const AllProduct = () => {
                     key={element.productId}
                     product={element}
                     onClick={() =>
-                      navigateTo(`/product/details/${element.productId}`, {
-                        state: { product: element },
-                      })
+                      handleMetaMaskCheck(() =>
+                        navigateTo(`/product/details/${element.productId}`, {
+                          state: { product: element },
+                        })
+                      )
                     }
                   />
                 ))}
@@ -91,7 +112,9 @@ const AllProduct = () => {
               <div className="text-center py-10">
                 <p className="text-gray-600 text-lg">No Products Found!</p>
                 <Button
-                  onClick={() => navigateTo("/product/add")}
+                  onClick={() =>
+                    handleMetaMaskCheck(() => navigateTo("/product/add"))
+                  }
                   className="mt-4 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md"
                 >
                   Add Your First Product
@@ -101,6 +124,33 @@ const AllProduct = () => {
           </>
         )}
       </div>
+
+      {/* MetaMask Alert Dialog */}
+      <AlertDialog open={showMetaMaskAlert} onOpenChange={setShowMetaMaskAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>MetaMask Not Detected</AlertDialogTitle>
+            <AlertDialogDescription>
+              MetaMask is required to perform this action. Please install MetaMask and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button onClick={() => setShowMetaMaskAlert(false)}>Close</Button>
+            <Button
+              asChild
+              className="bg-blue-600 text-white hover:bg-blue-700"
+            >
+              <a
+                href="https://metamask.io/download/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Install MetaMask
+              </a>
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

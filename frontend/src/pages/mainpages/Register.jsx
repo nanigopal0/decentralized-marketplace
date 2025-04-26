@@ -22,14 +22,11 @@ export default function Register({ className, ...props }) {
   const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const { backendNotResponding } = useSelector((state) => state.user);
+
+
   const handleRegister = (e) => {
     e.preventDefault();
-
     // Check if MetaMask is installed
-    if (!window.ethereum) {
-      toast.error("MetaMask must be installed in your browser.");
-      return;
-    }
 
     // Validate password
     const password = e.target.password.value;
@@ -43,12 +40,10 @@ export default function Register({ className, ...props }) {
     } else {
       setPasswordError("");
     }
-
     if (!role) {
       setError("Please select a role.");
       return;
     }
-
     const payload = {
       fullName: e.target.name.value,
       email: e.target.email.value,
