@@ -15,7 +15,7 @@ const SingleProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const getProduct = async () => {
     try {
       const response = await fetch(
@@ -30,7 +30,7 @@ const SingleProduct = () => {
       );
       handleUnauthorizedStatus(response);
       if (response.status === 401) {
-        dispatch(pingServer())
+        dispatch(pingServer());
       }
       if (!response.ok) {
         const errorData = await response.json();
@@ -52,11 +52,11 @@ const SingleProduct = () => {
     <div className="bg-gradient-to-r from-yellow-100 to-pink-100 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* Product Image */}
-        <div className="mb-6">
+        <div className="mb-6 flex justify-center">
           <img
             src={product.mediaUrl || "/avatarHolder.jpg"}
             alt={product.title || "Product Image"}
-            className="w-full h-auto rounded-lg shadow-md object-cover"
+            className="w-full max-w-md h-auto rounded-lg shadow-md object-contain"
           />
         </div>
 

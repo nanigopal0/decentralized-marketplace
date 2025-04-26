@@ -126,7 +126,7 @@ const AddProduct = () => {
         SmartMarketplace,
         signer
       );
-      const wei = price * 1000000000000000000;
+      const wei = price * 1e18;
       const tx = await contract.listProduct(
         productId,
         wei.toString(),

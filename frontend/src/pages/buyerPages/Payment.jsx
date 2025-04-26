@@ -73,7 +73,7 @@ export default function Payment() {
         order.orderId,
         order.quantity,
         {
-          value: ethers.utils.parseEther(order.totalPrice.toString()),
+          value: (order.totalPrice * 1e18).toString(),
         }
       );
 
