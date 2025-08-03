@@ -27,7 +27,7 @@ jobs:
           cache: maven
 
       - name: Build with maven
-        run: mvn -B package --file backend/pom.xml
+        run: mvn -B package --file backend/marketplace/pom.xml
         env:
           MAIL_HOST: ${{ secrets.MAIL_HOST }}
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
@@ -45,8 +45,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: backend
-          file: backend/Dockerfile
+          context: backend/marketplace
+          file: backend/marketplace/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_IMAGE_NAME }}:latest
 
