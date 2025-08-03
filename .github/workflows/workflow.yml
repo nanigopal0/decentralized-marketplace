@@ -27,7 +27,7 @@ jobs:
           cache: maven
 
       - name: Build with maven
-        run: mvn -B package --flle backend/pom.xml
+        run: mvn -B package --file backend/pom.xml
         env:
           MAIL_HOST: ${{ secrets.MAIL_HOST }}
           MAIL_PORT: ${{ secrets.MAIL_PORT }}
